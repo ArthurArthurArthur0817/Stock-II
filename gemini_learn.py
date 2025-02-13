@@ -2,7 +2,7 @@ import google.generativeai as genai
 import os
 
 # 配置 Gemini API 密鑰
-api_key = 'AIzaSyBMIXMv2ewbi-IJidv4lCwPXXyOdBzchUQ'  # ←🔹請替換為你的 API 金鑰
+api_key = ''  # ←🔹請替換為你的 API 金鑰
 genai.configure(api_key=api_key)
 
 def analyze_question():
