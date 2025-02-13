@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account</title>
+    <link rel="stylesheet" href="\static\style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to your account!</h1>
+        
+        <h3>Your current balance: ${{ balance }}</h3>
+        
+        <h4>Your Stocks:</h4>
+        <ul>
+            {% if stocks %}
+                {% for stock in stocks %}
+                    <li>{{ stock['stock'] }}: {{ stock['total_quantity'] }} shares</li>
+                {% endfor %}
+            {% else %}
+                <p>You have no stocks in your portfolio.</p>
+            {% endif %}
+        </ul>
+        
+        <h4>Full Portfolio Data:</h4>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Stock</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if portfolios %}
+                    {% for row in portfolios %}
+                        <tr>
+                            <td>{{ row['stock'] }}</td>
+                            <td>{{ row['quantity'] }}</td>
+                            <td>
+                                {% if row['price'] %}
+                                    ${{ "%.2f"|format(row['price']) }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3">No portfolio data available.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        
+        <div class="actions">
+            <a href="{{ url_for('trade') }}" class="btn">Go to Trading</a>
+            <a href="{{ url_for('transaction') }}" class="btn">See Trading History</a>
+        </div>
+    </div>
+</body>
+</html>

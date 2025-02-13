@@ -1,0 +1,280 @@
+/* styles.css */
+
+/* 全局樣式 */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f8ff; /* 浅藍背景 */
+    color: #333;
+}
+
+h1, h2, h3, h4 {
+    color: #004080; /* 深藍標題 */
+    text-align: center;
+}
+
+.container {
+    text-align: center; 
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+}
+
+/* 表單樣式 */
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+label {
+    font-size: 1.1rem;
+    color: #00509e;
+}
+
+input, select, button {
+    padding: 10px;
+    border: 1px solid #cce7ff;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 400px;
+}
+
+button {
+    background-color: #007acc;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #00509e;
+}
+
+/* 新增：選項按鈕樣式 */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+/* 新增：選項按鈕的基本樣式 */
+.option-btn {
+    background-color: #007acc; /* 預設按鈕顏色 */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+}
+
+/* 滑鼠移動到按鈕上的顏色變化 */
+.option-btn:hover {
+    background-color: #00509e;
+}
+
+/* 新增：當選項被選中時的高亮樣式 */
+.option-btn.active {
+    background-color: #ff6600 !important; /* 變成橘色，表示選中 */
+    color: white;
+}
+
+/* 表格樣式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    text-align: left;
+}
+
+thead {
+    background-color: #cce7ff;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* 鏈接樣式 */
+a {
+    text-decoration: none;
+    color: #00509e;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #003366;
+}
+
+/* 按鈕樣式 */
+.btn {
+    display: inline-block;
+    background-color: #004080;
+    color: #ffffff;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: #00264d;
+}
+
+/* 行動消息樣式 */
+.flash-messages {
+    list-style: none;
+    padding: 10px;
+    margin: 20px auto;
+    max-width: 500px;
+    border-radius: 5px;
+    background-color: #ffcccc;
+    color: #b30000;
+    text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    input, select, button {
+        font-size: 0.9rem;
+    }
+
+    h1, h2, h3 {
+        font-size: 1.5rem;
+    }
+}
+
+/* 為 .btn 添加按鈕樣式 */
+.btn {
+    display: block; /* 將按鈕設為塊狀元素 */
+    margin: 0 auto; /* 上下邊距為 0，左右自動對齊 */
+    padding: 10px 20px; /* 內邊距 */
+    background-color: #007acc; /* 按鈕背景色 */
+    color: #ffffff; /* 按鈕文字顏色 */
+    text-align: center; /* 文字居中 */
+    border: none; /* 移除默認邊框 */
+    border-radius: 5px; /* 圓角 */
+    font-size: 1rem; /* 字體大小 */
+    width: 140px; /* 固定寬度 */
+    margin: 50px auto 0; /* 100px 上邊距，置中 */
+    cursor: pointer; /* 鼠標移動到按鈕時顯示手型 */
+    text-decoration: none; /* 移除超連結下劃線 */
+    transition: background-color 0.3s ease; /* 添加背景變化過渡效果 */
+}
+
+.stock-info {
+    display: block;
+    width: 50%; /* 區塊寬度，根據需求調整 */
+    margin: 0 auto; /* 水平置中 */
+    text-align: left; /* 文字靠左對齊 */
+    padding: 20px; /* 添加內邊距，讓內容看起來不擁擠 */
+    border: 1px solid #ddd; /* 可選：添加邊框讓區塊更突出 */
+    border-radius: 5px; /* 可選：圓角效果 */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 可選：陰影效果 */
+}
+
+.btn:hover {
+    background-color: #00509e; /* 滑過時的背景顏色 */
+}
+/*  新增底部資訊欄及錯誤訊息樣式  */
+.notice-container {
+    background-color: #004080;  /* 深藍色底 */
+    color: #ffffff;  /* 白色字 */
+    padding: 20px;
+    margin-top: 30px;
+    font-size: 0.8rem;  /* 字體大小較小 */
+    text-align: center;
+    border-radius: 8px;
+}
+
+.notice-container h3 {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: #ffffff;  /* 確保標題文字是白色 */
+}
+
+
+.notice-container p {
+    margin: 5px 0;
+}
+
+/* 針對不同風險類型使用不同顏色 */
+.conservative {
+    border-left: 6px solid #2c3e50; /* 深藍色 */
+}
+.moderate {
+    border-left: 6px solid #f39c12; /* 橘色 */
+}
+.aggressive {
+    border-left: 6px solid #e74c3c; /* 紅色 */
+}
+
+.risk-description ul {
+    list-style-type: square;
+    padding-left: 30px;
+}
+
+/* 提示訊息樣式 */
+.error-message {
+    display: none;
+    background-color: #ffdddd;
+    color: #b30000;
+    border: 1px solid #b30000;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+/* 讓按鈕和結果區塊置中 */
+.analysis-container,
+#aiAnalysisBtn {
+    display: block;
+    text-align: center;
+    margin: 20px auto; /* 讓按鈕置中 */
+}
+
+/* 設定按鈕的大小、間距 */
+#aiAnalysisBtn {
+    background-color: #007bff; /* 藍色按鈕 */
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    width: fit-content; /* 讓按鈕寬度適應內容 */
+}
+
+/* 滑鼠懸停效果 */
+#aiAnalysisBtn:hover {
+    background-color: #0056b3;
+}
+

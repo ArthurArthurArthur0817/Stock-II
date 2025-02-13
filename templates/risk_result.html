@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投資風險評估結果</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>您的投資風險評估結果</h1>
+        <p><strong style="font-size: 1.5rem;">{{ risk_type }}</strong></p>
+        
+        <!-- 依據風險類型顯示不同的投資建議 -->
+        {% if risk_type == "保守型投資者" %}
+            <div class="risk-description conservative">
+                <p>&nbsp;&nbsp;適合 “穩健保本” 的投資者，通常對風險較敏感，希望資金安全。</p>
+                <p><strong>&nbsp;&nbsp;適合投資：</strong></p>
+                <ul>
+                    <li>銀行定存</li>
+                    <li>國內外政府公債</li>
+                    <li>投資等級債券</li>
+                    <li>高配息基金（如 REITs）</li>
+                </ul>
+                <p>&nbsp;📌 建議：這些投資方式 風險低、收益穩定，適合初學者慢慢累積資本。</p>
+            </div>
+
+        {% elif risk_type == "穩健型投資者" %}
+            <div class="risk-description moderate">
+                <p>&nbsp;&nbsp;適合願意承擔 ”中等風險“，但仍重視資產穩定成長的投資者。</p>
+                <p><strong>&nbsp;&nbsp;適合投資：</strong></p>
+                <ul>
+                    <li>ETF 指數型基金（如 S&P 500、台灣 0050）</li>
+                    <li>大型藍籌股（台積電、蘋果等）</li>
+                    <li>公司債 / 高收益債</li>
+                    <li>部分股票型基金</li>
+                </ul>
+                <p>&nbsp;📌 建議：透過資產配置，將一部分資金投入穩定收益資產，另一部分配置在長期成長標的。</p>
+            </div>
+
+        {% elif risk_type == "積極型投資者" %}
+            <div class="risk-description aggressive">
+                <p>&nbsp;&nbsp;適合 ”願意承擔較大風險“，追求高成長、高回報的投資者。</p>
+                <p><strong>&nbsp;&nbsp;適合投資：</strong></p>
+                <ul>
+                    <li>個股交易（科技、半導體、新創公司）</li>
+                    <li>新興市場基金</li>
+                    <li>加密貨幣（比特幣、以太坊）</li>
+                    <li>成長型科技股（Tesla、NVIDIA 等）</li>
+                </ul>
+                <p>&nbsp;📌 建議：這類投資風險較高，適合有長期投資規劃並願意承受市場波動的人。</p>
+            </div>
+        {% endif %}
+
+        <a href="/" class="btn">返回首頁</a>
+    </div>
+</body>
+</html>

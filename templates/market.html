@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Page</title>
+    <link rel="stylesheet" href="/static/style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body> 
+    <h1>市場類別</h1>  
+
+    <hr>       
+
+    <h3 style="text-align: left; margin-left: 20px;">板塊 (Sector/Industry)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        按行業分類的股票組合，如科技板塊、能源板塊等。
+    </p>
+    
+    <h3 style="text-align: left; margin-left: 20px;">空頭市場 (Bear Market)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        指股票市場整體下跌，投資者信心減弱。
+    </p>
+    
+    <h3 style="text-align: left; margin-left: 20px;">多頭市場 (Bull Market)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        指股票市場呈現整體上漲趨勢，投資者信心較強。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">IPO (Initial Public Offering)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        公司首次向公眾發行股票並上市交易的過程。
+    </p>
+
+    
+    <!-- 返回教學頁面按鈕 -->
+    <a href="{{ url_for('teach') }}" class="btn">Back to Teach Page</a>
+</body>
+</html>

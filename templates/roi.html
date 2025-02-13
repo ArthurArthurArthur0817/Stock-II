@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投資報酬率計算</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        async function calculateROI() {
+            let stock_code = document.getElementById("stock_code").value;
+            let initial_investment = document.getElementById("initial_investment").value;
+            let months = document.getElementById("months").value;
+    
+            if (!stock_code || !initial_investment) {
+                alert("請填寫所有欄位！");
+                return;
+            }
+    
+            let response = await fetch("/calculate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ stock_code, initial_investment, months })
+            });
+    
+            let result = await response.json();
+            if (result.error) {
+                alert(result.error);
+            } else {
+                document.getElementById("cagr").innerText = result.cagr + "%";
+                document.getElementById("final_value").innerText = result.final_value;
+                document.getElementById("profit").innerText = result.profit;
+                if (result.plot_url) {
+                    document.getElementById("chart").src = result.plot_url;
+                } else {
+                    alert("無法生成圖表，請稍後再試！");
+                }
+            }
+        }
+    
+        // 當選擇項目變更時，立即觸發計算
+        document.getElementById("months").addEventListener("change", function() {
+            calculateROI();
+        });
+    
+        // 當輸入台股代號和投資本金時，立即觸發計算
+        document.getElementById("stock_code").addEventListener("input", function() {
+            calculateROI();
+        });
+    
+        document.getElementById("initial_investment").addEventListener("input", function() {
+            calculateROI();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>投資報酬率計算</h2>
+        
+        <label>台股代號:</label>
+        <input type="text" id="stock_code" placeholder="例如 2330.TW"><br>
+
+        <label>投資本金:</label>
+        <input type="number" id="initial_investment" placeholder="例如 100000"><br>
+
+        <label>投資期間 :</label>
+        <select id="months" onchange="calculateROI()">
+            <option value="1">1個月</option>
+            <option value="3">3個月</option>
+            <option value="6">6個月</option>
+            <option value="12">1年</option>
+            <option value="24">2年</option>
+            <option value="60">5年</option>
+            <option value="120">10年</option>
+        </select><br><br>
+
+        <button onclick="calculateROI()">計算</button>
+
+        <div class="result">
+            <h3>結果：</h3>
+            <p>CAGR: <span id="cagr"></span></p>
+            <p>最終投資價值: <span id="final_value"></span></p>
+            <p>總收益: <span id="profit"></span></p>
+            <img id="chart">
+        </div>
+    </div>
+</body>
+</html>

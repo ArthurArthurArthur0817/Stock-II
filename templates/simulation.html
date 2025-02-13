@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票模擬走勢圖</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>當前顯示的股票：{{ stock_code }}</h1>
+    <img id="stock_chart" src="{{ plot_path }}" alt="股票走勢圖">
+    <br>
+    <button id="next_day_btn">下一天</button>
+
+    <script>
+        $(document).ready(function() {
+            $("#next_day_btn").click(function() {
+                $.get("/next_day", function(data) {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        $("#stock_chart").attr("src", data.plot_path + "?t=" + new Date().getTime());
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

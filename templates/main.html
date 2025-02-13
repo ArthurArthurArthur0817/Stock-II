@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+    <link rel="stylesheet" href="/static/style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body>
+    <h1>Welcome to the Main Page</h1>
+    <p>You have successfully logged in. Navigate using the options below:</p>
+    <div class="button-container">
+        <a href="{{ url_for('teach') }}" class="btn">Teach</a>
+        <a href="{{ url_for('account') }}" class="btn">Account</a>
+        <a href="{{ url_for('risk') }}" class="btn">Risk</a>
+        <a href="{{ url_for('roi') }}" class="btn">Return on Investment</a>
+        <a href="{{ url_for('simulation') }}" class="btn">Simulation</a>
+    </div>
+</body>
+</html>

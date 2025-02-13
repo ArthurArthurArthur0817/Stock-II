@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Page</title>
+    <link rel="stylesheet" href="/static/style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body> 
+    <h1>交易相關</h1>  
+
+    <hr>       
+
+    <h3 style="text-align: left; margin-left: 20px;">買入 (Buy)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        投資者以某一價格購買股票。
+    </p>
+    
+    <h3 style="text-align: left; margin-left: 20px;">賣出 (Sell)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        投資者以某一價格出售股票。
+    </p>
+    
+    <h3 style="text-align: left; margin-left: 20px;">掛單 (Order)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        投資者設定買入或賣出的價格和數量，等待成交。
+    </p>
+    <h4 style="text-align: left; margin-left: 40px;">限價單 (Limit Order)</h4>
+    <p style="text-align: left; margin-left: 40px;">
+        指定價格進行交易。
+    </p>
+    <h4 style="text-align: left; margin-left: 40px;">市價單 (Market Order)</h4>
+    <p style="text-align: left; margin-left: 40px;">
+        以市場當前價格立即成交。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">成交量 (Volume)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        在一定時間內成交的股票數量，反映市場活躍程度。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">股權登記日 (Record Date)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        公司記錄股東名冊的日期，確定股息分配對象。
+    </p>
+
+    <!-- 返回教學頁面按鈕 -->
+    <a href="{{ url_for('teach') }}" class="btn">Back to Teach Page</a>
+</body>
+</html>

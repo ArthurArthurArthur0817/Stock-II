@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Page</title>
+    <link rel="stylesheet" href="/static/style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body> 
+    <h1>基本概念</h1>  
+
+    <hr>       
+
+    <h3 style="text-align: left; margin-left: 20px;">股票(Stock/Share)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        公司發行的一種證券，代表持有人對公司的部分擁有權。
+    </p>
+    
+    <h3 style="text-align: left; margin-left: 20px;">股價(Stock Price)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        股票的市場價格，由供需決定。
+    </p>
+    
+    <h3 style="text-align: left; margin-left: 20px;">市值(Market Capitalization)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        公司總價值，計算公式為「股價 × 已發行股票數量」。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">股息 (Dividend)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        公司將利潤分配給股東的部分，通常以現金或股票形式發放。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">市盈率 (P/E Ratio)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        反映公司股價與其每股收益的比率，用於衡量股票估值是否合理。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">每股盈餘 (EPS, Earnings Per Share)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        公司每股股票能產生的收益，用於分析公司盈利能力。
+    </p>
+
+    <h3 style="text-align: left; margin-left: 20px;">流通股 (Outstanding Shares)</h3>
+    <p style="text-align: left; margin-left: 20px;">
+        市場上可自由交易的股票數量。
+    </p>
+    
+    <!-- 返回教學頁面按鈕 -->
+    <a href="{{ url_for('teach') }}" class="btn">Back to Teach Page</a>
+</body>
+</html>

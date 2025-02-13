@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台積電新聞</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>📢 台積電最新新聞（最近 7 天內）</h1>
+
+        {% if error %}
+            <p style="color: red; font-weight: bold;">{{ error }}</p>
+        {% elif news_list %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>標題</th>
+                        <th>來源</th>
+                        <th>時間</th>
+                        <th>連結</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for news in news_list %}
+                    <tr>
+                        <td>{{ loop.index }}</td>  <!-- 🔹 使用 loop.index 取代 enumerate() -->
+                        <td>{{ news['title'] }}</td>
+                        <td>{{ news['media'] }}</td>
+                        <td>{{ news['date'] }}</td>
+                        <td><a href="{{ news['link'] }}" target="_blank">閱讀</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: red; font-weight: bold;">⚠️ 目前沒有可用新聞，請稍後再試！</p>
+        {% endif %}
+
+        <a href="{{ url_for('main') }}" class="btn">回到首頁</a>
+    </div>
+</body>
+</html>

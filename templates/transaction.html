@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History</title>
+    <link rel="stylesheet" href="\static\style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body>
+    <div class="container">
+        <h1>Transaction History</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Stock</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Transaction Time</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- This section will be dynamically populated with data -->
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.stock }}</td>
+                    <td>{{ transaction.quantity }}</td>
+                    <td>{{ transaction.price }}</td>
+                    <td>{{ transaction.transaction_time }}</td>
+                    <td>{{ transaction.type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('account') }}" class="btn">Back to account</a>
+    </div>
+</body>
+</html>

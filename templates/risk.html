@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投資風險評估</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>投資風險評估問卷</h1>
+       <!--  提示訊息區塊 -->
+       <div id="error-message" class="error-message" style="display: none;"></div>
+
+       <form id="risk-form" action="/result" method="POST">
+
+            
+            <label>1. 您目前的年齡範圍？</label>
+            <div class="button-group">
+                <button type="button" class="option-btn" data-name="q1" data-value="1">60歲以上</button>
+                <button type="button" class="option-btn" data-name="q1" data-value="2">45-59歲</button>
+                <button type="button" class="option-btn" data-name="q1" data-value="3">30-44歲</button>
+                <button type="button" class="option-btn" data-name="q1" data-value="4">18-29歲</button>
+            </div>
+            <input type="hidden" name="q1" id="q1-input" required>
+
+            <label>2. 您目前的儲蓄或投資總額？</label>
+            <div class="button-group">
+                <button type="button" class="option-btn" data-name="q3" data-value="1">少於10萬</button>
+                <button type="button" class="option-btn" data-name="q3" data-value="2">10萬-50萬</button>
+                <button type="button" class="option-btn" data-name="q3" data-value="3">50萬-100萬</button>
+                <button type="button" class="option-btn" data-name="q3" data-value="4">超過100萬</button>
+            </div>
+            <input type="hidden" name="q2" id="q3-input" required>
+
+            <label>3. 您的主要投資目標是？</label>
+            <div class="button-group">
+                <button type="button" class="option-btn" data-name="q4" data-value="1">保持資金安全</button>
+                <button type="button" class="option-btn" data-name="q4" data-value="2">穩定增長</button>
+                <button type="button" class="option-btn" data-name="q4" data-value="3">追求較高回報</button>
+                <button type="button" class="option-btn" data-name="q4" data-value="4">追求最大回報</button>
+            </div>
+            <input type="hidden" name="q3" id="q4-input" required>
+
+            <label>4. 如果您的投資在短時間內下跌20%，您會怎麼做？</label>
+            <div class="button-group">
+                <button type="button" class="option-btn" data-name="q5" data-value="1">立即賣出</button>
+                <button type="button" class="option-btn" data-name="q5" data-value="2">觀望一陣子</button>
+                <button type="button" class="option-btn" data-name="q5" data-value="3">考慮加碼投資</button>
+                <button type="button" class="option-btn" data-name="q5" data-value="4">立即加碼投資</button>
+            </div>
+            <input type="hidden" name="q4" id="q5-input" required>
+
+            <label>5. 您希望投資的時間長度？</label>
+            <div class="button-group">
+                <button type="button" class="option-btn" data-name="q6" data-value="1">1年內</button>
+                <button type="button" class="option-btn" data-name="q6" data-value="2">1-5年</button>
+                <button type="button" class="option-btn" data-name="q6" data-value="3">5-10年</button>
+                <button type="button" class="option-btn" data-name="q6" data-value="4">10年以上</button>
+            </div>
+            <input type="hidden" name="q5" id="q6-input" required>
+
+            <!--股票種類問答-->
+            <label>6. 您感興趣的股票種類？</label>
+            <div class="button-group">
+            <select name="stock_type" required>
+            <option value="1">選項一</option>
+            <option value="2">選項二</option>
+            <option value="3">選項三</option>
+            <option value="4">選項四</option>
+            <option value="5">選項五</option>
+            <option value="6">選項六</option>
+            <option value="7">選項七</option>
+            <option value="8">選項八</option>
+            <option value="9">選項九</option>
+            <option value="10">選項十</option>
+            <option value="11">選項十一</option>
+            <option value="12">選項十二</option>
+            <option value="13">選項十三</option>
+            <option value="14">選項十四</option>
+            <option value="15">選項十五</option>
+            <option value="16">選項十六</option>
+            <option value="17">選項十七</option>
+            <option value="18">選項十八</option>
+            <option value="19">選項十九</option>
+            <option value="20">選項二十</option>
+            <option value="21">選項二十一</option>
+            <option value="22">選項二十二</option>
+            <option value="23">選項二十三</option>
+            <option value="24">選項二十四</option>
+            <option value="25">選項二十五</option>
+            <option value="26">選項二十六</option>
+            <option value="27">選項二十七</option>
+            <option value="28">選項二十八</option>
+            <option value="29">選項二十九</option>
+            <option value="30">選項三十</option>
+            </select>
+            </div>
+
+            <button type="submit" class="btn">提交</button>
+        </form>
+
+        <!-- 結果顯示區塊 -->
+        <div id="result" class="result-container"></div>
+    </div>
+
+    <!-- 注意事項區塊 -->
+    <div class="notice-container">
+        <h3>注意事項</h3>
+        <p>本問卷僅為初步的風險評估，不代表您實際的投資能力。</p>
+        <p>投資有風險，請謹慎評估自身狀況及風險承受能力。</p>
+
+        <h3>金管會提醒</h3>
+        <p>投資前應充分了解金融產品資訊及風險。</p>
+        <p>不輕信來路不明的投資訊息。</p>
+        <p>如有任何疑問，可向金管會或相關機構查詢。</p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const buttons = document.querySelectorAll(".option-btn");
+            const errorMessage = document.getElementById("error-message");
+            const form = document.getElementById("risk-form");
+
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const questionName = this.getAttribute("data-name");
+                    const value = this.getAttribute("data-value");
+
+                    // 移除其他按鈕的 active 樣式
+                    document.querySelectorAll(`.option-btn[data-name="${questionName}"]`).forEach(btn => {
+                        btn.classList.remove("active");
+                    });
+
+                    // 設置當前按鈕為 active
+                    this.classList.add("active");
+
+                    // 更新隱藏 input 值
+                    document.querySelector(`#${questionName}-input`).value = value;
+                });
+            });
+
+            // 監聽表單提交，檢查是否有未選擇的項目
+            form.addEventListener("submit", function(event) {
+                let isValid = true;
+                let missingQuestions = [];
+
+                document.querySelectorAll("input[type='hidden']").forEach(input => {
+                    if (!input.value) {
+                        isValid = false;
+                        missingQuestions.push(input.name.replace("q", "題目 "));
+                    }
+                });
+
+                let stockSelection = document.querySelector("select[name='stock_type']").value;
+                if (!stockSelection) {
+                    isValid = false;
+                    missingQuestions.push("股票種類");
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    errorMessage.innerHTML = `請完成以下問題：<br>${missingQuestions.join("、")}`;
+                    errorMessage.style.display = "block";
+                }
+            });
+        });
+    </script>
+</body>
+</html>

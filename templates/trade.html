@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade</title>
+    <link rel="stylesheet" href="\static\style.css"> <!-- 引入自訂樣式 -->
+</head>
+<body>
+    <h1>Trade Stocks</h1>
+
+    <!-- 股票資訊顯示 -->
+    <div class="stock-info">
+        {% if stock_info %}
+            <h2>Stock Information</h2>
+            <p><strong>Name:</strong> {{ stock_info['name'] }}</p>
+            <p><strong>Symbol:</strong> {{ stock_info['symbol'] }}</p>
+            <p><strong>Sector:</strong> {{ stock_info['sector'] }}</p>
+            <p><strong>Market Cap:</strong> {{ stock_info['market_cap'] }}</p>
+            <p><strong>Current Price:</strong> {{ stock_info['current_price'] }}</p>
+        {% else %}
+            <p>No stock information available. Please search for a stock symbol.</p>
+        {% endif %}
+    </div>
+
+    <!-- 股票查詢表單 -->
+    <form method="POST">
+        <label for="stock">Stock Name:</label>
+        <input type="text" name="stock" required placeholder="Enter 4-digit Taiwan stock code">
+        <button type="submit" name="get_stock_info">Get Stock Info</button>
+        <p style="font-size: 0.9em; color: gray;">Only 4-digit Taiwan stock codes are supported (e.g., 2330).</p>
+    </form>
+
+    <!-- 交易表單 -->
+    {% if stock_info %}
+        <form method="POST">
+            <input type="hidden" name="stock" value="{{ stock_info['symbol'] }}">
+            <input type="hidden" name="current_price" value="{{ stock_info['current_price'] }}">
+
+            <!-- 交易類型 -->
+            <label for="type">Trade Type:</label>
+            <select name="type">
+                <option value="BUY">Buy</option>
+                <option value="SELL">Sell</option>
+            </select>
+
+            <!-- 交易方式 -->
+            <label for="trade_category">Trade Category:</label>
+            <select name="trade_category">
+                <option value="CASH">現股</option>
+            </select>
+
+            <!-- 盤別 -->
+            <label for="market_session">Market Session:</label>
+            <select name="market_session">
+                <option value="REGULAR">普通</option>
+            </select>
+
+            <!-- 價格 -->
+            <label for="price">Price:</label>
+            <input type="number" step="0.01" name="price" required value="{{ stock_info['current_price'] }}">
+
+            <!-- 數量 -->
+            <label for="quantity">Quantity:</label>
+            <input type="number" name="quantity" required placeholder="Enter quantity">
+
+            <!-- 提交交易 -->
+            <button type="submit" name="submit_trade" {% if not is_trading_time %} disabled {% endif %}>Submit Trade</button>
+            {% if not is_trading_time %}
+                <p style="color: red;">Currently not within trading hours. Trading is only allowed from 9:00 AM to 1:30 PM.</p>
+            {% endif %}
+        </form>
+    {% endif %}
+    
+    <!-- 策略選擇 -->
+    {% if stock_info %}
+        <form method="POST">
+            <label for="strategy">Select Strategy:</label>
+            <select name="strategy">
+                <option value="momentum">Momentum Strategy</option>
+                <option value="mean_reversion">Mean Reversion Strategy</option>
+                <option value="breakout">Breakout Strategy</option>
+                <option value="fundamental">Fundamental Analysis</option>
+                <option value="rsi">RSI Strategy</option>
+            </select>
+
+            <!-- 投資金額 -->
+            <label for="investment_amount">Investment Amount:</label>
+            <input type="number" name="investment_amount" required placeholder="Enter investment amount">
+
+            <button type="submit" name="apply_strategy">Apply Strategy Analysis</button>
+        </form>
+    {% endif %}
+
+    <!-- **策略分析結果顯示在畫面下方** -->
+    {% if strategy_result %}
+        <div class="strategy-result">
+            <h2>Strategy Analysis Result</h2>
+            <p>{{ strategy_result }}</p>
+        </div>
+    {% endif %}
+
+    <div class="center">
+        <button type="button" id="aiAnalysisBtn">AI 分析</button>
+    </div>
+    
+    <div id="analysis-result" class="analysis-container">
+        <h2>Gemini 分析結果</h2>
+        <pre id="analysis-text">🔹 尚未進行 AI 分析</pre>
+    </div>
+    
+    <!-- 使用者輸入區 (在 AI 分析結果下方) -->
+    <div id="user-response-container" style="display: none; text-align: center; margin-top: 20px;">
+        <h3>請輸入您的回答：</h3>
+        <textarea id="user-response" placeholder="請輸入您的回答..." style="width: 80%; height: 100px; padding: 5px;"></textarea>
+        <br>
+        <button id="submit-response">提交</button>
+    </div>
+    
+    <!-- JavaScript 處理 -->
+    <script>
+        document.getElementById("aiAnalysisBtn").addEventListener("click", function() {
+            fetch("/ai_analysis", {
+                method: "POST",
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("analysis-text").textContent = data.analysis_result;
+    
+                // 🔹 確保輸入框區塊存在，然後顯示
+                let responseContainer = document.getElementById("user-response-container");
+                if (responseContainer) {
+                    responseContainer.style.display = "block"; 
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    
+        document.getElementById("submit-response").addEventListener("click", function() {
+            let userResponse = document.getElementById("user-response").value.trim();
+    
+            if (userResponse === "") {
+                alert("❌ 請輸入您的回答！");
+                return;
+            }
+    
+            fetch("/save_question", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: userResponse })  
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);  
+                document.getElementById("user-response").value = "";  
+    
+                // 🔹 問題儲存成功後，呼叫 AI 分析
+                return fetch("/process_question", { method: "POST" });
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("🔹 Gemini AI 回應:", data.response);  
+    
+                let aiResponseElement = document.getElementById("ai-response-text");
+                if (aiResponseElement) {
+                    aiResponseElement.textContent = data.response;  // ✅ 顯示 learn.txt 內容
+                } else {
+                    console.error("❌ 找不到 ai-response-text 元素！");
+                }
+            })
+            .catch(error => console.error("❌ Error:", error));
+        });
+    </script>
+    
+        
+    
+
+    
+    
+    <a href="{{ url_for('account') }}" class="btn">Back to Account</a>
+</body>
+</html>
