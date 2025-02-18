@@ -19,6 +19,7 @@ import os
 import datetime
 import importlib
 from simulation import plot_stock_data, get_random_stock
+from risk_analysis import  process_stock_type
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -320,16 +321,26 @@ def result():
     
     answers = request.form
     stock_type = request.form.get('stock_type', "未選擇")
+    
+    # **取得股票風險分析結果**
+    stock_risk_results = process_stock_type(stock_type)  
 
+    # **計算用戶的風險評估類型**
     risk_type, risk_value = calculate_risk_score(answers)
 
+    # **寫入風險數據到檔案**
     try:
         with open("risk_type.txt", "w", encoding="utf-8") as file:
             file.write(f"{stock_type},{risk_value}\n")
     except Exception as e:
-        'print(f"寫入 risk_type.txt 失敗: {e}")'
+        print(f"⚠️ 寫入 risk_type.txt 失敗: {e}")
 
-    return render_template("risk_result.html", risk_type=risk_type)
+    # **將風險數據傳給前端**
+    return render_template("risk_result.html", 
+                           risk_type=risk_type, 
+                           stock_type=stock_type, 
+                           stock_risk_results=stock_risk_results)
+
 
 
 

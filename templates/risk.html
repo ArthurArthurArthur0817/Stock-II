@@ -61,44 +61,104 @@
             <input type="hidden" name="q5" id="q6-input" required>
 
             <!--股票種類問答-->
-            <label>6. 您感興趣的股票種類？</label>
+            <label>6. 您偏好 ETF 還是上市股票？</label>
             <div class="button-group">
-            <select name="stock_type" required>
-            <option value="1">選項一</option>
-            <option value="2">選項二</option>
-            <option value="3">選項三</option>
-            <option value="4">選項四</option>
-            <option value="5">選項五</option>
-            <option value="6">選項六</option>
-            <option value="7">選項七</option>
-            <option value="8">選項八</option>
-            <option value="9">選項九</option>
-            <option value="10">選項十</option>
-            <option value="11">選項十一</option>
-            <option value="12">選項十二</option>
-            <option value="13">選項十三</option>
-            <option value="14">選項十四</option>
-            <option value="15">選項十五</option>
-            <option value="16">選項十六</option>
-            <option value="17">選項十七</option>
-            <option value="18">選項十八</option>
-            <option value="19">選項十九</option>
-            <option value="20">選項二十</option>
-            <option value="21">選項二十一</option>
-            <option value="22">選項二十二</option>
-            <option value="23">選項二十三</option>
-            <option value="24">選項二十四</option>
-            <option value="25">選項二十五</option>
-            <option value="26">選項二十六</option>
-            <option value="27">選項二十七</option>
-            <option value="28">選項二十八</option>
-            <option value="29">選項二十九</option>
-            <option value="30">選項三十</option>
-            </select>
+                <button type="button" class="option-btn" data-name="q7" data-value="1">ETF</button>
+                <button type="button" class="option-btn" data-name="q7" data-value="2">上市股票</button>
             </div>
-
+            <input type="hidden" name="q6" id="q7-input" required>
+            
+            <!-- 股票種類問答 -->
+            <label>7. 您感興趣的上市股票或 ETF 種類？</label>
+            <div class="button-group">
+                <select name="stock_type" id="stock-type" required>
+                    <option value="">請先選擇第 6 題</option>
+                </select>
+            </div>
+            
+            <script>
+                // 定義不同類別的選項
+                const options = {
+                    "1": [
+                        { value: "34", text: "國內成分證券指數股票型基金" },
+                        { value: "35", text: "國外成份/加掛外幣證券指數股票型基金" },
+                        { value: "36", text: "國外成分證券指數股票型基金" },
+                        { value: "37", text: "境外指數股票型基金" },
+                        { value: "38", text: "指數股票型期貨信託基金" },
+                        { value: "39", text: "槓桿/反向指數股票型基金" },
+                        { value: "40", text: "連結式證券指數股票型基金" }
+                    ],
+                    "2": [
+                        { value: "1", text: "上市水泥" },
+                        { value: "2", text: "上市食品" },
+                        { value: "3", text: "上市塑膠" },
+                        { value: "4", text: "上市紡織" },
+                        { value: "5", text: "上市電機" },
+                        { value: "6", text: "上市電器電纜" },
+                        { value: "7", text: "上市玻璃" },
+                        { value: "8", text: "上市造紙" },
+                        { value: "9", text: "上市鋼鐵" },
+                        { value: "10", text: "上市橡膠" },
+                        { value: "11", text: "上市汽車" },
+                        { value: "12", text: "上市電子" },
+                        { value: "13", text: "上市營建" },
+                        { value: "14", text: "上市航運" },
+                        { value: "15", text: "上市觀光" },
+                        { value: "16", text: "上市金融" },
+                        { value: "17", text: "上市貿易百貨" },
+                        { value: "18", text: "上市化學" },
+                        { value: "19", text: "上市生技醫療" },
+                        { value: "20", text: "上市半導體" },
+                        { value: "21", text: "上市電腦週邊" },
+                        { value: "22", text: "上市光電" },
+                        { value: "23", text: "上市通信網路" },
+                        { value: "24", text: "上市電子零組件" },
+                        { value: "25", text: "上市電子通路" },
+                        { value: "26", text: "上市資訊服務" },
+                        { value: "27", text: "上市其它電子" },
+                        { value: "28", text: "上市電燃氣" },
+                        { value: "29", text: "上市其他" },
+                        { value: "30", text: "上市數位雲端" },
+                        { value: "31", text: "上市綠能環保" },
+                        { value: "32", text: "上市居家生活" },
+                        { value: "33", text: "上市運動休閒" },
+                    ]
+                };
+            
+                // 取得按鈕和下拉選單
+                const buttons = document.querySelectorAll(".option-btn");
+                const stockTypeSelect = document.getElementById("stock-type");
+                const q6Input = document.getElementById("q6-input");
+            
+                // 監聽按鈕點擊事件
+                buttons.forEach(button => {
+                    button.addEventListener("click", function() {
+                        const selectedValue = this.getAttribute("data-value");  // ETF 或 上市股票
+                        q6Input.value = selectedValue; // 設定 hidden input 的值
+            
+                        // 清空並更新下拉選單
+                        stockTypeSelect.innerHTML = "";
+            
+                        // 依據選擇填入對應選項
+                        if (options[selectedValue]) {
+                            options[selectedValue].forEach(option => {
+                                let opt = document.createElement("option");
+                                opt.value = option.value;
+                                opt.textContent = option.text;
+                                stockTypeSelect.appendChild(opt);
+                            });
+                        } else {
+                            let opt = document.createElement("option");
+                            opt.value = "";
+                            opt.textContent = "請先選擇第 6 題";
+                            stockTypeSelect.appendChild(opt);
+                        }
+                    });
+                });
+            </script>
             <button type="submit" class="btn">提交</button>
         </form>
+
 
         <!-- 結果顯示區塊 -->
         <div id="result" class="result-container"></div>
