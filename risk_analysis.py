@@ -12,10 +12,10 @@ def assess_risk(row):
     else:
         return "中等風險"
 
-def analyze_stock_risk(stock_code):
-    """下載股票數據，計算技術指標並評估風險，回傳最新的風險等級"""
+def analyze_stock_risk(stock_code, stock_name):
+    """下載股票數據，計算技術指標並評估風險，回傳 (股票代碼, 股票簡稱, 風險等級)"""
     try:
-        print(f"📊 正在分析 {stock_code} ...")
+        print(f"📊 正在分析 {stock_code} ({stock_name}) ...")
 
         # 設定時間範圍（最近 6 個月）
         today = datetime.today().strftime("%Y-%m-%d")
@@ -26,7 +26,7 @@ def analyze_stock_risk(stock_code):
 
         if df.empty:
             print(f"⚠ {stock_code} 無法下載數據，可能是無效代碼。")
-            return stock_code, "無數據"
+            return stock_code, stock_name, "無數據"
 
         # 確保欄位是平坦名稱
         df.columns = [col[0] if isinstance(col, tuple) else col for col in df.columns]
@@ -47,15 +47,15 @@ def analyze_stock_risk(stock_code):
 
         if latest_data is not None:
             latest_risk = latest_data["風險評估"]
-            print(f"✅ {stock_code} 目前風險等級：{latest_risk}")
-            return stock_code, latest_risk
+            print(f"✅ {stock_code} ({stock_name}) 目前風險等級：{latest_risk}")
+            return stock_code, stock_name, latest_risk
         else:
-            print(f"⚠ {stock_code} 數據不足，無法評估風險。")
-            return stock_code, "數據不足"
+            print(f"⚠ {stock_code} ({stock_name}) 數據不足，無法評估風險。")
+            return stock_code, stock_name, "數據不足"
 
     except Exception as e:
-        print(f"❌ {stock_code} 處理時發生錯誤: {e}")
-        return stock_code, "錯誤"
+        print(f"❌ {stock_code} ({stock_name}) 處理時發生錯誤: {e}")
+        return stock_code, stock_name, "錯誤"
 
 def filter_stocks_by_type(stock_type, csv_path="filtered_top2.csv"):
     """篩選符合 stock_type 的股票，並回傳風險分析結果"""
@@ -67,11 +67,11 @@ def filter_stocks_by_type(stock_type, csv_path="filtered_top2.csv"):
 
         # 篩選符合 stock_type 的股票
         filtered_df = df[df.iloc[:, 2] == str(stock_type)]
-        stock_codes = filtered_df.iloc[:, 0].tolist()
+        stock_data = filtered_df.iloc[:, [0, 1]].values.tolist()  # 取得 [股票代碼, 股票簡稱]
 
-        if stock_codes:
-            print(f"✅ 符合類型 {stock_type} 的股票代碼：{stock_codes}")
-            stock_risk_results = [analyze_stock_risk(stock) for stock in stock_codes]
+        if stock_data:
+            print(f"✅ 符合類型 {stock_type} 的股票：{stock_data}")
+            stock_risk_results = [analyze_stock_risk(stock, name) for stock, name in stock_data]
             return stock_risk_results
         else:
             print(f"⚠ 沒有符合類型 {stock_type} 的股票。")
