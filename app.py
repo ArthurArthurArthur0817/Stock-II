@@ -478,16 +478,22 @@ def next_day():
 
 
 #相關新聞
-# (目前以台積電為例)
 @app.route('/news')
 def news():
-    """ 顯示新聞頁面 """
-    news_list = fetch_news()  # 獲取新聞
+    """ 顯示特定股票的新聞頁面 """
+    stock_name = request.args.get("stock_name")
+
+    if not stock_name:
+        return render_template('news.html', news_list=[], error="⚠️ 未提供股票名稱，請返回重新選擇！")
+
+    print(f"📢 正在獲取 {stock_name} 的新聞...")
+    news_list = fetch_news(stock_name)  # 🔹 傳入股票名稱來獲取對應新聞
 
     if not news_list:
-        return render_template('news.html', news_list=[], error="⚠️ 目前沒有可用新聞，請稍後再試！")
+        return render_template('news.html', news_list=[], error=f"⚠️ 目前沒有 {stock_name} 的新聞，請稍後再試！")
 
-    return render_template('news.html', news_list=news_list)
+    return render_template('news.html', news_list=news_list, stock_name=stock_name)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
