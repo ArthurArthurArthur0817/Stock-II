@@ -1,8 +1,10 @@
 import google.generativeai as genai
 import os
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 # 配置 Gemini API 密鑰
-api_key = ''  # ←🔹請替換為你的 API 金鑰
+api_key = 'AIzaSyBMIXMv2ewbi-IJidv4lCwPXXyOdBzchUQ'  # ←🔹請替換為你的 API 金鑰
 genai.configure(api_key=api_key)
 
 def analyze_question():
@@ -46,4 +48,5 @@ def analyze_question():
 
 if __name__ == "__main__":
     result = analyze_question()
-    print(result)
+    print(result.encode('utf-8').decode('utf-8'))
+
