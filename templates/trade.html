@@ -82,6 +82,7 @@
                 <option value="breakout">Breakout Strategy</option>
                 <option value="fundamental">Fundamental Analysis</option>
                 <option value="rsi">RSI Strategy</option>
+                <option value="adx">ADX Strategy</option>
             </select>
 
             <!-- 投資金額 -->
@@ -96,9 +97,26 @@
     {% if strategy_result %}
         <div class="strategy-result">
             <h2>Strategy Analysis Result</h2>
-            <p>{{ strategy_result }}</p>
+            <table class="strategy-table">
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th>數值</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in strategy_result.items() %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     {% endif %}
+
+
 
     <div class="center">
         <button type="button" id="aiAnalysisBtn">AI 分析</button>
@@ -116,25 +134,42 @@
         <br>
         <button id="submit-response">提交</button>
     </div>
+
+        <!-- AI 分析結果顯示區 -->
+    <div id="ai-response-container" style="text-align: center; margin-top: 20px;">
+        <h3>AI 分析結果：</h3>
+        <div id="ai-response-text" style="white-space: pre-line; margin-top: 10px; font-size: 16px; color: #333;"></div>
+    </div>
+
     
     <!-- JavaScript 處理 -->
     <script>
         document.getElementById("aiAnalysisBtn").addEventListener("click", function() {
+            let aiButton = this; // 取得按鈕元素
+            aiButton.style.display = "none"; // 🔹 按鈕點擊後隱藏
+        
             fetch("/ai_analysis", {
                 method: "POST",
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById("analysis-text").textContent = data.analysis_result;
-    
+        
                 // 🔹 確保輸入框區塊存在，然後顯示
                 let responseContainer = document.getElementById("user-response-container");
                 if (responseContainer) {
                     responseContainer.style.display = "block"; 
                 }
+        
+                // 🔹 AI 分析完成後，顯示按鈕
+                aiButton.style.display = "block"; 
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                console.error("Error:", error);
+                aiButton.style.display = "block"; // 🔹 發生錯誤時，也讓按鈕重新顯示
+            });
         });
+        
     
         document.getElementById("submit-response").addEventListener("click", function() {
             let userResponse = document.getElementById("user-response").value.trim();
