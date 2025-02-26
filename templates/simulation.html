@@ -3,24 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>股票模擬走勢圖</title>
+    <title>股票模擬交易</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="\static\style.css">
+    <style>
+        /* AI 分析結果區塊 */
+        #ai_result {
+            display: none;
+            background-color: white;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            text-align: left;
+            white-space: pre-line; /* ✅ 確保換行 */
+        }
+
+        /* 分析中 (Loading) 樣式 */
+        #loading {
+            display: none;
+            font-weight: bold;
+            color: blue;
+        }
+    </style>
 </head>
 <body>
-    <h1>當前顯示的股票：{{ stock_code }}</h1>
-    <img id="stock_chart" src="{{ plot_path }}" alt="股票走勢圖">
-    <br>
-    <button id="next_day_btn">下一天</button>
+    <div class="content-container">
+        <div class="stock-info">
+            <h1>當前顯示的股票：{{ stock_code }}</h1>
+            <h3>當前股價：<span id="latest_price">{{ latest_price }}</span></h3>
+            <h3>帳戶餘額：<span id="balance">{{ balance }}</span></h3>
+            <h3>當前持有股票數：<span id="stock_count">0</span></h3>
+        </div>
+
+        <div class="chart-wrapper">
+            <img id="stock_chart" src="{{ plot_path }}" alt="股票走勢圖">
+
+            <div class="button-container">
+                <button id="next_day_btn" class="button-simulation">下一天</button>
+                <button id="buy_stock_btn" class="button-simulation">買入</button>
+                <button id="sell_stock_btn" class="button-simulation">賣出</button>
+                <button id="close_position_btn" class="button-simulation">平倉</button>
+                <button id="settle_btn" class="button-simulation">結算</button>  
+                <button id="ai_analysis_btn" class="button-simulation" style="display: none;">AI 分析</button>
+            </div>
+        </div>  
+
+        <!-- AI 分析結果區塊 -->
+        <div id="ai_result">
+            <h3>AI 分析結果：</h3>
+            <p id="loading">分析中，請稍候...</p>  <!-- ✅ 新增 Loading 提示 -->
+            <p id="analysis_content"></p>
+        </div>
+    </div>       
 
     <script>
+         // 切換到下一天
+         $("#next_day_btn").click(function() {
+            $.get("/next_day", function(data) {
+                if (!data.error) {
+                    $("#stock_chart").attr("src", data.plot_path + "?t=" + new Date().getTime());
+                    $("#latest_price").text(data.latest_price);
+                }
+            });
+        });
+        
         $(document).ready(function() {
-            $("#next_day_btn").click(function() {
-                $.get("/next_day", function(data) {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        $("#stock_chart").attr("src", data.plot_path + "?t=" + new Date().getTime());
+            updateStockCount();  // 頁面載入時獲取持股數量
+    
+            function updateStockCount() {
+                $.get("/get_stock_count", function(data) {
+                    if (!data.error) {
+                        $("#stock_count").text(data.stock_count);
                     }
+                });
+            }
+    
+            $("#buy_stock_btn").click(function() {
+                $.post("/buy_stock", function(data) {
+                    if (data.success) {
+                        alert("買入成功！");
+                        $("#balance").text(data.balance);
+                        $("#stock_count").text(data.stock_count);  
+                    } else {
+                        alert(data.error);
+                    }
+                });
+            });
+    
+            $("#sell_stock_btn").click(function() {
+                $.post("/sell_stock", function(data) {
+                    if (data.success) {
+                        alert("賣出成功！");
+                        $("#balance").text(data.balance);
+                        $("#stock_count").text(data.stock_count);  
+                    } else {
+                        alert(data.error);
+                    }
+                });
+            });
+
+            // 平倉（不影響 AI 分析）
+            $("#close_position_btn").click(function() {
+                $.post("/close_position", function(data) {
+                    if (data.success) {
+                        alert("已成功平倉！");
+                        updateStockCount();
+                    } else {
+                        alert(data.error);
+                    }
+                });
+            });
+
+            // 結算：按下後才顯示 "AI 分析" 按鈕
+            $("#settle_btn").click(function() {
+                alert("結算完成！");
+                $("#ai_analysis_btn").show();
+            });
+
+            // AI 分析
+            $("#ai_analysis_btn").click(function() {
+                $("#loading").show();  // ✅ 顯示 "分析中..."
+                $("#analysis_content").text("");  // 清空舊內容
+                $("#ai_analysis_btn").hide();  // 隱藏按鈕防止多次點擊
+
+                $.post("/run_ai_analysis", function(data) {
+                    $("#loading").hide();  // ✅ 隱藏 "分析中..."
+                    $("#ai_result").show();
+
+                    if (data.success) {
+                        $("#analysis_content").html(data.analysis_result.replace(/\n/g, "<br>")); // ✅ 換行處理
+                    } else {
+                        $("#analysis_content").text("AI 分析失敗！");
+                    }
+
+                    $("#ai_analysis_btn").show();  // ✅ 讓按鈕可以再次使用
                 });
             });
         });
