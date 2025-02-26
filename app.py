@@ -15,6 +15,7 @@ import os
 import importlib
 from simulation import fetch_stock_data,plot_stock_data,get_random_stock
 from history_trading import TradingHistory
+from risk_analysis import  process_stock_type
 
 
 app = Flask(__name__)
