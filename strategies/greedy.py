@@ -2,25 +2,22 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 
-def fetch_and_analyze_greedy(stock_ticker, start_date, end_date, initial_capital=100000):
-    # 抓取股票數據
-    data = yf.download(stock_ticker, start=start_date, end=end_date)
+def run(stock_symbol, initial_capital):
+    # 獲取最近 3 個月數據
+    data = yf.download(stock_symbol, period="3mo")
     
     if data.empty:
-        print(f"No data found for {stock_ticker}.")
-        return
+        return "No data available for the selected stock."
     
-    # 確保 'Close' 欄位是 Series 類型
     close_prices = data['Close'].squeeze()
     
     # 計算每日收盤價變化
     data['Change'] = data['Close'].diff()
     
-    # 定義買入、賣出、不變的信號
+    # 設定買入、賣出、不變的信號
     data['Signal'] = 0
     data.loc[data['Change'] > 0, 'Signal'] = 1   # 當天價格上漲，買入
     data.loc[data['Change'] < 0, 'Signal'] = -1  # 當天價格下跌，賣出
-    data.loc[data['Change'] == 0, 'Signal'] = 0  # 價格不變，保持不動
     
     # 初始化交易變數
     capital = initial_capital  # 初始資金
@@ -55,28 +52,45 @@ def fetch_and_analyze_greedy(stock_ticker, start_date, end_date, initial_capital
                      sum(t['price'] * t['shares'] for t in trade_log if t['type'] == 'buy')) if total_trades > 0 else 0
     avg_pl = net_profit / total_trades if total_trades > 0 else 0
     
-    # 計算平均持有K線數
+    # 計算平均持有 K 線數
     hold_days = [((trade_log[i]['date'] - trade_log[i-1]['date']).days) for i in range(1, len(trade_log), 2)]
     avg_k_lines = np.mean(hold_days) if hold_days else 0
     
-    # 顯示結果
-    print("\n--- Greedy Strategy Analysis ---")
-    print(data[['Close', 'Change', 'Signal']].tail(10))  # 顯示最後10筆記錄
-    
-    print("\n--- Performance Summary ---")
-    print(f"淨利: {net_profit:.2f}")
-    print(f"最大資本回撤: {max_drawdown:.2f}%")
-    print(f"總交易次數: {total_trades}")
-    print(f"勝率: {win_rate:.2f}%")
-    print(f"獲利因子: {profit_factor:.2f}")
-    print(f"平均盈虧: {avg_pl:.2f}")
-    print(f"交易的平均K線數: {avg_k_lines:.2f}")
+    # 將結果存成字典
+    result = {
+        'net_profit': round(net_profit, 2),
+        'max_drawdown': round(max_drawdown, 2),
+        'total_trades': total_trades,
+        'win_rate': round(win_rate, 2),
+        'profit_factor': round(profit_factor, 2),
+        'avg_pl': round(avg_pl, 2),
+        'avg_k_lines': round(avg_k_lines, 2)
+    }
 
-# 使用範例
-if __name__ == "__main__":
-    stock_ticker = "2330.TW"
-    start_date = "2024-01-01"
-    end_date = "2024-09-30"
-    initial_capital = 100000  # 初始資金
+    # 儲存結果到 TXT 檔案
+    save_analysis_to_txt(result, data)
 
-    fetch_and_analyze_greedy(stock_ticker, start_date, end_date, initial_capital)
+    return result
+
+def save_analysis_to_txt(result, data):
+    filename = "analysis_results.txt"
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # 寫入策略分析
+        f.write("--- Greedy Strategy Analysis ---\n")
+        f.write("Price       Close   Change   Signal\n")
+        f.write("Ticker                             \n")
+        f.write("Date                                \n")
+        
+        # 確保 'Change' 和 'Signal' 欄位存在
+        if 'Change' in data.columns and 'Signal' in data.columns:
+            f.write(data[['Close', 'Change', 'Signal']].tail(10).to_string() + "\n\n")
+        else:
+            f.write("Change or Signal data is missing.\n\n")
+
+        # 寫入績效總結
+        f.write("--- Performance Summary ---\n")
+        for key, value in result.items():
+            f.write(f"{key}: {value}\n")
+
+    print(f"分析結果已儲存至 {filename}")
