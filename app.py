@@ -9,20 +9,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import io
 import base64
-#==============================================================
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from db import get_connection
-from trade import get_stock_info, process_trade
-from strategies import rsi  # 確保 strategies 內有 rsi.py
+from strategies import rsi,momentum  # 確保 strategies 內有 rsi.py
 import subprocess
 import os
-import datetime
 import importlib
-from simulation import plot_stock_data, get_random_stock
+from simulation import fetch_stock_data,plot_stock_data,get_random_stock
+from history_trading import TradingHistory
 from risk_analysis import  process_stock_type
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+trading_history = TradingHistory()
+from simulation import DATA_DIR  # 匯入 DATA_DIR
 
 # 計算風險分數的函式
 def calculate_risk_score(answers):
@@ -256,28 +256,31 @@ def save_question():
 @app.route("/process_question", methods=["POST"])
 def process_question():
     try:
-        # 🔹 強制 subprocess 以 UTF-8 讀取
-        result = subprocess.run(
-            ["python", "gemini_learn.py"], 
-            capture_output=True, 
-            text=True, 
-            encoding="utf-8"  # 🔹 確保 subprocess 讀取 UTF-8
-        )
+        learn_path = "learn.txt"
 
-        # 🔹 印出 stdout 和 stderr 來偵錯
-        print("Gemini stdout:", result.stdout)
-        print("Gemini stderr:", result.stderr)
+        # 🔹 確保 subprocess 直接將輸出寫入 learn.txt
+        with open(learn_path, "w", encoding="utf-8") as learn_file:
+            result = subprocess.run(
+                ["python", "gemini_learn.py"], 
+                stdout=learn_file,   # 直接將 stdout 寫入檔案
+                stderr=subprocess.PIPE,  # 保持 stderr 可讀取
+                text=True
+            )
 
+        # 🔹 檢查 subprocess 是否成功執行
         if result.returncode != 0:
             return jsonify({"response": f"❌ Gemini 執行失敗：{result.stderr.strip()}"}), 500
 
-        # 讀取 learn.txt 的內容
-        learn_path = "learn.txt"
+        # 🔹 讀取 learn.txt 的內容
         if not os.path.exists(learn_path):
             return jsonify({"response": "❌ 找不到 learn.txt，請先執行 AI 分析！"}), 500
 
-        with open(learn_path, "r", encoding="utf-8") as f:
-            learn_content = f.read().strip()
+        try:
+            with open(learn_path, "r", encoding="utf-8") as f:
+                learn_content = f.read().strip()
+        except UnicodeDecodeError:
+            with open(learn_path, "r", encoding="latin-1") as f:
+                learn_content = f.read().strip()
 
         print("📜 Learn.txt 內容：\n", learn_content)  # 🔹 顯示 learn.txt 內容到後端
 
@@ -285,7 +288,6 @@ def process_question():
 
     except Exception as e:
         return jsonify({"response": f"❌ 處理問題時發生錯誤：{str(e)}"}), 500
-
 
 @app.route('/transaction')
 def transaction():
@@ -453,41 +455,192 @@ def roi():
 
 
 @app.route('/simulation')
-def simulation():
-    if 'stock_code' not in session:
-        session['stock_code'] = get_random_stock()  # 隨機選一支股票
-    session['start_index'] = 0  # 初始 index
+def simulation():  
+    # **每次都選一支新的隨機股票**
+    session['stock_code'] = get_random_stock()
+    session['start_index'] = 0  # 重置 K 線圖索引
+    session['balance'] = 100_000  # **每次進入都重置餘額**
+
+    clear_trading_history()  # **清空交易紀錄**
+
+    if not fetch_stock_data(session['stock_code']):
+        return "無法獲取股票數據，請稍後再試"
 
     plot_path = plot_stock_data(session['stock_code'], session['start_index'])
     if not plot_path:
-        return "無法獲取股票數據，請稍後再試"
+        return "無法生成股票圖表，請稍後再試"
+    
+    latest_price_response = get_latest_price()
+    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
 
-    return render_template('simulation.html', plot_path=plot_path, stock_code=session['stock_code'])
+    return render_template('simulation.html', plot_path=plot_path, stock_code=session['stock_code'], latest_price=latest_price, balance=session['balance'])
+
+
+
+@app.route('/get_latest_price')
+def get_latest_price():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'})
+
+    csv_path = os.path.join(DATA_DIR, f'{stock_code}.csv')
+    if not os.path.exists(csv_path):
+        return jsonify({'error': '股票數據不存在'})
+
+    df = pd.read_csv(csv_path, parse_dates=['Date'])
+
+    start_index = session.get('start_index', 0)
+    end_index = start_index + 10
+    if end_index > len(df):
+        end_index = len(df)
+    
+    latest_price = df.iloc[end_index - 1]['Close']  # 取得目前區間的最新價格
+    return jsonify({'latest_price': latest_price})
+
 
 @app.route('/next_day')
 def next_day():
-    """確保繪圖函數在 Flask 主線程內執行"""
-    with app.app_context():
-        session['start_index'] += 1
-        plot_path = plot_stock_data(session['stock_code'], session['start_index'])
+    """顯示下一天的 K 線圖，並更新股價"""
+    session['start_index'] += 1
+    plot_path = plot_stock_data(session['stock_code'], session['start_index'])
 
     if not plot_path:
         return jsonify({'error': '已超出資料範圍'})
 
-    return jsonify({'plot_path': plot_path})
+    # 取得最新股價，確保與 session['start_index'] 對應
+    latest_price_response = get_latest_price()
+    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
+
+    return jsonify({'plot_path': plot_path, 'latest_price': latest_price})
+
+
+
+held_stocks = 0  # 持有的股票數
+
+@app.route("/get_stock_count", methods=["GET"])
+def get_stock_count():
+    return jsonify({"stock_count": 0})  # ✅ 無論如何，回傳 0
+
+
+@app.route('/buy_stock', methods=['POST'])
+def buy_stock():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'})
+
+    latest_price_response = get_latest_price()
+    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
+    
+    if latest_price is None:
+        return jsonify({'error': '無法獲取最新股價'})
+
+    if trading_history.buy_stock(latest_price):
+        return jsonify({
+            'success': True,
+            'balance': trading_history.get_balance(),
+            'stock_count': trading_history.get_held_stocks()  # ✅ 取得最新持股數
+        })
+
+    return jsonify({'error': '餘額不足'})
+
+
+@app.route('/sell_stock', methods=['POST'])
+def sell_stock():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'})
+
+    latest_price_response = get_latest_price()
+    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
+
+    if latest_price is None:
+        return jsonify({'error': '無法獲取最新股價'})
+
+    if trading_history.sell_stock(latest_price):
+        return jsonify({
+            'success': True,
+            'balance': trading_history.get_balance(),
+            'stock_count': trading_history.get_held_stocks()  # ✅ 取得最新持股數
+        })
+
+    return jsonify({'error': '沒有可賣股票'})
+
+
+
+
+@app.route('/close_position', methods=['POST'])
+def close_position():
+    """平倉：賣出所有持股"""
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'})
+    
+    # 確保股價與 UI 顯示的一致
+    latest_price_response = get_latest_price()
+    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
+
+    if latest_price is None:
+        return jsonify({'error': '無法獲取最新股價'})
+
+    if trading_history.close_position(latest_price):
+        return jsonify({'success': True, 'balance': trading_history.get_balance()})
+    
+    return jsonify({'error': '沒有可平倉股票'})
+
+
+
+
+@app.route('/get_balance')
+def get_balance():
+    """獲取帳戶餘額"""
+    return jsonify({'balance': trading_history.get_balance()})
+
+
+
+RECORD_FILE = "trading_history.txt"
+def clear_trading_history():
+    """清空交易紀錄 txt 檔案"""
+    if os.path.exists(RECORD_FILE):
+        with open(RECORD_FILE, 'w') as f:
+            f.write("|---num---|-----buy_price-----|-------sell_price--------|----signal---|\n")  # 保留標題行
+
+
+ANALYSIS_FILE = "simulation_analysis.txt"
+@app.route("/run_ai_analysis", methods=["POST"])
+def run_ai_analysis():
+    # 先刪除舊的分析結果，確保每次都是最新的
+    if os.path.exists(ANALYSIS_FILE):
+        os.remove(ANALYSIS_FILE)
+        
+    subprocess.run(["python", "gemini_simulation.py"], check=True)
+    
+    analysis_result = "AI 分析失敗"
+    if os.path.exists("simulation_analysis.txt"):
+        with open("simulation_analysis.txt", "r", encoding="utf-8") as f:
+            analysis_result = f.read().strip()
+
+    return jsonify({"success": True, "analysis_result": analysis_result})
+
+
 
 
 #相關新聞
-# (目前以台積電為例)
 @app.route('/news')
 def news():
-    """ 顯示新聞頁面 """
-    news_list = fetch_news()  # 獲取新聞
+    """ 顯示特定股票的新聞頁面 """
+    stock_name = request.args.get("stock_name")
+
+    if not stock_name:
+        return render_template('news.html', news_list=[], error="⚠️ 未提供股票名稱，請返回重新選擇！")
+
+    print(f"📢 正在獲取 {stock_name} 的新聞...")
+    news_list = fetch_news(stock_name)  # 🔹 傳入股票名稱來獲取對應新聞
 
     if not news_list:
-        return render_template('news.html', news_list=[], error="⚠️ 目前沒有可用新聞，請稍後再試！")
+        return render_template('news.html', news_list=[], error=f"⚠️ 目前沒有 {stock_name} 的新聞，請稍後再試！")
 
-    return render_template('news.html', news_list=news_list)
+    return render_template('news.html', news_list=news_list, stock_name=stock_name)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

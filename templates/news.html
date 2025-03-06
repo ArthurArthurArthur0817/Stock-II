@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>台積電新聞</title>
+    <title>{{ stock_name }} 最新新聞</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>📢 台積電最新新聞（最近 7 天內）</h1>
+        <h1>📢 {{ stock_name }} 最新新聞（最近 7 天內）</h1>
 
         {% if error %}
             <p style="color: red; font-weight: bold;">{{ error }}</p>

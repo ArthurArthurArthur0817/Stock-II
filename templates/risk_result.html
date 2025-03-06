@@ -62,15 +62,24 @@
                     <th>股票代碼</th>
                     <th>股票名稱</th>
                     <th>風險評估</th>
+                    <th>相關新聞</th>
                 </tr>
-                {% for stock, name, risk in stock_risk_results %}
+                {% for stock_code, stock_name, risk in stock_risk_results %}
                     <tr>
-                        <td>{{ stock }}</td>
-                        <td>{{ name }}</td>
+                        <td>{{ stock_code }}</td>  <!-- 顯示股票代碼 -->
+                        <td>{{ stock_name }}</td>  <!-- 股票名稱變成可點擊的超連結 -->
                         <td>{{ risk }}</td>
+                        <td>
+                            <a href="{{ url_for('news', stock_name=stock_name) }}" target="_blank">
+                                查看相關新聞
+                            </a>
+                        </td>
+
                     </tr>
                 {% endfor %}
             </table>
+        
+        
         {% else %}
             <p>⚠️ 無可用的股票風險評估結果。</p>
         {% endif %}

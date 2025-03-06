@@ -12,9 +12,9 @@ def clean_link(link):
     link = urllib.parse.unquote(link).strip()  # 解碼 URL，移除空格
     return link
 
-def fetch_news():
-    """ 爬取最近 7 天的台積電新聞（最多 35 則） """
-    query = "台積電"
+def fetch_news(stock_name):
+    """ 爬取最近 7 天的指定股票新聞 """
+    query = stock_name  # 🔹 使用股票名稱作為搜尋關鍵字
     googlenews = GoogleNews(lang="zh-TW", region="TW")
 
     # 計算最近 7 天的日期範圍
@@ -33,7 +33,7 @@ def fetch_news():
     seen_links = set()  # 🔹 記錄已經出現的新聞連結，避免重複
     page = 1
 
-    while len(news_results) < 35:
+    while len(news_results) < 15:
         try:
             googlenews.search(query)
             news = googlenews.result()
@@ -68,7 +68,7 @@ def fetch_news():
                 })
 
                 # 🔹 如果超過 35 則，跳出迴圈
-                if len(news_results) >= 35:
+                if len(news_results) >= 15:
                     break
 
             googlenews.get_page(page)

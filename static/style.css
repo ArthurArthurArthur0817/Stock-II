@@ -278,3 +278,88 @@ a:hover {
     background-color: #0056b3;
 }
 
+/*==============歷史模擬投資頁面=====================*/
+:root {
+    --button-top-offset: 50%;  /* 按鈕區塊的垂直位置，50% 代表視窗中間 */
+    --button-distance: 40px;  /* 按鈕與走勢圖的距離 */
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.chart-wrapper {
+    background-color: white;
+    padding: 60px 20px;
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    display: flex;  /* 讓內部元素水平排列 */
+    align-items: center; /* 讓按鈕和圖片在垂直方向置中 */
+    width: fit-content; /* 讓框的大小根據內容變化 */
+}
+
+#stock_chart {
+    width: 800px; /* 控制走勢圖大小 */
+    height: auto;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column; /* 讓按鈕垂直排列 */
+    gap: 15px;
+    margin-left: 30px; /* 調整與圖片的距離 */
+}
+
+.button-simulation {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.button-simulation:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+.button-simulation:active {
+    background-color: #004095;
+    transform: scale(1);
+}
+
+/*==============================*/
+.strategy-result {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.strategy-table {
+    border-collapse: collapse;
+    width: 50%;
+    margin-top: 10px;
+}
+
+.strategy-table th, .strategy-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.strategy-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+
