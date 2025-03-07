@@ -3,13 +3,12 @@ import talib
 import pandas as pd
 import numpy as np
 
-def fetch_and_analyze_channel_breakout(stock_ticker, start_date, end_date, initial_capital=100000, period=5):
-    # 抓取股票數據
-    data = yf.download(stock_ticker, start=start_date, end=end_date)
+def run(stock_symbol, initial_capital, period=5):
+    # 抓取最近 3 個月的股票資料
+    data = yf.download(stock_symbol, period="3mo")
     
-
     if data.empty:
-        print(f"No data found for {stock_ticker}.")
+        print(f"No data found for {stock_symbol}.")
         return
 
     # 展開 MultiIndex，只選取 Price 層級的列名
@@ -45,8 +44,8 @@ def fetch_and_analyze_channel_breakout(stock_ticker, start_date, end_date, initi
 
     # 定義信號
     data['Signal'] = 0
-    data.loc[data['Close'] > data['High_Channel'].shift(1), 'Signal'] = 1  # 買入信號,Close 大於前一天的 High_Channel 
-    data.loc[data['Close'] < data['Low_Channel'].shift(1), 'Signal'] = -1 # 賣出信號,Close 小於前一天的 Low_Channel
+    data.loc[data['Close'] > data['High_Channel'].shift(1), 'Signal'] = 1  # 買入信號
+    data.loc[data['Close'] < data['Low_Channel'].shift(1), 'Signal'] = -1  # 賣出信號
 
     # 計算持倉：連續持倉的狀態
     data['Position'] = data['Signal'].replace(0, np.nan).ffill()
@@ -65,20 +64,45 @@ def fetch_and_analyze_channel_breakout(stock_ticker, start_date, end_date, initi
     profit_factor = data.loc[data['Strategy Returns'] > 0, 'Strategy Returns'].sum() / abs(data.loc[data['Strategy Returns'] < 0, 'Strategy Returns'].sum()) if abs(data.loc[data['Strategy Returns'] < 0, 'Strategy Returns'].sum()) > 0 else float('inf')
     
 
-    # 顯示結果
-    print("\n--- Channel Breakout Strategy ---")
-    print(data[['Close', 'High_Channel', 'Low_Channel', 'Signal', 'Position']].tail(20)) 
-    print("\n--- Performance Metrics ---")
-    print(f"Net Profit: {net_profit:.2f}")
-    print(f"Max Equity Drawdown: {max_equity_drawdown:.2f}")
-    print(f"Total Trades: {total_trades}")
-    print(f"Percent Profitable: {percent_profitable:.2f}%")
-    print(f"Profit Factor: {profit_factor:.2f}")
+    # 結果輸出
+    result = {
+        'latest_Close': round(data['Close'].iloc[-1], 2),
+        'latest_High_Channel': round(data['High_Channel'].iloc[-1], 2),
+        'latest_Low_Channel': round(data['Low_Channel'].iloc[-1], 2),
+        'net_profit': round(net_profit, 2),
+        'max_drawdown': round(max_equity_drawdown, 2),
+        'total_trades': total_trades,
+        'percent_profitable': round(percent_profitable, 2),
+        'profit_factor': round(profit_factor, 2),
+        
+    }
 
-# 使用範例
-if __name__ == "__main__":
-    stock_ticker = "2330.TW"  # 指定股票代碼
-    start_date = "2024-09-12"  # 開始日期
-    end_date = "2024-09-30"    # 結束日期
-    initial_capital = 100000   # 本金
-    fetch_and_analyze_channel_breakout(stock_ticker, start_date, end_date, initial_capital)
+    # 保存結果到檔案
+    save_analysis_to_txt(result, data, stock_symbol)
+
+    return result
+
+
+def save_analysis_to_txt(result, data, stock_symbol):
+    filename = "analysis_results.txt"
+
+    with open(filename, "w", encoding="utf-8") as f:
+        # 寫入通道分析資料
+        f.write("--- Channel Breakout Analysis ---\n")
+        f.write("Price       Close      HighChannel    LowChannel   Signal\n")
+        f.write("Ticker                           \n")
+        f.write("Date                                \n")
+        
+        # 保存最後 10 行資料
+        for index, row in data.tail(10).iterrows():
+            f.write(f"{index.date()}  {row['Close']:.2f}  {row['High_Channel']:.2f}  {row['Low_Channel']:.2f}  {int(row['Signal'])}\n")
+
+        # 寫入績效總結
+        f.write("\n--- Performance Summary ---\n")
+        for key, value in result.items():
+            f.write(f"{key}: {value}\n")
+
+    print(f"分析結果已保存到 {filename}")
+
+
+
