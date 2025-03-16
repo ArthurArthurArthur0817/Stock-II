@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 
-def fetch_and_analyze_InsideBar(stock_ticker, start_date, end_date):
+def fetch_and_analyze_OutsideBar(stock_ticker, start_date, end_date):
     try:
         data = yf.download(stock_ticker, start=start_date, end=end_date, interval="1d", progress=False, auto_adjust=False)
     except Exception as e:
@@ -30,19 +30,19 @@ def fetch_and_analyze_InsideBar(stock_ticker, start_date, end_date):
     # **對齊 DataFrame 以防止錯誤**
     data, shifted = data.align(data.shift(1), axis=0, copy=False)
 
-    # 計算 Inside Bar 訊號
-    inside_bar_signal = (data['High'] < shifted['High']) & (data['Low'] > shifted['Low'])
-    data['Signal'] = inside_bar_signal.astype(int)
+    # 計算 Outside Bar 訊號
+    outside_bar_signal = (data['High'] > shifted['High']) & (data['Low'] < shifted['Low'])
+    data['Signal'] = outside_bar_signal.astype(int)
 
     # 移除 NaN 值
     data = data.dropna()
 
     # 顯示結果
-    print("\n--- Inside Bar Analysis ---")
+    print("\n--- Outside Bar Analysis ---")
     print(data[['Date', 'High', 'Low', 'Prev_High', 'Prev_Low', 'Signal']].to_string(index=False))
 
 if __name__ == "__main__":
     stock_ticker = "2330.TW"
     start_date = "2024-09-12"
     end_date = "2024-09-30"
-    fetch_and_analyze_InsideBar(stock_ticker, start_date, end_date)
+    fetch_and_analyze_OutsideBar(stock_ticker, start_date, end_date)

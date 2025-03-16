@@ -5,7 +5,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 
 # 配置 API 密鑰
-api_key = 'AIzaSyBE_AGHv3ncVmHrI0UI6M6tVGyFQ3CZrtY'
+api_key = ''
 genai.configure(api_key=api_key)
 
 def chatting(strategy_name, data):
