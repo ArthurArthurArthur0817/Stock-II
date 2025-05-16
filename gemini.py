@@ -31,7 +31,7 @@ def chatting(strategy_name, data):
     """
 
     try:
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content(prompt)
         response.resolve()
         full_text = response.text
