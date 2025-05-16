@@ -3,9 +3,9 @@ import talib
 import pandas as pd
 import numpy as np
 
-def run(stock_symbol, initial_capital, adx_period=14, threshold=25):
+def run(stock_symbol, initial_capital, adx_period=14, threshold=18):
     # 获取最近 3 个月数据
-    data = yf.download(stock_symbol, period="3mo")
+    data = yf.download(stock_symbol, period="1y")
 
     if data.empty:
         return "No data available for the selected stock."
@@ -70,14 +70,14 @@ def run(stock_symbol, initial_capital, adx_period=14, threshold=25):
 
     # 结果
     result = {
-        'latest_ADX': round(data['ADX'].iloc[-1], 2),
-        'net_profit': round(net_profit, 2),
-        'max_drawdown': round(max_drawdown, 2),
-        'total_trades': total_trades,
-        'win_rate': round(win_rate, 2),
-        'profit_factor': round(profit_factor, 2),
-        'avg_pl': round(avg_pl, 2),
-        'avg_k_lines': round(avg_k_lines, 2)
+        'latest_ADX(ADX指數)': round(data['ADX'].iloc[-1], 2),
+        'net_profit(淨利潤)': round(net_profit, 2),
+        'max_drawdown(最大回撤)': round(max_drawdown, 2),
+        'total_trades(總交易次數)': total_trades,
+        'win_rate(勝率)': round(win_rate, 2),
+        'profit_factor(獲利因子)': round(profit_factor, 2),
+        'avg_pl(平均盈虧)': round(avg_pl, 2),
+        'avg_k_lines(平均 K 線數)': round(avg_k_lines, 2)
     }
 
     # 存入 TXT

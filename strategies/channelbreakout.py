@@ -103,6 +103,3 @@ def save_analysis_to_txt(result, data, stock_symbol):
             f.write(f"{key}: {value}\n")
 
     print(f"分析結果已保存到 {filename}")
-
-
-

@@ -5,7 +5,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 
 # 配置 API 密鑰
-api_key = ''
+api_key = 'AIzaSyBE_AGHv3ncVmHrI0UI6M6tVGyFQ3CZrtY'
 genai.configure(api_key=api_key)
 
 def chatting(strategy_name, data):
@@ -18,7 +18,7 @@ def chatting(strategy_name, data):
     {data}
     
     評估策略的淨利潤、回撤、交易總數、勝率、獲利因子及平均盈虧，並提供具體的結論。
-
+    交易次數少就先忽略不要討論
     **回答格式請遵循以下規則：**
     分析結果:
     
@@ -27,6 +27,7 @@ def chatting(strategy_name, data):
     
     參考回答:
     回答1:
+    最多問兩個問題就好
     """
 
     try:
@@ -68,7 +69,7 @@ def process_answer_file(file_path):
             questions_part = "問題:" + sections[1].strip()  # 從「問題」開始的部分
 
             # 🖥️ 只顯示「分析結果」
-            print(analysis_result)
+            #print("gmeini:"+analysis_result)
 
             # 再進一步拆分「問題」與「參考回答」
             question_sections = questions_part.split("參考回答:")

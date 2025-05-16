@@ -78,7 +78,7 @@
             <label for="strategy">Select Strategy:</label>
             <select name="strategy">
                 <option value="momentum">Momentum Strategy</option>
-                <option value="mean_reversion">Mean Reversion Strategy</option>
+                <!--option value="mean_reversion">Mean Reversion Strategy</option-->
                 <option value="breakout">Breakout Strategy</option>
                 <option value="fundamental">Fundamental Analysis</option>
                 <option value="rsi">RSI Strategy</option>
@@ -124,52 +124,72 @@
     {% endif %}
 
 
-
-    <div class="center">
-        <button type="button" id="aiAnalysisBtn">AI 分析</button>
-    </div>
+    {% if stock_info %}    
+        <div class="center">
+            <button type="button" id="aiAnalysisBtn">AI 分析</button>
+        </div>
+        
+        <div id="ai_result_1" class="analysis-container">
+            <h2>AI 分析結果</h2>
+            <pre id="analysis-text">🔹 尚未進行AI策略分析</pre>
+        </div>
     
-    <div id="analysis-result" class="analysis-container">
-        <h2>Gemini 分析結果</h2>
-        <pre id="analysis-text">🔹 尚未進行 AI 分析</pre>
-    </div>
-    
-    <!-- 使用者輸入區 (在 AI 分析結果下方) -->
-    <div id="user-response-container" style="display: none; text-align: center; margin-top: 20px;">
-        <h3>請輸入您的回答：</h3>
-        <textarea id="user-response" placeholder="請輸入您的回答..." style="width: 80%; height: 100px; padding: 5px;"></textarea>
-        <br>
-        <button id="submit-response">提交</button>
-    </div>
 
-        <!-- AI 分析結果顯示區 -->
-    <div id="ai-response-container" style="text-align: center; margin-top: 20px;">
-        <h3>AI 分析結果：</h3>
-        <div id="ai-response-text" style="white-space: pre-line; margin-top: 10px; font-size: 16px; color: #333;"></div>
-    </div>
+        <!-- 使用者輸入區 (在 AI 分析結果下方) -->
+        <div id="user-response-container" style="display: none; text-align: center; margin-top: 20px;">
+            <h3>請輸入您的回答：</h3>
+            <textarea id="user-response" placeholder="請輸入您的回答..." style="width: 80%; height: 100px; padding: 5px;"></textarea>
+            <br>
+            <button id="submit-response">提交</button>
+        </div>
 
+            <!-- AI 分析結果顯示區 -->
+        <div id="ai_result_2" class="analysis-container">  
+            <h2>AI 分析結果：</h2>
+            <pre id="ai-response-text" >🔹 尚未進行AI問答分析</pre>
+        </div>
+    {% endif %}
     
     <!-- JavaScript 處理 -->
     <script>
         document.getElementById("aiAnalysisBtn").addEventListener("click", function() {
             let aiButton = this; // 取得按鈕元素
             aiButton.style.display = "none"; // 🔹 按鈕點擊後隱藏
-        
+            let textarea = document.getElementById("user-response");
+            let button = document.getElementById("submit-response");
+
+            if (textarea && button) {
+                textarea.disabled = true;  
+                button.disabled = true;  
+            }
+
             fetch("/ai_analysis", {
                 method: "POST",
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("analysis-text").textContent = data.analysis_result;
-        
+                console.log("AI 分析結果:", data.analysis_result); // ✅ 檢查是否有回傳結果
+
+                let aiResultContainer = document.getElementById("ai_result_1");
+                let analysisText = document.getElementById("analysis-text");
+
+                if (aiResultContainer && data.analysis_result) {
+                    analysisText.textContent = data.analysis_result;  // ✅ 設定文字內容
+                    aiResultContainer.style.display = "block";  // ✅ 顯示區塊
+                }
+
+
                 // 🔹 確保輸入框區塊存在，然後顯示
                 let responseContainer = document.getElementById("user-response-container");
                 if (responseContainer) {
                     responseContainer.style.display = "block"; 
                 }
-        
-                // 🔹 AI 分析完成後，顯示按鈕
-                aiButton.style.display = "block"; 
+
+                // ✅ AI 分析完成後，恢復輸入框
+                if (textarea && button) {
+                    textarea.disabled = false;
+                    button.disabled = false;
+                }
             })
             .catch(error => {
                 console.error("Error:", error);
@@ -202,10 +222,12 @@
             .then(response => response.json())
             .then(data => {
                 console.log("🔹 Gemini AI 回應:", data.response);  
-    
+                
+                let aiResultContainer = document.getElementById("ai_result_2");
                 let aiResponseElement = document.getElementById("ai-response-text");
-                if (aiResponseElement) {
+                if (aiResponseElement && aiResultContainer) {
                     aiResponseElement.textContent = data.response;  // ✅ 顯示 learn.txt 內容
+                    aiResultContainer.style.display = "block";  // ✅ 顯示區塊
                 } else {
                     console.error("❌ 找不到 ai-response-text 元素！");
                 }
@@ -215,9 +237,6 @@
     </script>
     
         
-    
-
-    
     
     <a href="{{ url_for('account') }}" class="btn">Back to Account</a>
 </body>

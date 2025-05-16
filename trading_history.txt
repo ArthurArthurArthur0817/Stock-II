@@ -1,0 +1,1 @@
+|---num---|-----buy_price-----|-------sell_price--------|----signal---|

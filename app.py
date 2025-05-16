@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import io
 import base64
-from strategies import rsi,momentum  # 確保 strategies 內有 rsi.py
+from strategies import rsi,momentum  
 import subprocess
 import os
 import importlib
@@ -24,21 +24,16 @@ app.secret_key = 'your_secret_key'
 trading_history = TradingHistory()
 from simulation import DATA_DIR  # 匯入 DATA_DIR
 
-# 計算風險分數的函式
-def calculate_risk_score(answers):
-    """計算使用者的投資風險評估分數"""
-    score = sum(map(int, answers.values()))  # 將所有選項數值加總
 
-    # 根據分數分類風險類型
-    if score <= 10:
-        return "保守型投資者", -1
-    elif 11 <= score <= 18:
-        return "穩健型投資者", 0
-    else:
-        return "積極型投資者", 1
-        
+
+
+
+@app.route('/')
+def main():
+    return render_template('main.html')
+     
 # 登入頁面
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -59,6 +54,7 @@ def login():
             if 'connection' in locals():
                 connection.close()
     return render_template('login.html')
+
 
 # 註冊頁面
 @app.route('/register', methods=['GET', 'POST'])
@@ -83,11 +79,31 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/main')
-def main():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    return render_template('main.html')
+
+@app.route('/check_login')
+def check_login():
+    if 'user_id' in session:
+        return jsonify({"logged_in": True})
+    return jsonify({"logged_in": False})
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)  # 清除 session
+    return redirect(url_for('login'))  # 重新導向到登入頁面
+
+
+
+# 計算風險分數的函式
+def calculate_risk_score(answers):
+    """計算使用者的投資風險評估分數"""
+    score = sum(map(int, answers.values()))  # 將所有選項數值加總
+
+    # 根據分數分類風險類型
+    if score <= 10:
+        return "保守型投資者", -1
+    elif 11 <= score <= 18:
+        return "穩健型投資者", 0
+    else:
+        return "積極型投資者", 1
 
 
 
@@ -421,9 +437,7 @@ def plot_comparison(stock_code, months):
     plt.close()
     return f"data:image/png;base64,{plot_url}"
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+
 
 @app.route("/calculate", methods=["POST"])
 def calculate():
@@ -456,6 +470,8 @@ def roi():
 
 @app.route('/simulation')
 def simulation():  
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     # **每次都選一支新的隨機股票**
     session['stock_code'] = get_random_stock()
     session['start_index'] = 0  # 重置 K 線圖索引

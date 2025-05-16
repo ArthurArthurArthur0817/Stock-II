@@ -3,9 +3,9 @@ import talib
 import pandas as pd
 import numpy as np
 
-def run(stock_symbol, initial_capital, rsi_period=13, overbought=70, oversold=30):
+def run(stock_symbol, initial_capital, rsi_period=13, overbought=60, oversold=40):
     # 獲取最近 3 個月數據
-    data = yf.download(stock_symbol, period="3mo")
+    data = yf.download(stock_symbol, period="12mo")
     
     if data.empty:
         return "No data available for the selected stock."
@@ -81,7 +81,7 @@ def save_analysis_to_txt(result, data):
         # 寫入 RSI Analysis
         f.write("--- RSI Analysis ---\n")
         f.write("Price        Close        RSI Signal\n")
-        f.write("Ticker     2330.TW                  \n")
+        f.write("Ticker                       \n")
         f.write("Date                                \n")
         
         # 確保 'RSI' 和 'Signal' 欄位存在

@@ -17,7 +17,7 @@ def run(stock_symbol, initial_capital, window=5, num_std_dev=1):
         data = data.dropna(subset=['Close'])
     
     if data.empty:
-        print(f"找不到股票代碼 {stock_ticker} 的數據，請確認代碼或日期是否正確。")
+        print(f"找不到股票代碼 {stock_symbol} 的數據，請確認代碼或日期是否正確。")
         return
 
     # 計算布林通道

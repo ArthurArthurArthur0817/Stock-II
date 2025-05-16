@@ -362,4 +362,74 @@ a:hover {
     font-weight: bold;
 }
 
+/*==============================*/
+#ai_result_1 {
+    display: none;
+    background-color: white;
+    padding: 15px;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    text-align: left;
+    
+    white-space: normal;  /* ✅ 讓文字換行 */
+    word-wrap: break-word; /* ✅ 長單字換行 */
+    overflow-wrap: break-word; /* ✅ 確保所有瀏覽器適用 */
+
+    max-height: 300px; /* ✅ 限制高度 */
+    overflow-y: auto; /* ✅ 內容超出時可滾動 */
+
+    font-size: 16px;
+    color: #333;
+}
+#ai_result_2 {
+    display: none;
+    background-color: white;
+    padding: 15px;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    text-align: left;
+    
+    white-space: normal;  /* ✅ 讓文字換行 */
+    word-wrap: break-word; /* ✅ 長單字換行 */
+    overflow-wrap: break-word; /* ✅ 確保所有瀏覽器適用 */
+
+    max-height: 300px; /* ✅ 限制高度 */
+    overflow-y: auto; /* ✅ 內容超出時可滾動 */
+
+    font-size: 16px;
+    color: #333;
+}
+
+/*===========================================================================================*/
+
+/* 讓鏈接容器內的鏈接水平排列並置中 */
+/* 讓鏈接容器內的鏈接水平排列並置中 */
+.link-container {
+    display: flex;
+    justify-content: center; /* 讓鏈接水平置中 */
+    gap: 20px; /* 設定鏈接之間的間距 */
+    padding: 10px 0;
+}
+
+/* 設定鏈接樣式，使其看起來像文字，並將顏色設為白色 */
+.link {
+    text-decoration: none; /* 移除超連結底線 */
+    font-size: 18px; /* 設定字體大小 */
+    color: white; /* 預設文字顏色為白色 */
+    font-weight: bold;
+    padding: 5px 10px; /* 增加點擊範圍 */
+    transition: color 0.3s ease-in-out; /* 平滑顏色變化效果 */
+}
+
+/* 滑鼠懸停時改變顏色 */
+.link:hover {
+    color: #007bff; /* 變成藍色（你可以換成你喜歡的顏色） */
+    cursor: pointer;
+}
+
+
 
