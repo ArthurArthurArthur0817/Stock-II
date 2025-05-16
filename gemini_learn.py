@@ -27,7 +27,7 @@ def analyze_question():
         """
 
         # 🔹 呼叫 Gemini API 生成回答
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content(prompt)
         response.resolve()
 
