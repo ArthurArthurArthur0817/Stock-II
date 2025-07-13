@@ -44,21 +44,29 @@
     }
 
     /* 4.  選項按鈕顏色 */
-    .btn-outline-primary{color:var(--primary);border-color:var(--primary);}   
+    .btn-outline-primary,
     .btn-outline-primary:hover,
-    .option-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);} 
-    .btn-primary{background:var(--primary);border-color:var(--primary);} 
-    .btn-primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);} 
-    .btn-primary,
-  .btn-primary:hover,
-  .btn-primary:focus,
-  .btn-primary:active,
-  .btn-primary.active,
-  .show > .btn-primary.dropdown-toggle{
-    background: var(--primary) !important;
-    border-color: var(--primary) !important;
-    color:#fff !important;
-  }
+    .btn-outline-primary:focus,
+    .btn-outline-primary:active,
+    .btn-outline-primary.active,
+    .btn-outline-primary:focus:active {
+      color: var(--primary) !important;
+      background-color: transparent !important;
+      border-color: var(--primary) !important;
+      box-shadow: none !important;
+      outline: none !important;
+      transition: none !important;
+    }
+    .option-btn.active,
+    .option-btn:focus,
+    .option-btn:active {
+      background: var(--primary) !important;
+      color: #fff !important;
+      border-color: var(--primary) !important;
+      box-shadow: none !important;
+      outline: none !important;
+      transition: none !important;
+    }
 
     /* 5.  背景動畫 */
     body::before{
