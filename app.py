@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import io
+import time
 import base64
 from strategies import rsi,momentum  
 import subprocess
@@ -472,24 +473,75 @@ def roi():
 def simulation():  
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    # **每次都選一支新的隨機股票**
+
+    # ✅ 每次都隨機選一支新的股票
     session['stock_code'] = get_random_stock()
-    session['start_index'] = 0  # 重置 K 線圖索引
-    session['balance'] = 100_000  # **每次進入都重置餘額**
+    session['start_index'] = 0
+    session['balance'] = 100_000
+    clear_trading_history()
 
-    clear_trading_history()  # **清空交易紀錄**
-
-    if not fetch_stock_data(session['stock_code']):
+    # ✅ 嘗試抓股票資料（包含 retry 機制）
+    max_retries = 3
+    for i in range(max_retries):
+        if fetch_stock_data(session['stock_code']):
+            break
+        else:
+            print(f"第 {i+1} 次抓取失敗，稍後再試...")
+            time.sleep(2 * (i + 1))  # 緩衝時間 2s, 4s, 6s
+    else:
         return "無法獲取股票數據，請稍後再試"
 
+    # ✅ 繪製股票圖
     plot_path = plot_stock_data(session['stock_code'], session['start_index'])
     if not plot_path:
         return "無法生成股票圖表，請稍後再試"
     
+    # ✅ 最新股價
     latest_price_response = get_latest_price()
-    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
+    latest_price = latest_price_response.json.get('latest_price', None)
 
-    return render_template('simulation.html', plot_path=plot_path, stock_code=session['stock_code'], latest_price=latest_price, balance=session['balance'])
+    # ✅ 建立資料庫紀錄並寫入 stock_code 和模擬開始時間
+    try:
+        from db import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # 讀取最早的模擬起始日期
+        df = pd.read_csv(os.path.join(DATA_DIR, f"{session['stock_code']}.csv"))
+        simulation_start_date = df['Date'].iloc[0]
+
+        insert_query = """
+            INSERT INTO ai_logs (user_id, stock_code, simulation_start_date)
+            VALUES (%s, %s, %s)
+        """
+        cursor.execute(insert_query, (session['user_id'], session['stock_code'], simulation_start_date))
+        conn.commit()
+
+        session['log_id'] = cursor.lastrowid
+        cursor.close()
+        conn.close()
+        print(f"✅ 已寫入 log_id={session['log_id']}，模擬開始於 {simulation_start_date}")
+    except Exception as e:
+        print("❌ 建立資料庫紀錄失敗：", e)
+
+    return render_template(
+        'simulation.html',
+        plot_path=plot_path,
+        stock_code=session['stock_code'],
+        latest_price=latest_price,
+        balance=session['balance']
+    )
+
+
+
+    
+    return render_template(
+        'simulation.html',
+        plot_path=plot_path,
+        stock_code=session['stock_code'],
+        latest_price=latest_price,
+        balance=session['balance']
+    )
 
 
 
@@ -635,8 +687,47 @@ def run_ai_analysis():
         with open("simulation_analysis.txt", "r", encoding="utf-8") as f:
             analysis_result = f.read().strip()
 
+                # ✅ 將分析結果更新進既有紀錄
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            update_query = "UPDATE ai_logs SET content = %s WHERE id = %s"
+            cursor.execute(update_query, (analysis_result, session.get('log_id')))
+            conn.commit()
+
+            cursor.close()
+            conn.close()
+            print(f"✅ 已將 AI 分析結果寫入資料庫 log_id={session.get('log_id')}")
+        except Exception as e:
+            print("❌ 更新資料庫失敗：", e)
+
+
     return jsonify({"success": True, "analysis_result": analysis_result})
 
+
+@app.route('/journal')
+def journal():
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # 只取出 content 和 created_at 不為空的資料
+        query = """
+            SELECT user_id, stock_code, simulation_start_date, content, created_at
+            FROM ai_logs
+            WHERE content IS NOT NULL AND content <> ''
+              AND created_at IS NOT NULL
+            ORDER BY created_at DESC
+        """
+        cursor.execute(query)
+        logs = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return render_template("journal.html", logs=logs)
+    except Exception as e:
+        return f"讀取資料失敗：{e}"
 
 
 
