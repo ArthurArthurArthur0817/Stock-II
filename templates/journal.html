@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>模擬紀錄總覽</title>
+    <style>
+        body {
+            background-color: #D2E9FF;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #004B97;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .btn {
+            background-color: white;
+            color: #004B97;
+            border: 2px solid #004B97;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #004B97;
+            color: white;
+        }
+
+        table {
+            width: 90%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #004B97;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #004B97;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #F1F7FF;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>歷程追蹤</h1>
+    <a href="{{ url_for('simulation') }}" class="btn">返回主畫面</a>
+</header>
+
+{% if logs %}
+    <table>
+        <thead>
+            <tr>
+                <th>使用者 ID</th>
+                <th>股票代碼</th>
+                <th>模擬起始日</th>
+                <th>AI 分析內容</th>
+                <th>建立時間</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.user_id }}</td>
+                    <td>{{ log.stock_code }}</td>
+                    <td>{{ log.simulation_start_date }}</td>
+                    <td style="text-align: left;">{{ log.content | replace('\n', '<br>') | safe }}</td>
+                    <td>{{ log.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p style="text-align:center; margin-top:40px; color:#004B97;">目前尚無有效紀錄。</p>
+{% endif %}
+
+</body>
+</html>
