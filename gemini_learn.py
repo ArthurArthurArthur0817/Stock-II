@@ -4,7 +4,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
 # 配置 Gemini API 密鑰
-api_key = 'AIzaSyBMIXMv2ewbi-IJidv4lCwPXXyOdBzchUQ'  # ←🔹請替換為你的 API 金鑰
+api_key = ''  # ←🔹請替換為你的 API 金鑰
 genai.configure(api_key=api_key)
 
 def analyze_question():
@@ -27,7 +27,7 @@ def analyze_question():
         """
 
         # 🔹 呼叫 Gemini API 生成回答
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content(prompt)
         response.resolve()
 

@@ -96,6 +96,7 @@
                 <a href="{{ url_for('account') }}" class="nav-item nav-link" style="font-size: 25px;">Account</a>
                 <a href="{{ url_for('risk') }}" class="nav-item nav-link" style="font-size: 25px;">Risk</a>
                 <a href="{{ url_for('roi') }}" class="nav-item nav-link" style="font-size: 25px;">Return on Investment</a>
+                <a href="{{ url_for('journal') }}" class="nav-item nav-link" style="font-size: 25px;">Journal</a>
                 <a href="{{ url_for('simulation') }}" class="nav-item nav-link" style="font-size: 25px;">Simulation</a>
                 <a href="#" id="authLink" class="nav-item nav-link" style="font-size: 25px;">Login</a>
             </div>                      
@@ -199,9 +200,12 @@
                 <img width="100%" class="img-fluid" src="/static/img/study.jpg" alt="Image">
             </div>
             <div class="col-lg-6 py-5 py-lg-0 px-3 px-lg-5">
-                <h5 class="text-primary mb-3">About Us</h5>
-                <h1 class="mb-4">15 Years Experience</h1>
-                <p>Labore vero lorem eos sed aliquy ipsum aliquy sed. Vero dolore dolore takima ipsum lorem rebum</p>
+                <h1 class="text-primary mb-3">About Us</h5>
+                <h1 class="mb-4" style="font-size:2.8em;">建立宗旨</h1>
+                <p style="font-size: 1.75em;">目前市面上缺乏針對零基礎使用者設計的模擬投資平台，導致許多初學者必須經歷多次嘗試與失敗，才能逐步累積投資經驗。因此本專題旨在打造一個結合Python Flask與Gemini AI的智慧投資學習平台，協助新手投資者在無基礎的情況下也能有效入門投資，讓投資變得更簡單且可學習。</p>
+                <h1 class="mb-4"style="font-size:2.8em;">網站特色</h1>
+                <p style="font-size: 1.75em;">使用者只需根據需求填寫表單，系統便會推薦合適股票，並提供報酬率模擬與模擬交易功能。透過 20 種交易策略，使用者可選擇策略並輸入股票，獲得對應的分析結果。如有疑問，可提交給 AI 解釋分析內容，AI 也會反問使用者以確認理解，實現互動式學習。
+此外，平台提供歷史資料模擬交易，隨機選股且隱藏代號，使用者需依圖表與判斷操作。模擬結束後，AI 將分析操作表現並提供策略建議，幫助學習與反思。</p>
                 <div class="row py-2">
                     <div class="col-sm-6">
                         <i class="flaticon-approved display-3 text-primary"></i>
@@ -224,18 +228,18 @@
     <!-- Services Start -->
     <div class="container pt-5">
         <div class="d-flex flex-column text-center mb-5">
-            <h5 class="text-primary mb-3">Our Services</h5>
-            <h1 class="m-0">Premium Security Services</h1>
+            <h5 class="text-primary mb-3">網站功能介紹</h5>
+            <h1 class="m-0">為新手打造，結合AI的投資學習平台</h1>
         </div>
         <div class="row pb-3">
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/service-1.jpg" alt="">
+                    <img class="card-img-top" src="/static/img/risk.jpg" alt="">
                     <div class="card-body bg-secondary d-flex align-items-center p-0">
                         <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-robot"></i>
+                            <i class="bi bi-shield-fill-check"></i>
                         </h3>                        
-                        <h6 class="card-title text-white text-truncate m-0">AI分析</h6>
+                        <h6 class="card-title text-white text-truncate m-0">風險投資與推薦</h6>
                     </div>
                     <div class="card-footer">
                         將指定股票套用策略分析，或是分析投資行為，皆可配合程式所搭載的Gemini進行報告分析
@@ -247,26 +251,26 @@
                     <img class="card-img-top" src="/static/img/risk.jpg" alt="">
                     <div class="card-body bg-secondary d-flex align-items-center p-0">
                         <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-shield-fill"></i>
-                        </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">風險投資與推薦</h6>
-                    </div>
-                    <div class="card-footer">
-                        ABC amet eos at no eos sit lorem, amet rebum ipsum clita stet, diam sea est magna diam eos, rebum sit vero stet ipsum justo et.
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/service-3.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
                             <i class="bi bi-calculator"></i>
                         </h3> 
                         <h6 class="card-title text-white text-truncate m-0">投資報酬率計算</h6>
                     </div>
                     <div class="card-footer">
-                        Diam amet eos at no eos sit lorem, amet rebum ipsum clita stet, diam sea est magna diam eos, rebum sit vero stet ipsum justo et.
+                        動不動就壞掉的功能
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card mb-2 p-3">
+                    <img class="card-img-top" src="/static/img/journal.jpg" alt="">
+                    <div class="card-body bg-secondary d-flex align-items-center p-0">
+                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
+                            <i class="bi bi-book"></i>
+                        </h3> 
+                        <h6 class="card-title text-white text-truncate m-0">歷程追蹤</h6>
+                    </div>
+                    <div class="card-footer">
+                        將歷史模擬投資的每次交易，都詳細的紀錄，搭配股票代號與模擬的時間，讓使用者更好複習與紀錄!
                     </div>
                 </div>
             </div>
@@ -280,7 +284,7 @@
                         <h6 class="card-title text-white text-truncate m-0">策略套用</h6>
                     </div>
                     <div class="card-footer">
-                        Diam amet eos at no eos sit lorem, amet rebum ipsum clita stet, diam sea est magna diam eos, rebum sit vero stet ipsum justo et.
+                        超過20種股票策略，套用即時的股票數據，告訴你在該策略下股票的相關指標是好是壞
                     </div>
                 </div>
             </div>
@@ -291,10 +295,10 @@
                         <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
                             <i class="bi bi-bar-chart-line-fill"></i>
                         </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">模擬投資</h6>
+                        <h6 class="card-title text-white text-truncate m-0">AI即時數據投資</h6>
                     </div>
                     <div class="card-footer">
-                        Diam amet eos at no eos sit lorem, amet rebum ipsum clita stet, diam sea est magna diam eos, rebum sit vero stet ipsum justo et.
+                        實際取得當前的股票買賣價格，搭配AI的參考意見，體驗真實的股票模擬投資，同時分析套用策略的各項指標意義
                     </div>
                 </div>
             </div>
@@ -305,10 +309,10 @@
                         <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
                             <i class="bi bi-currency-dollar"></i>
                         </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">歷史數據模擬</h6>
+                        <h6 class="card-title text-white text-truncate m-0">AI歷史數據模擬</h6>
                     </div>
                     <div class="card-footer">
-                        Diam amet eos at no eos sit lorem, amet rebum ipsum clita stet, diam sea est magna diam eos, rebum sit vero stet ipsum justo et.
+                        利用隨機股票往年的數據，自行加速時間來買賣，立即知道交易結果是賺是賠，搭配AI反饋學習更即時
                     </div>
                 </div>
             </div>
@@ -322,23 +326,23 @@
         <div class="row pt-5">
             <div class="col-lg-3 col-sm-6 mb-5">
                 <h5 class="fa fa-user-shield mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white" style="width: 50px; height: 50px;"></h5>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">250</h4>
-                <h6 class="text-white m-0">Our Staff</h6>
+                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">6</h4>
+                <h6 class="text-white m-0">開發人員</h6>
             </div>
             <div class="col-lg-3 col-sm-6 mb-5">
                 <h3 class="bi bi-people-fill mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white"></i>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">1500</h4>
-                <h6 class="text-white m-0">Happy Client</h6>
+                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">243</h4>
+                <h6 class="text-white m-0">開發時間(天)</h6>
             </div>
             <div class="col-lg-3 col-sm-6 mb-5">
                 <h5 class="fa fa-shield-alt mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white" style="width: 50px; height: 50px;"></h5>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">10000</h4>
-                <h6 class="text-white m-0">Project Complete</h6>
+                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">22</h4>
+                <h6 class="text-white m-0">交易策略(種)</h6>
             </div>
             <div class="col-lg-3 col-sm-6 mb-5">
                 <h5 class="fa fa-award mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white" style="width: 50px; height: 50px;"></h5>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">25</h4>
-                <h6 class="text-white m-0">Award Winning</h6>
+                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">997</h4>
+                <h6 class="text-white m-0">支援股票</h6>
             </div>
         </div>
     </div>
@@ -378,14 +382,14 @@
                         </div>
                     </div>
                     <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/team-1.jpg" alt="Image">
+                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 mb-4">
                 <div class="row mb-2 align-items-center">
                     <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/team-2.jpg" alt="Image">
+                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
                     </div>
                     <div class="col-6 text-left">
                         <h6>Officer Name</h6>
@@ -414,14 +418,14 @@
                         </div>
                     </div>
                     <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/team-3.jpg" alt="Image">
+                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 mb-4">
                 <div class="row mb-2 align-items-center">
                     <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/team-4.jpg" alt="Image">
+                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
                     </div>
                     <div class="col-6 text-left">
                         <h6>Officer Name</h6>
@@ -450,14 +454,14 @@
                         </div>
                     </div>
                     <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/team-3.jpg" alt="Image">
+                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 mb-4">
                 <div class="row mb-2 align-items-center">
                     <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/team-4.jpg" alt="Image">
+                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
                     </div>
                     <div class="col-6 text-left">
                         <h6>Officer Name</h6>

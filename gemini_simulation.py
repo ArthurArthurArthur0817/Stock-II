@@ -2,7 +2,7 @@ import google.generativeai as genai
 import os
 
 # 配置 Gemini API 密鑰
-api_key = 'AIzaSyDQ3rFXvaefqgNuJ6tsL-L0JDDqjQDVq4Q'  # ← 請替換為你的 API 金鑰
+api_key = ''  # ← 請替換為你的 API 金鑰
 genai.configure(api_key=api_key)
 
 def analyze_trading_history():
@@ -30,7 +30,7 @@ def analyze_trading_history():
         """
 
         # 呼叫 Gemini API
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
         response = model.generate_content(prompt)
         response.resolve()
 
