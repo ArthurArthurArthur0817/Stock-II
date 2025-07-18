@@ -729,6 +729,9 @@ def journal():
     except Exception as e:
         return f"讀取資料失敗：{e}"
 
+@app.route('/dictionary')
+def dictionary():
+    return render_template('dictionary.html')  # 確保你有 dictionary.html 檔案
 
 
 #相關新聞
