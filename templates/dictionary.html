@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>股票策略名詞解釋</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f9ff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 2rem;
+      color: #003060;
+      margin-bottom: 30px;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      justify-items: center;
+      min-height: 600px;
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 900px) {
+      .card-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .card-container {
+        grid-template-columns: repeat(1, 1fr);
+      }
+    }
+
+    .pagination {
+      margin-top: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .pagination button {
+      padding: 8px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 300px;
+      height: 180px;
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .card:hover .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      padding: 20px;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      word-wrap: break-word;
+      text-align: center;
+      font-size: 1rem;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      font-weight: normal;
+      font-size: 0.95rem;
+    }
+
+    .main-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .sidebar {
+      width: 200px;
+      text-align: left;
+    }
+
+    .sidebar button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #003D79;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background-color: #005AB5;
+    }
+
+    .content {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="title">股票主題學習卡片</h1>
+  <div class="main-container">
+    <div class="sidebar" id="topicList"></div>
+    <div class="content">
+      <div class="card-container" id="cardContainer"></div>
+      <div class="pagination">
+        <button id="prevPage">上一頁</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage">下一頁</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const topics = {
+      "技術分析與交易策略": [
+        { name: "布林帶策略", description: "用三條線包住價格，當價格碰到上下邊界時，可能代表太貴或太便宜，是進出場的參考點。" },
+        { name: "布林帶定向策略", description: "除了看布林帶，也看成交量，幫助你判斷這個價格變化是不是「真的」動起來了。" },
+        { name: "通道突破策略", description: "價格如果「突破」上下界線，表示有大變動發生，是追漲或殺跌的信號。" },
+        { name: "肯特納通道策略", description: "用平均價格加上波動幅度畫出一個通道，判斷趨勢是向上還是向下。" },
+        { name: "移動平均線交叉策略", description: "短期均線從下往上穿過長期均線是買進訊號，反之則是賣出訊號。" },
+        { name: "移動平均雙線交叉策略", description: "觀察兩條不同天數的均線是否交叉，判斷趨勢可能轉變。" },
+        { name: "SAR 拋物線策略", description: "SAR 點點顯示可能的反轉位置，幫助你抓停利或停損點。" },
+        { name: "超級趨勢策略", description: "結合趨勢與波動資訊，抓出多空轉折點。" },
+        { name: "RSI 策略", description: "RSI 超過 70 可能太熱，低於 30 可能太冷，用來判斷買賣時機。" },
+        { name: "慢速隨機策略(KD指標)", description: "根據 %K 和 %D 線的交叉決定進出場，像在看市場節奏快慢。" }
+      ],
+      "進階與突破型策略": [
+        { name: "動量策略", description: "如果股票漲得很快，可能還會繼續漲；跌得快，也可能繼續跌。" },
+        { name: "ADX 突破策略", description: "ADX 高代表趨勢強，可以考慮順勢；低則表示市場不明朗，暫時觀望。" },
+        { name: "樞軸點策略", description: "用前一天價格算出支撐與壓力位，幫助今天判斷漲跌轉折點。" },
+        { name: "BarUpDn 策略", description: "今天收盤比昨天高，表示上漲趨勢；比昨天低，則是下跌趨勢。" },
+        { name: "連續向上/向下策略", description: "如果連漲幾天，可能太熱要小心；連跌幾天，也可能要反彈了。" },
+        { name: "Inside Bar 策略", description: "今天的價格範圍被昨天包住，表示市場安靜，可能準備爆發大行情。" },
+        { name: "OutSide Bar 策略", description: "今天的價格波動超越昨天，代表市場強烈波動，是出手或避開的關鍵時刻。" },
+        { name: "Price Channel 策略", description: "看價格在一個上下範圍內來回跑，碰邊界時考慮反方向操作。" }
+      ],
+      "情緒與風險類策略": [
+        { name: "貪婪策略", description: "為了多賺一點不斷加碼，但風險很大，容易從賺錢變賠錢。" },
+        { name: "MACD 策略", description: "利用兩條線的交叉和柱狀圖看趨勢走向，是常見的趨勢判斷工具。" }
+      ],
+      "技術指標": [
+        { name: "EMA", description: "一種平均價格，最近的價格變化會更被重視。" },
+        { name: "VWAP", description: "機構常用的平均價，比單純價格更能反映真實價值。" },
+        { name: "OBV", description: "觀察資金是流入還是流出股票，判斷人多在哪邊。" },
+        { name: "成交量", description: "代表今天交易多不多，量大通常代表很多人在關注這檔股票。" },
+        { name: "均線 (MA)", description: "看股票過去一段時間的平均價格，幫助你看趨勢方向。" }
+      ],
+      "基本面指標": [
+        { name: "本益比 (PE Ratio)", description: "股價除以公司每年賺的錢，數字越高代表越貴。" },
+        { name: "殖利率", description: "買股票得到的年回報比率，像銀行定存利率的概念。" },
+        { name: "股價淨值比 (P/B Ratio)", description: "股價跟公司資產的比值，太高可能被高估。" },
+        { name: "營收成長率", description: "營業收入成長越快，通常代表公司越有潛力。" },
+        { name: "負債比", description: "公司有多少錢是借來的，負債高可能風險較大。" },
+        { name: "每股盈餘 (EPS)", description: "公司賺多少錢除以股票數，幫你了解每張股票賺的錢。" },
+        { name: "ROE 股東權益報酬率", description: "公司幫股東賺錢的效率，高代表公司運用資金有效率。" },
+        { name: "現金流量", description: "實際進出的現金，正現金流代表公司活力強。" },
+        { name: "毛利率", description: "公司賣東西扣掉成本後還能賺多少錢。" }
+      ],
+      "投資理財觀念": [
+        { name: "複利的力量", description: "利滾利讓小錢變大錢，是投資最強的武器。" },
+        { name: "風險與報酬", description: "報酬高的投資通常風險也高，要找到適合自己的平衡。" },
+        { name: "資產配置", description: "別把所有錢放一種投資，分散風險才穩。" },
+        { name: "長期 vs 短期投資", description: "短期波動大，長期才能靠複利累積財富。" },
+        { name: "ETF 投資", description: "像一籃子股票，風險低又簡單，是新手好選擇。" },
+        { name: "定期定額", description: "固定時間投入固定金額，不用猜高低點，平均成本。" },
+        { name: "緊急預備金", description: "存一筆錢備不時之需，避免投資時急著賣股票。" },
+        { name: "投資 vs 投機", description: "投資是穩定增值，投機是賭漲跌，風險與心態完全不同。" },
+        { name: "資金管理", description: "不要把全部資金都壓在一個點上，學會分配與控制風險。" },
+        { name: "財務目標設定", description: "先想清楚為什麼投資，是為了退休、買房，還是學費？目標不同策略也不同。" }
+      ],
+      "投資心理學": [
+        { name: "羊群效應", description: "大家買你就跟著買，小心變成最後接盤的那個人。" },
+        { name: "FOMO", description: "怕錯過賺錢機會而亂買，常讓人追高殺低。" },
+        { name: "貪婪與恐懼", description: "看到漲就想買，看到跌就急著賣，這是虧錢的來源。" },
+        { name: "確認偏誤", description: "只看支持自己想法的資訊，會讓判斷變得不客觀。" },
+        { name: "紀律投資", description: "照計劃做事，不因情緒而改變，才是穩定賺錢的關鍵。" },
+        { name: "後悔心態", description: "沒買就漲會懊悔，買了就跌會自責，要學會接受結果。" },
+        { name: "停損恐懼", description: "不敢認賠是新手常見錯誤，小虧不忍會變大虧。" },
+        { name: "過度自信", description: "一兩次賺錢就以為自己是股神，小心反被市場教訓。" },
+        { name: "賭徒心態", description: "輸了想翻本、贏了想加碼，這是賭場不是投資。" },
+        { name: "短視近利", description: "只看明天賺多少，容易忽略長期風險與機會。" }
+      ]
+    };
+
+    const colors = [
+      "#00507D", "#0A5A87", "#146492", "#1E6E9C", "#2878A6",
+      "#3382B0", "#3D8DBA", "#4797C4", "#51A1CE", "#5BADD8",
+      "#65B7E2", "#70C1EC", "#7ACBF6", "#84D5FF"
+    ];
+
+    let currentTopic = null;
+    let currentPage = 1;
+    const itemsPerPage = 9;
+
+    const topicList = document.getElementById("topicList");
+    const cardContainer = document.getElementById("cardContainer");
+    const prevPageBtn = document.getElementById("prevPage");
+    const nextPageBtn = document.getElementById("nextPage");
+    const pageInfo = document.getElementById("pageInfo");
+
+    Object.keys(topics).forEach(topic => {
+      const btn = document.createElement("button");
+      btn.textContent = topic;
+      btn.onclick = () => {
+        currentTopic = topic;
+        currentPage = 1;
+        renderCards();
+      };
+      topicList.appendChild(btn);
+    });
+
+    function renderCards() {
+      const terms = topics[currentTopic] || [];
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const currentTerms = terms.slice(startIndex, startIndex + itemsPerPage);
+
+      cardContainer.innerHTML = "";
+      currentTerms.forEach((term, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const cardInner = document.createElement("div");
+        cardInner.className = "card-inner";
+
+        const front = document.createElement("div");
+        front.className = "card-front";
+        front.style.backgroundColor = colors[index % colors.length];
+        front.textContent = term.name;
+
+        const back = document.createElement("div");
+        back.className = "card-back";
+        back.style.backgroundColor = colors[index % colors.length];
+        back.textContent = term.description;
+
+        cardInner.appendChild(front);
+        cardInner.appendChild(back);
+        card.appendChild(cardInner);
+        cardContainer.appendChild(card);
+      });
+
+      const totalPages = Math.ceil(terms.length / itemsPerPage);
+      pageInfo.textContent = `第 ${currentPage} 頁 / 共 ${totalPages} 頁`;
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages;
+
+      const blankCount = itemsPerPage - currentTerms.length;
+      for (let i = 0; i < blankCount; i++) {
+        const blankCard = document.createElement("div");
+        blankCard.className = "card";
+        blankCard.style.visibility = "hidden";
+        cardContainer.appendChild(blankCard);
+      }
+    }
+
+    prevPageBtn.onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderCards();
+      }
+    };
+
+    nextPageBtn.onclick = () => {
+      const totalPages = Math.ceil((topics[currentTopic] || []).length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderCards();
+      }
+    };
+
+    const defaultTopic = Object.keys(topics)[0];
+    currentTopic = defaultTopic;
+    renderCards();
+  </script>
+</body>
+</html>
