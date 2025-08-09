@@ -7,12 +7,33 @@ Stock/
 ├── app.py           # 主 Flask 應用程式文件
 ├── db.py            # 資料庫連線帳密
 ├── trade.py         # 負責交易的相關邏輯
+├── simulation.py
+├── gemini.py
+├── gemini_learn.py
+├── gemini_simulation.py
+├── history_trading.py
+├── news.py
+├── risk_analysis.py
 ├── templates/
 │   ├── account.html     # 用戶當前個人資料(帳戶餘額/持有股票)  
 │   ├── login.html       # 登入介面
 │   ├── register.html    # 註冊介面
 │   ├── transaction.html # 歷史交易紀錄顯示介面   
-│   └── trade.html       # 交易介面(選擇股票/顯示該股票相關資訊)
+│   ├── trade.html       # 交易介面(選擇股票/顯示該股票相關資訊)
+│   ├── K_chart.html
+│   ├── analysis_tools.html
+│   ├── basic.html
+│   ├── dictionary.html
+│   ├── journal.html
+│   ├── main.html
+│   ├── market.html
+│   ├── news.html
+│   ├── risk.html
+│   ├── risk_result.html
+│   ├── roi.html
+│   ├── simulation.html
+│   ├── teach.html
+│   └── trans_related.html      
 └── static/
     ├── styles.css         
 ```
