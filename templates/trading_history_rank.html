@@ -1,0 +1,89 @@
+<!-- templates/rank.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>交易排行榜</title>
+    <style>
+        body {
+            background-color: #D2E9FF;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #004B97;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .btn {
+            background-color: white;
+            color: #004B97;
+            border: 2px solid #004B97;
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #004B97;
+            color: white;
+        }
+
+        table {
+            width: 90%;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #004B97;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #004B97;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #F1F7FF;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>交易排行榜</h1>
+        <a href="/" class="btn">返回首頁</a>
+    </header>
+
+    <table>
+        <tr>
+            <th>使用者名稱</th>
+            <th>平均勝率</th>
+            <th>總獲利</th>
+        </tr>
+        {% for row in ranks %}
+        <tr>
+            <td>{{ row.username }}</td>
+            <td>{{ row.avg_win_rate }}</td>
+            <td>{{ row.total_profit }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
