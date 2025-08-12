@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <title>{{ stock_code }} 模擬交易</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <!-- 加入 industry_info class -->
+    <div class="industry_info">
+        <h2>股票代號：{{ stock_code }}</h2>
+        <h3>股價：<span id="latest_price">{{ latest_price }}</span></h3>
+        <h3>帳戶餘額：<span id="balance">{{ balance }}</span></h3>
+        <h3>持股數量：<span id="stock_count">{{ stock_count }}</span></h3>
+
+        <!-- 按鈕加 class industry_btn -->
+        
+
+        <!-- 加上 industry_chart class 讓圖片置中 -->
+        <div class="industry_chart">
+            <img id="stock_chart" class="stock_chart_img" src="{{ plot_path }}" alt="K線圖">
+        </div>
+
+        <button class="industry_btn" id="next_day_btn" style="margin-top: 10px;">下一天</button>
+        <div style="margin-top: 20px;">
+            <button class="industry_btn" id="buy_btn">買入</button>
+            <button class="industry_btn" id="sell_btn">賣出</button>
+            <button class="industry_btn" id="close_btn">平倉</button>
+        </div>
+
+
+        <!-- 加上對應 class -->
+    <div id="event_alerts" class="industry_alerts"></div>
+        
+        <div id="indicators" class="industry_indicators">
+            <div class="indicator_card">
+                <p>RSI: <span id="rsi_value">-</span></p>
+                <p class="indicator_description">這裡是 RSI 的簡要說明</p>
+                <!-- div class="indicator_content"-->
+                    <!-- 可放圖表、詳細分析等內容 -->
+                <!-- /div-->
+            </div>
+            <div class="indicator_card">
+                <p>MACD: <span id="macd_value">-</span></p>
+                <p class="indicator_description">這裡是 MACD 的簡要說明</p>
+                <!-- div class="indicator_content"-->
+                    <!-- 可放圖表、詳細分析等內容 -->
+                <!-- /div-->
+            </div>
+            <div class="indicator_card">
+                <p>ADX: <span id="adx_value">-</span></p>
+                <p class="indicator_description">這裡是 ADX 的簡要說明</p>
+                <div class="indicator_content">
+                    <!-- 可放圖表、詳細分析等內容 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+<script>
+$(function() {
+    function refreshBalanceAndCount() {
+        $.get("/industry_get_balance", function(data) {
+            $("#balance").text(data.balance);
+        });
+
+        $.get("/industry_get_stock_count", function(data) {
+            $("#stock_count").text(data.stock_count);
+        });
+    }
+
+    $("#buy_btn").click(function() {
+        $.ajax({
+            url: "/industry_buy_stock",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                stock: "{{ stock_code }}",
+                current_price: parseFloat($("#latest_price").text())
+            }),
+            success: function(response) {
+                refreshBalanceAndCount();
+                alert("✅ 買入成功！");
+            },
+            error: function(xhr) {
+                alert("買入失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
+            }
+        });
+    });
+
+    $("#sell_btn").click(function() {
+        $.ajax({
+            url: "/industry_sell_stock",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                stock: "{{ stock_code }}",
+                current_price: parseFloat($("#latest_price").text())
+            }),
+            success: function(response) {
+                refreshBalanceAndCount();
+                alert("✅ 賣出成功！");
+            },
+            error: function(xhr) {
+                alert("賣出失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
+            }
+        });
+    });
+
+
+    $("#close_btn").click(function() {
+        $.ajax({
+            url: "/industry_close_position",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                stock: "{{ stock_code }}",
+                current_price: parseFloat($("#latest_price").text())
+            }),
+            success: function(response) {
+                refreshBalanceAndCount();
+                alert("✅ 平倉成功！");
+            },
+            error: function(xhr) {
+                alert("平倉失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
+            }
+        });
+    });
+
+
+    $("#next_day_btn").click(function() {
+        $(this).prop('disabled', true).text('載入中...');
+
+        $.get("/industry_next_day")
+        .done(function(data) {
+            if (!data.error) {
+                $("#stock_chart").attr("src", "");
+                setTimeout(function() {
+                    var timestamp = new Date().getTime();
+                    var randomNum = Math.random();
+                    var newSrc = data.plot_path + "?v=" + timestamp + "&r=" + randomNum;
+                    $("#stock_chart").attr("src", newSrc);
+                }, 50);
+
+                $("#latest_price").text(data.latest_price);
+                $("#rsi_value").text(data.rsi);
+                $("#macd_value").text(data.macd);
+                $("#adx_value").text(data.adx);
+
+                let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
+                $("#event_alerts").html(alerts);
+            } else {
+                alert(data.error);
+            }
+        })
+        .fail(function(xhr, status, error) {
+            alert('請求失敗: ' + error);
+        })
+        .always(function() {
+            $("#next_day_btn").prop('disabled', false).text('下一天');
+        });
+    });
+
+    $("#stock_chart").on('error', function() {
+        var currentSrc = $(this).attr('src');
+        if (currentSrc && !currentSrc.includes('retry=1')) {
+            $(this).attr('src', currentSrc + '&retry=1');
+        }
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <title>選擇股票模擬</title>
+    <style>
+        /* 大容器，背景色可自行調整 */
+        .select_industry_container {
+            background-color: #D2E9FF; /* 你想要的背景色 */
+            min-height: 100vh;
+            padding: 60px 20px 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 字卡區塊 */
+        .select_industry_card_group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        /* 單張字卡 */
+        .select_industry_card {
+            cursor: pointer;
+            padding: 150px 50px;
+            border: 3px solid #004B97;
+            border-radius: 14px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #004B97;
+            background-color: white;
+            transition: all 0.3s ease;
+            min-width: 200px;
+            user-select: none;
+            box-shadow: 0 0 8px rgba(0, 75, 151, 0.15);
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .select_industry_card:hover {
+            background-color: #004B97;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 75, 151, 0.5);
+            transform: scale(1.05);
+        }
+
+        .select_industry_card.selected {
+            background-color: #004B97;
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 75, 151, 0.7);
+            transform: scale(1.1);
+            border-color: #002f5a;
+        }
+
+        /* 隱藏輸入欄 */
+        .select_industry_hidden_input {
+            display: none;
+        }
+
+        /* 送出按鈕 */
+        .select_industry_submit_btn {
+            padding: 14px 36px;
+            font-size: 20px;
+            background-color: #004B97;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            min-width: 160px;
+            disabled: true;
+        }
+
+        .select_industry_submit_btn:hover:enabled {
+            background-color: #002f5a;
+        }
+
+        .select_industry_submit_btn:disabled {
+            background-color: #7aa5d9;
+            cursor: not-allowed;
+        }
+
+        /* 底部說明容器 */
+        .select_industry_footer {
+            max-width: 1400px;
+            width: 100%;
+            background-color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 75, 151, 0.2);
+            color: #004B97;
+            font-size: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="select_industry_container">
+    <form method="POST" id="selectIndustryForm" style="width: 100%; max-width: 700px;">
+        <h2 style="color:#004B97; text-align:center; margin-bottom: 40px;">請選擇要模擬的股票</h2>
+
+        <div class="select_industry_card_group">
+            {% for code, name in stocks %}
+            <div class="select_industry_card" data-code="{{ code }}">{{ name }}</div>
+            {% endfor %}
+        </div>
+
+        <input type="hidden" name="stock" id="select_industry_hidden_input" class="select_industry_hidden_input" required>
+
+        <div style="text-align: center;">
+            <button type="submit" class="select_industry_submit_btn" disabled>開始模擬</button>
+        </div>
+    </form>
+
+    <div class="select_industry_footer" style="margin-top: 50px;">
+        <!-- 你可以放任何說明文字或內容在這裡 -->
+        <p>請從上方選擇一檔股票開始模擬，系統將根據選擇進行即時行情分析。</p>
+        <p>如果有任何問題，歡迎聯絡客服支援。</p>
+    </div>
+</div>
+
+<script>
+    const cards = document.querySelectorAll('.select_industry_card');
+    const hiddenInput = document.getElementById('select_industry_hidden_input');
+    const submitBtn = document.querySelector('.select_industry_submit_btn');
+
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            // 清除先前選中狀態
+            cards.forEach(c => c.classList.remove('selected'));
+
+            // 標示當前選中卡片
+            card.classList.add('selected');
+
+            // 設定隱藏欄位值
+            hiddenInput.value = card.getAttribute('data-code');
+
+            // 啟用送出按鈕
+            submitBtn.disabled = false;
+        });
+    });
+</script>
+
+</body>
+</html>
