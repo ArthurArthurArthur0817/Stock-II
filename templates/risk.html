@@ -104,6 +104,17 @@
     footer ul{list-style:none;padding-left:0;margin-bottom:1.5rem;}
     footer li{margin-bottom:.25rem;}
     footer .copyright{border-top:1px solid rgba(255, 255, 255, 0.722);margin-top:2rem;padding-top:1rem;font-size:.875rem;color:#cccccc;}
+
+    /* Q7 下拉選單：解除固定高度，拉高行高與上下內距，避免文字被裁切 */
+    #stock-type.form-control{
+      height: auto;        /* 取消 Bootstrap 的固定 calc() 高度 */
+      min-height: 3rem;    /* 你要多高就調這裡，例如 3.25rem、3.5rem */
+      padding-top: .75rem; /* 與 p-3 視覺一致（1rem 也可） */
+      padding-bottom: .75rem;
+      line-height: 1.6;    /* 行高再高一點比較不會切字 */
+      box-sizing: border-box;
+    }
+
   </style>
 </head>
 <body>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>近期新聞 - {{ stock_name }}</title>
+
+  <!-- Speed up Google Fonts handshake -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <style>
+    :root{ --primary:#043b8f; --secondary:#0b1f33; --bg:#f2f5fb; }
+    html,body{height:100%;}
+    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans TC',sans-serif;}
+
+    /* 讓載入畫面文字也使用 Noto Serif TC（含常見 CJK 宋體備援） */
+    #loading-overlay, #loading-overlay *{
+      font-family:'Noto Serif TC','Source Han Serif TC','Noto Serif CJK TC','Songti TC',serif;
+    }
+
+    /* full-viewport container */
+    .wrap{position:fixed;inset:0;display:flex;align-items:stretch;justify-content:stretch;}
+    /* iframe fills the page under the overlay */
+    iframe{width:100%;height:100%;border:0;display:block;background:#fff;}
+    /* overlay that paints immediately */
+    #loading-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.96);z-index:9999;transition:opacity .4s ease;color:var(--primary);font-weight:700;letter-spacing:.02em;padding:16px;}
+    #loading-overlay.hidden{opacity:0;pointer-events:none;}
+    .spinner{width:56px;height:56px;border-radius:50%;border:4px solid #e0e6f7;border-top-color:var(--primary);animation:spin 1s linear infinite;margin:0 auto 12px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-box{text-align:center;}
+  </style>
+
+  <!-- 非阻塞載入字型（載好即切換，不擋住 overlay 的首屏繪製） -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap"
+        rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap"></noscript>
+</head>
+<body>
+  <div class="wrap">
+    <iframe id="appFrame" title="內容載入中…" loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+
+  <div id="loading-overlay" role="status" aria-live="polite" aria-busy="true">
+    <div class="loading-box">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>載入中，請稍候…</div>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // Parse ?target=<encoded URL>
+      var params = new URLSearchParams(location.search);
+      var target = params.get('target') || '';
+      try { target = decodeURIComponent(target); } catch(e){}
+      if (!target) {
+        // Fallback: show hint
+        document.querySelector('.loading-box').innerHTML = "<div style='font-weight:700;margin-bottom:8px'>需要指定 target 參數</div><div style='font-weight:400;color:#333'>例如：<code>news_loader_wrapper.html?target=/news/%E5%8F%B0%E7%A9%8D%E9%9B%BB</code></div>";
+        return;
+      }
+      // Set iframe src
+      var f = document.getElementById('appFrame');
+      f.src = target;
+      // Hide overlay when iframe fully loaded
+      f.addEventListener('load', function(){
+        var overlay = document.getElementById('loading-overlay');
+        overlay.classList.add('hidden');
+      }, { once:true });
+    })();
+  </script>
+</body>
+</html>

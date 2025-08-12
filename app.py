@@ -858,6 +858,11 @@ def news():
 
     return render_template('news.html', news_list=news_list, stock_name=stock_name)
 
+@app.route("/news/loader")
+def news_loader():
+    
+    return render_template("news_loader_wrapper.html")
+
 
 #==============================================================================
 #==============================================================================
