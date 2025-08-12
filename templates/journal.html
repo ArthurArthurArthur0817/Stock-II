@@ -63,6 +63,7 @@
             background-color: #F1F7FF;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -70,6 +71,59 @@
     <h1>歷程追蹤</h1>
     <a href="{{ url_for('main') }}" class="btn">返回主畫面</a>
 </header>
+
+<!-- 📊 圖表容器 -->
+    <div style="max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <canvas id="winRateChart"></canvas>
+        <p style="margin-top: 10px; font-size: 14px; color: #555;">此圖顯示最近五筆 win_rate 的變化趨勢。</p>
+    </div>
+
+<script>
+    const winRateLabels = {{ win_rate_data | map(attribute='created_at') | list | tojson }};
+    const winRateValues = {{ win_rate_data | map(attribute='win_rate') | list | tojson }};
+
+    const ctx = document.getElementById('winRateChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: winRateLabels,
+            datasets: [{
+                label: 'Win Rate',
+                data: winRateValues,
+                borderColor: '#004B97',
+                backgroundColor: 'rgba(0, 75, 151, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Win Rate'
+                    },
+                    min: 0,
+                    max: 100
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '交易時間'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: {
+                        color: '#004B97'
+                    }
+                }
+            }
+        }
+    });
+</script>
 
 {% if logs %}
     <table>
