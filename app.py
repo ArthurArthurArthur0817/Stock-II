@@ -17,7 +17,8 @@ import importlib
 from simulation import fetch_stock_data,plot_stock_data,get_random_stock
 from history_trading import TradingHistory
 from risk_analysis import  process_stock_type
-
+import math
+from industry_simulation import trading_industry
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -533,18 +534,6 @@ def simulation():
     )
 
 
-
-    
-    return render_template(
-        'simulation.html',
-        plot_path=plot_path,
-        stock_code=session['stock_code'],
-        latest_price=latest_price,
-        balance=session['balance']
-    )
-
-
-
 @app.route('/get_latest_price')
 def get_latest_price():
     stock_code = session.get('stock_code')
@@ -664,7 +653,6 @@ def get_balance():
     return jsonify({'balance': trading_history.get_balance()})
 
 
-
 RECORD_FILE = "trading_history.txt"
 def clear_trading_history():
     """清空交易紀錄 txt 檔案"""
@@ -680,6 +668,55 @@ def run_ai_analysis():
     if os.path.exists(ANALYSIS_FILE):
         os.remove(ANALYSIS_FILE)
         
+    #新增紀錄勝率 賺取金額區域
+    trading_file = "trading_history.txt"
+    initial_money = 100000.0
+    current_money = initial_money
+    win_count = 0
+    total_count = 0
+
+    if os.path.exists(trading_file):
+        with open(trading_file, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if line.strip().startswith("|") or not line.strip():
+                continue  # 跳過表頭或空行
+            try:
+                parts = line.strip().split()
+                buy_price = float(parts[1])
+                sell_price = float(parts[2])
+                signal = int(parts[3])
+
+                profit = sell_price - buy_price
+                current_money += profit
+                total_count += 1
+                if signal == 1:
+                    win_count += 1
+            except Exception as e:
+                print(f"❌ 解析交易紀錄失敗：{e}，跳過此行 -> {line}")
+
+        win_rate = round(win_count / total_count, 4) if total_count > 0 else 0.0
+        profit_total = round(current_money - initial_money, 2)
+
+        # ✅ 更新 win_rate 和 profit 欄位進 ai_logs
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            update_profit_query = "UPDATE ai_logs SET win_rate = %s, profit = %s WHERE id = %s"
+            cursor.execute(update_profit_query, (win_rate, profit_total, session.get('log_id')))
+            conn.commit()
+
+            cursor.close()
+            conn.close()
+            print(f"✅ 勝率與獲利已寫入資料庫 log_id={session.get('log_id')}")
+        except Exception as e:
+            print("❌ 更新 profit 和 win_rate 失敗：", e)
+    else:
+        print("❌ 找不到 trading_history.txt")
+
+       
     subprocess.run(["python", "gemini_simulation.py"], check=True)
     
     analysis_result = "AI 分析失敗"
@@ -706,33 +743,103 @@ def run_ai_analysis():
     return jsonify({"success": True, "analysis_result": analysis_result})
 
 
+
 @app.route('/journal')
 def journal():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    try:
+        user_id = session['user_id']
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        # 撈用戶模擬紀錄
+        query_logs = """
+            SELECT user_id, stock_code, simulation_start_date, content, created_at
+            FROM ai_logs
+            WHERE user_id = %s
+              AND content IS NOT NULL AND content <> ''
+              AND created_at IS NOT NULL
+            ORDER BY created_at DESC
+        """
+        cursor.execute(query_logs, (user_id,))
+        logs = cursor.fetchall()
+
+        # 撈用戶最近5筆非0的 win_rate
+        query_win_rate = """
+            SELECT win_rate, created_at
+            FROM ai_logs
+            WHERE user_id = %s
+              AND win_rate IS NOT NULL
+              AND win_rate != 0
+            ORDER BY created_at DESC
+            LIMIT 5
+        """
+        cursor.execute(query_win_rate, (user_id,))
+        win_rate_rows = cursor.fetchall()
+
+        # 反轉舊->新，並乘上 100 轉成百分比格式
+        win_rate_data = []
+        for row in reversed(win_rate_rows):
+            win_rate_data.append({
+                'win_rate': round(row['win_rate'] * 100, 2),
+                'created_at': row['created_at'].strftime('%Y-%m-%d')
+            })
+
+        cursor.close()
+        conn.close()
+
+        return render_template("journal.html", logs=logs, win_rate_data=win_rate_data)
+
+    except Exception as e:
+        return f"讀取資料失敗：{e}"
+
+
+
+
+@app.route("/trading_history_rank")
+def trading_history_rank():
     try:
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
-        # 只取出 content 和 created_at 不為空的資料
-        query = """
-            SELECT user_id, stock_code, simulation_start_date, content, created_at
-            FROM ai_logs
-            WHERE content IS NOT NULL AND content <> ''
-              AND created_at IS NOT NULL
-            ORDER BY created_at DESC
-        """
-        cursor.execute(query)
-        logs = cursor.fetchall()
+        # 清空舊資料，重建排行榜
+        cursor.execute("TRUNCATE TABLE trading_history_rank")
+
+        # 更新排行榜資料
+        cursor.execute("""
+            INSERT INTO trading_history_rank (username, avg_win_rate, total_profit)
+            SELECT 
+                u.username,
+                ROUND(AVG(a.win_rate), 4),
+                ROUND(SUM(a.profit), 2)
+            FROM 
+                users u
+            JOIN 
+                ai_logs a ON u.id = a.user_id
+            GROUP BY 
+                u.username
+        """)
+
+        # 讀取排行榜資料（依勝率、獲利排序）
+        cursor.execute("SELECT * FROM trading_history_rank ORDER BY avg_win_rate DESC, total_profit DESC")
+        ranks = cursor.fetchall()
 
         cursor.close()
         conn.close()
-        return render_template("journal.html", logs=logs)
+
+        return render_template("trading_history_rank.html", ranks=ranks)
     except Exception as e:
-        return f"讀取資料失敗：{e}"
+        return f"❌ 發生錯誤：{e}"
+
+
+
 
 @app.route('/dictionary')
 def dictionary():
     return render_template('dictionary.html')  # 確保你有 dictionary.html 檔案
-
 
 #相關新聞
 @app.route('/news')
@@ -750,6 +857,171 @@ def news():
         return render_template('news.html', news_list=[], error=f"⚠️ 目前沒有 {stock_name} 的新聞，請稍後再試！")
 
     return render_template('news.html', news_list=news_list, stock_name=stock_name)
+
+
+#==============================================================================
+#==============================================================================
+
+from industry_simulation import (
+    get_available_stocks,industry_plot_stock_data, indusrty_fetch_stock_data,
+    compute_indicators, detect_upcoming_event, get_stock_dataframe,get_safe_start_index
+)
+
+
+@app.route('/industry_select_stock', methods=['GET', 'POST'])
+def industry_select_stock():
+    if request.method == 'POST':
+        stock_code = request.form['stock']
+        session['stock_code'] = stock_code
+        
+        # 修改：計算安全的開始索引，而不是從 0 開始
+        df = get_stock_dataframe(stock_code)
+        df = compute_indicators(df)
+        session['start_index'] = get_safe_start_index(df)  # 從安全位置開始
+        
+        session['balance'] = 100_000
+        return redirect(url_for('industry_simulation'))
+
+    stocks = get_available_stocks()
+    return render_template('industry_select_stock.html', stocks=stocks)
+
+@app.route('/industry_simulation')
+def industry_simulation():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return redirect(url_for('industry_select_stock'))
+
+    csv_ready = fetch_stock_data(stock_code)
+    if not csv_ready:
+        return "無法獲取股票資料"
+
+    #引用到錯誤的繪圖
+    start_index = session.get('start_index', 0)
+    plot_path = industry_plot_stock_data(stock_code, start_index+1)
+    df = get_stock_dataframe(stock_code)
+    indicators = compute_indicators(df)
+
+    if start_index >= len(indicators):
+        start_index = len(indicators) - 1
+
+    latest_price = indicators.iloc[start_index]['Close']
+
+    return render_template('industry_simulation.html', stock_code=stock_code,
+                           plot_path=plot_path, latest_price=latest_price,
+                           balance=session['balance'],
+                           stock_count=trading_history.get_held_stocks())  # 加上這行
+
+from flask import request, jsonify
+
+@app.route('/industry_buy_stock', methods=['POST'])
+def industry_buy_stock():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'}), 400
+
+    current_price = request.json.get('current_price')
+    if current_price is None:
+        return jsonify({'error': '缺少價格'}), 400
+
+    if trading_industry.buy(current_price):
+        return jsonify({
+            'success': True,
+            'balance': trading_industry.get_balance(),
+            'stock_count': trading_industry.get_held_stocks()
+        })
+    else:
+        return jsonify({'error': '餘額不足'})
+
+@app.route('/industry_sell_stock', methods=['POST'])
+def industry_sell_stock():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'}), 400
+
+    current_price = request.json.get('current_price')
+    if current_price is None:
+        return jsonify({'error': '缺少價格'}), 400
+
+    if trading_industry.sell(current_price):
+        return jsonify({
+            'success': True,
+            'balance': trading_industry.get_balance(),
+            'stock_count': trading_industry.get_held_stocks()
+        })
+    else:
+        return jsonify({'error': '沒有可賣股票'})
+
+@app.route('/industry_close_position', methods=['POST'])
+def industry_close_position():
+    stock_code = session.get('stock_code')
+    if not stock_code:
+        return jsonify({'error': '未選擇股票'}), 400
+
+    current_price = request.json.get('current_price')
+    if current_price is None:
+        return jsonify({'error': '缺少價格'}), 400
+
+    if trading_industry.close_position(current_price):
+        return jsonify({
+            'success': True,
+            'balance': trading_industry.get_balance(),
+            'stock_count': trading_industry.get_held_stocks()
+        })
+    else:
+        return jsonify({'error': '沒有可平倉股票'})
+
+
+@app.route('/industry_get_balance')
+def industry_get_balance():
+    return jsonify({'balance': trading_industry.get_balance()})
+
+
+@app.route("/industry_get_stock_count")
+def industry_get_stock_count():
+    return jsonify({"stock_count": trading_industry.get_held_stocks()})
+
+
+
+@app.route('/industry_next_day')
+def industry_next_day():
+    session['start_index'] += 1
+    stock_code = session.get('stock_code')
+    df = get_stock_dataframe(stock_code)
+    df = compute_indicators(df)
+    idx = session['start_index']
+        
+    if idx >= len(df):
+        return jsonify({'error': '已超出資料範圍'})
+        
+    plot_path = plot_stock_data(stock_code, idx)
+        
+    # 檢查圖片是否成功產生
+    if plot_path is None:
+        return jsonify({'error': '圖片產生失敗'})
+        
+    event_messages = detect_upcoming_event(stock_code, df, idx)
+        
+    # 安全處理 NaN 值的函數
+    def safe_round(value, decimals=2):
+        if pd.isna(value) or math.isnan(value) or math.isinf(value):
+            return 0.0
+        try:
+            return round(float(value), decimals)
+        except:
+            return 0.0
+        
+    return jsonify({
+        'plot_path': plot_path,
+        'latest_price': safe_round(df.iloc[idx]['Close']),
+        'rsi': safe_round(df.iloc[idx]['rsi']),
+        'macd': safe_round(df.iloc[idx]['macd']),
+        'adx': safe_round(df.iloc[idx]['adx']),
+        'events': event_messages
+    })
+
+@app.route('/industry_get_stocks')
+def industry_get_stocks():
+    return jsonify({'stocks': get_available_stocks()})
 
 
 if __name__ == '__main__':
