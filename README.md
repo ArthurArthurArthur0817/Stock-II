@@ -78,6 +78,38 @@ WHERE p1.id > p2.id;
 
 SET SQL_SAFE_UPDATES=0;
 
+
+
+CREATE TABLE ai_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50),                      -- 使用者 ID
+    stock_code VARCHAR(10),                   -- 股票代號（如 2330）
+    simulation_start_date DATE,               -- 模擬開始日期（從歷史資料擷取）
+    content TEXT,                             -- AI 分析文字結果
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP  -- 紀錄建立時間
+);
+
+
+
+
+ALTER TABLE ai_logs
+ADD COLUMN win_rate FLOAT DEFAULT 0,
+ADD COLUMN profit FLOAT DEFAULT 0;
+
+
+CREATE TABLE trading_history_rank AS
+SELECT 
+    u.username,
+    ROUND(AVG(a.win_rate), 4) AS avg_win_rate,
+    ROUND(SUM(a.profit), 2) AS total_profit
+FROM 
+    users u
+JOIN 
+    ai_logs a ON u.id = a.user_id
+GROUP BY 
+    u.username;
+
+
 ```
 
 
