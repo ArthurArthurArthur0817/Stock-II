@@ -104,17 +104,18 @@
                 });
             });
 
-            // 平倉（不影響 AI 分析）
             $("#close_position_btn").click(function() {
                 $.post("/close_position", function(data) {
                     if (data.success) {
                         alert("已成功平倉！");
-                        updateStockCount();
+                        $("#stock_count").text(0); // 平倉後持股一定是 0
+                        $("#balance").text(data.balance); // 更新餘額
                     } else {
                         alert(data.error);
                     }
                 });
             });
+
 
             // 結算：按下後才顯示 "AI 分析" 按鈕
             $("#settle_btn").click(function() {
