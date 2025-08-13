@@ -560,6 +560,34 @@ def calculate():
 
 
 
+# 全域儲存每個使用者的 TradingHistory
+user_trading_histories = {}
+
+def get_user_trading_history():
+    user_id = session.get('user_id')
+    if not user_id:
+        return None
+
+    if user_id not in user_trading_histories:
+        record_file = f"trading_history_{user_id}.txt"
+        user_trading_histories[user_id] = TradingHistory(record_file=record_file)
+
+    return user_trading_histories[user_id]
+
+
+def clear_trading_history():
+    """清空使用者的交易紀錄檔案"""
+    record_file = session.get('record_file')
+    if record_file and os.path.exists(record_file):
+        with open(record_file, 'w') as f:
+            f.write("|---num---|-----buy_price-----|-------sell_price--------|----signal---|\n")
+
+
+
+
+
+
+# ----------------- 路由 -----------------
 @app.route('/simulation')
 def simulation():  
     if 'user_id' not in session:
@@ -571,6 +599,11 @@ def simulation():
     session['balance'] = 100_000
     clear_trading_history()
 
+    user_id = session['user_id']
+
+    # ✅ 初始化使用者專屬 TradingHistory
+    user_trading_histories[user_id] = TradingHistory(initial_balance=100_000)
+
     # ✅ 嘗試抓股票資料（包含 retry 機制）
     max_retries = 3
     for i in range(max_retries):
@@ -578,7 +611,7 @@ def simulation():
             break
         else:
             print(f"第 {i+1} 次抓取失敗，稍後再試...")
-            time.sleep(2 * (i + 1))  # 緩衝時間 2s, 4s, 6s
+            time.sleep(2 * (i + 1))
     else:
         return "無法獲取股票數據，請稍後再試"
 
@@ -591,13 +624,11 @@ def simulation():
     latest_price_response = get_latest_price()
     latest_price = latest_price_response.json.get('latest_price', None)
 
-    # ✅ 建立資料庫紀錄並寫入 stock_code 和模擬開始時間
+    # ✅ 建立資料庫紀錄
     try:
-        from db import get_connection
         conn = get_connection()
         cursor = conn.cursor()
 
-        # 讀取最早的模擬起始日期
         df = pd.read_csv(os.path.join(DATA_DIR, f"{session['stock_code']}.csv"))
         simulation_start_date = df['Date'].iloc[0]
 
@@ -623,7 +654,6 @@ def simulation():
         balance=session['balance']
     )
 
-
 @app.route('/get_latest_price')
 def get_latest_price():
     stock_code = session.get('stock_code')
@@ -640,66 +670,64 @@ def get_latest_price():
     end_index = start_index + 10
     if end_index > len(df):
         end_index = len(df)
-    
-    latest_price = df.iloc[end_index - 1]['Close']  # 取得目前區間的最新價格
+
+    latest_price = df.iloc[end_index - 1]['Close']
+    try:
+        latest_price = float(latest_price)   # ✅ 關鍵：轉成 float
+    except (TypeError, ValueError):
+        return jsonify({'error': '股價格式錯誤'})
+
     return jsonify({'latest_price': latest_price})
 
 
 @app.route('/next_day')
 def next_day():
-    """顯示下一天的 K 線圖，並更新股價"""
     session['start_index'] += 1
     plot_path = plot_stock_data(session['stock_code'], session['start_index'])
 
     if not plot_path:
         return jsonify({'error': '已超出資料範圍'})
 
-    # 取得最新股價，確保與 session['start_index'] 對應
     latest_price_response = get_latest_price()
     latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
 
     return jsonify({'plot_path': plot_path, 'latest_price': latest_price})
 
-
-
-held_stocks = 0  # 持有的股票數
-
-@app.route("/get_stock_count", methods=["GET"])
-def get_stock_count():
-    return jsonify({"stock_count": 0})  # ✅ 無論如何，回傳 0
-
-
 @app.route('/buy_stock', methods=['POST'])
 def buy_stock():
-    stock_code = session.get('stock_code')
-    if not stock_code:
+    trading_history = get_user_trading_history()
+    if not trading_history:
+        return jsonify({'error': '未登入'})
+
+    if not session.get('stock_code'):
         return jsonify({'error': '未選擇股票'})
 
     latest_price_response = get_latest_price()
-    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
-    
-    if latest_price is None:
+    data = latest_price_response.json
+    if not data or 'latest_price' not in data:
         return jsonify({'error': '無法獲取最新股價'})
+
+    try:
+        latest_price = float(data['latest_price'])
+    except (TypeError, ValueError):
+        return jsonify({'error': '股價格式錯誤'})
 
     if trading_history.buy_stock(latest_price):
         return jsonify({
             'success': True,
             'balance': trading_history.get_balance(),
-            'stock_count': trading_history.get_held_stocks()  # ✅ 取得最新持股數
+            'stock_count': trading_history.get_held_stocks()
         })
-
     return jsonify({'error': '餘額不足'})
-
 
 @app.route('/sell_stock', methods=['POST'])
 def sell_stock():
-    stock_code = session.get('stock_code')
-    if not stock_code:
-        return jsonify({'error': '未選擇股票'})
+    trading_history = get_user_trading_history()
+    if not trading_history:
+        return jsonify({'error': '未登入'})
 
     latest_price_response = get_latest_price()
-    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
-
+    latest_price = latest_price_response.json.get('latest_price')
     if latest_price is None:
         return jsonify({'error': '無法獲取最新股價'})
 
@@ -707,49 +735,45 @@ def sell_stock():
         return jsonify({
             'success': True,
             'balance': trading_history.get_balance(),
-            'stock_count': trading_history.get_held_stocks()  # ✅ 取得最新持股數
+            'stock_count': trading_history.get_held_stocks()
         })
-
     return jsonify({'error': '沒有可賣股票'})
-
-
-
 
 @app.route('/close_position', methods=['POST'])
 def close_position():
-    """平倉：賣出所有持股"""
-    stock_code = session.get('stock_code')
-    if not stock_code:
-        return jsonify({'error': '未選擇股票'})
-    
-    # 確保股價與 UI 顯示的一致
-    latest_price_response = get_latest_price()
-    latest_price = latest_price_response.json['latest_price'] if 'latest_price' in latest_price_response.json else None
+    trading_history = get_user_trading_history()
+    if not trading_history:
+        return jsonify({'error': '未登入'})
 
+    latest_price_response = get_latest_price()
+    latest_price = latest_price_response.json.get('latest_price')
     if latest_price is None:
         return jsonify({'error': '無法獲取最新股價'})
 
     if trading_history.close_position(latest_price):
-        return jsonify({'success': True, 'balance': trading_history.get_balance()})
-    
+        return jsonify({
+            'success': True,
+            'balance': trading_history.get_balance(),
+            'stock_count': trading_history.get_held_stocks()
+        })
     return jsonify({'error': '沒有可平倉股票'})
+
+@app.route('/get_stock_count')
+def get_stock_count():
+    trading_history = get_user_trading_history()
+    if not trading_history:
+        return jsonify({'error': '未登入'})
+    return jsonify({'stock_count': trading_history.get_held_stocks()})
 
 
 
 
 @app.route('/get_balance')
 def get_balance():
-    """獲取帳戶餘額"""
+    trading_history = get_user_trading_history()
+    if not trading_history:
+        return jsonify({'error': '未登入'})
     return jsonify({'balance': trading_history.get_balance()})
-
-
-RECORD_FILE = "trading_history.txt"
-def clear_trading_history():
-    """清空交易紀錄 txt 檔案"""
-    if os.path.exists(RECORD_FILE):
-        with open(RECORD_FILE, 'w') as f:
-            f.write("|---num---|-----buy_price-----|-------sell_price--------|----signal---|\n")  # 保留標題行
-
 
 ANALYSIS_FILE = "simulation_analysis.txt"
 @app.route("/run_ai_analysis", methods=["POST"])
