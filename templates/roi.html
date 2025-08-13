@@ -1,87 +1,109 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>投資報酬率計算</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script>
-        async function calculateROI() {
-            let stock_code = document.getElementById("stock_code").value;
-            let initial_investment = document.getElementById("initial_investment").value;
-            let months = document.getElementById("months").value;
+  <meta charset="UTF-8">
+  <title>投資報酬率試算</title>
+  <style>
+    body {
+      background: #e0f0ff;
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      margin: 0;
+      padding: 60px 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 32px;
+      color: #003060;
+      margin-bottom: 40px;
+    }
+
+    .form-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 96, 192, 0.1);
+      backdrop-filter: blur(8px);
+      text-align: left;
+    }
+
+    .form-card label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #003060;
+  }
+
+  .form-card input,
+  .form-card select {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ccddee;
+    font-size: 16px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+
     
-            if (!stock_code || !initial_investment) {
-                alert("請填寫所有欄位！");
-                return;
-            }
-    
-            let response = await fetch("/calculate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ stock_code, initial_investment, months })
-            });
-    
-            let result = await response.json();
-            if (result.error) {
-                alert(result.error);
-            } else {
-                document.getElementById("cagr").innerText = result.cagr + "%";
-                document.getElementById("final_value").innerText = result.final_value;
-                document.getElementById("profit").innerText = result.profit;
-                if (result.plot_url) {
-                    document.getElementById("chart").src = result.plot_url;
-                } else {
-                    alert("無法生成圖表，請稍後再試！");
-                }
-            }
-        }
-    
-        // 當選擇項目變更時，立即觸發計算
-        document.getElementById("months").addEventListener("change", function() {
-            calculateROI();
-        });
-    
-        // 當輸入台股代號和投資本金時，立即觸發計算
-        document.getElementById("stock_code").addEventListener("input", function() {
-            calculateROI();
-        });
-    
-        document.getElementById("initial_investment").addEventListener("input", function() {
-            calculateROI();
-        });
-    </script>
+
+    .submit-button {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 14px 28px;
+      margin-top: 30px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #003060;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 96, 192, 0.1);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .submit-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 96, 192, 0.2);
+      background: rgba(255, 255, 255, 0.85);
+      border-color: #cce6ff;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>投資報酬率計算</h2>
-        
-        <label>台股代號:</label>
-        <input type="text" id="stock_code" placeholder="例如 2330.TW"><br>
+  <div class="container">
+    <h2>投資報酬率試算</h2>
+    <form method="post" action="/calculate">
+      <div class="form-card">
+        <label for="ticker">台股代號：</label>
+        <input type="text" id="ticker" name="ticker" required>
+      
+        <label for="amount">投資金額：</label>
+        <input type="number" id="amount" name="amount" required>
+      
+        <label for="period">投資期間：</label>
+        <select id="period" name="period">
+          <option value="1d">1 天</option>
+          <option value="5d">5 天</option>
+          <option value="1m">1 個月</option>
+          <option value="3m">3 個月</option>
+          <option value="6m">6 個月</option>
+          <option value="1y">1 年</option>
+        </select>
+      </div>
 
-        <label>投資本金:</label>
-        <input type="number" id="initial_investment" placeholder="例如 100000"><br>
-
-        <label>投資期間 :</label>
-        <select id="months" onchange="calculateROI()">
-            <option value="1">1個月</option>
-            <option value="3">3個月</option>
-            <option value="6">6個月</option>
-            <option value="12">1年</option>
-            <option value="24">2年</option>
-            <option value="60">5年</option>
-            <option value="120">10年</option>
-        </select><br><br>
-
-        <button onclick="calculateROI()">計算</button>
-
-        <div class="result">
-            <h3>結果：</h3>
-            <p>CAGR: <span id="cagr"></span></p>
-            <p>最終投資價值: <span id="final_value"></span></p>
-            <p>總收益: <span id="profit"></span></p>
-            <img id="chart">
-        </div>
-    </div>
+      <button type="submit" class="submit-button">🔍 開始試算</button>
+    </form>
+  </div>
 </body>
 </html>

@@ -20,6 +20,15 @@ from risk_analysis import  process_stock_type
 import math
 from industry_simulation import trading_industry
 
+from functools import lru_cache
+from datetime import datetime, timedelta
+from twstock import Stock
+import plotly.graph_objs as go
+from plotly.offline import plot
+
+
+
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
@@ -362,112 +371,193 @@ def result():
                            stock_risk_results=stock_risk_results)
 
 
+    
+    
+    
+CACHE_DIR = "cache"
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+def fetch_recent_data(stock_id):
+    cache_path = f"{CACHE_DIR}/{stock_id}_recent.csv"
+    if os.path.exists(cache_path):
+        return pd.read_csv(cache_path, index_col=0, parse_dates=True)
+
+    for i in range(3):
+        try:
+            stock = Stock(stock_id)
+            time.sleep(0.5)
+            raw = stock.fetch_31()
+            if not raw or len(raw) < 2:
+                raise Exception("Empty data")
+
+            df = pd.DataFrame([{
+                'date': x.date,
+                'close': x.close
+            } for x in raw])
+            df['date'] = pd.to_datetime(df['date'])
+            df.set_index('date', inplace=True)
+            df.to_csv(cache_path)
+            return df
+
+        except Exception as e:
+            print(f"近31筆抓取失敗：{e}")
+            time.sleep(2)
+    return None
 
 
+def roi_fetch_stock_data(stock_id, start_date):
+    cache_path = f"{CACHE_DIR}/{stock_id}_{start_date.strftime('%Y%m%d')}.csv"
+    if os.path.exists(cache_path):
+        return pd.read_csv(cache_path, index_col=0, parse_dates=True)
 
-# 計算 CAGR
-def calculate_cagr(stock_code):
-    stock = yf.Ticker(stock_code)
-    df = stock.history(period="max")  # 取得所有歷史數據
+    for i in range(3):
+        try:
+            stock = Stock(stock_id)
+            time.sleep(0.5)
+            raw = stock.fetch_from(start_date.year, start_date.month)
+            if not raw:
+                raise Exception("Empty data")
+            
+            # ✅ 正確縮排與正確資料格式化方式
+            df = pd.DataFrame([{
+                'date': x.date,
+                'open': x.open,
+                'high': x.high,
+                'low': x.low,
+                'close': x.close,
+                'volume': x.capacity
+            } for x in raw])
 
-    if df.empty:
-        return None  # 沒有數據則回傳 None
+            df['date'] = pd.to_datetime(df['date'])
+            df.set_index('date', inplace=True)
+            df.to_csv(cache_path)
+            return df
 
-    start_price = df["Close"].iloc[0]  # 最早的收盤價
-    end_price = df["Close"].iloc[-1]  # 最新的收盤價
-    years = (df.index[-1] - df.index[0]).days / 365  # 計算經過的年數
-    cagr = ((end_price / start_price) ** (1 / years)) - 1  # CAGR 計算公式
-    return cagr * 100  # 轉成百分比
+        except Exception as e:
+            print(f"第 {i+1} 次抓取失敗：{e}")
+            time.sleep(2)
+    return None
 
-# 預測未來收益
-def predict_future_value(initial_investment, cagr, months):
-    years = months / 12  # 換算成年
-    final_value = initial_investment * ((1 + cagr / 100) ** years)  # 預測最終價值
-    profit = final_value - initial_investment  # 計算總收益
-    return final_value, profit
 
-# 將月份轉換為 yfinance 可接受的 period 格式
-def get_valid_period(months):
-    if months <= 1:
-        return "1mo"
-    elif months <= 3:
-        return "3mo"
-    elif months <= 6:
-        return "6mo"
-    elif months <= 12:
-        return "1y"
-    elif months <= 24:
-        return "2y"
-    elif months <= 60:
-        return "5y"
-    elif months <= 120:
-        return "10y"
+def calculate_roi(stock_id, investment, period):
+    today = datetime.today()
+
+    if period in ['1d', '5d']:
+        df = fetch_recent_data(stock_id)
+        if df is None or len(df) < 2:
+            return None, "無法取得足夠的近日資料"
+
+
+        # ✅ 選擇最近 1 或 5 筆資料
+        if period == '1d':
+            df = df.tail(2)
+        elif period == '5d':
+            df = df.tail(6)
+        df = df.sort_index()
+
     else:
-        return "max"
+        # 原本邏輯
+        delta_days = {
+            '1m': 30,
+            '3m': 90,
+            '6m': 180,
+            '1y': 365
+        }.get(period, 30)
+        start_date = today - timedelta(days=delta_days)
 
-# 繪製 K 線圖
-def plot_comparison(stock_code, months):
-    period = get_valid_period(months)
-    stock = yf.Ticker(stock_code)
-    market = yf.Ticker("^TWII")  # 台灣加權指數
+        df = roi_fetch_stock_data(stock_id, start_date)
 
-    df_stock = stock.history(period=period)
-    df_market = market.history(period=period)
+        if df is None or df.empty:
+            return None, "查無資料或抓取失敗"
 
-    print(df_stock.head())  # 檢查是否有資料
-    print(df_market.head())  # 檢查是否有資料
+        df = df[df.index >= pd.to_datetime(start_date)]
+        df = df[df.index <= today]
+        df = df.sort_index()
+        if len(df) < 2:
+            return None, "資料不足"
 
-    if df_stock.empty or df_market.empty:
-        return None  # 沒數據就不畫圖
+    start_price = df.iloc[0]['close']
+    end_price = df.iloc[-1]['close']
+    shares = investment / start_price
+    final_value = shares * end_price
+    roi = (final_value - investment) / investment * 100
 
-    df_stock["Return"] = df_stock["Close"].pct_change().cumsum() * 100
-    df_market["Return"] = df_market["Close"].pct_change().cumsum() * 100
+    # 繪製 Plotly 圖表
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df.index,
+        y=df['close'],
+        mode='lines+markers',
+        name='收盤價',
+        line=dict(color='royalblue'),
+        marker=dict(size=6)
+    ))
 
-    plt.figure(figsize=(8, 5))
-    plt.plot(df_stock.index, df_stock["Return"], label=f"{stock_code} (%)", color="blue")
-    plt.plot(df_market.index, df_market["Return"], label="^TWII (%)", color="red")
-    plt.xlabel("Period")
-    plt.ylabel("Price change (%)")
-    plt.title(f"{stock_code} vs ^TWII")
-    plt.legend()
-    plt.grid()
+    fig.update_layout(
+        
+        xaxis_title='日期',
+        yaxis_title='收盤價',
+        template='plotly_white',
+        height=400,
+        margin=dict(l=40, r=20, t=40, b=40)
+    )
 
-    img = io.BytesIO()
-    plt.savefig(img, format="png")
-    img.seek(0)
-    plot_url = base64.b64encode(img.getvalue()).decode()
-    plt.close()
-    return f"data:image/png;base64,{plot_url}"
+    # 產出 HTML 字串
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+    
 
+    desc = ""
+    if period == '1d':
+        desc = "近 1 個交易日"
+    elif period == '5d':
+        desc = "近 5 個交易日"
+    elif period == '1m':
+        desc = "近 1 個月"
+    elif period == '3m':
+        desc = "近 3 個月"
+    elif period == '6m':
+        desc = "近 6 個月"
+    elif period == '1y':
+        desc = "近 1 年"
 
-
-@app.route("/calculate", methods=["POST"])
-def calculate():
-    data = request.json
-    stock_code = data.get("stock_code")
-    initial_investment = float(data.get("initial_investment"))
-    months = int(data.get("months"))
-
-    cagr = calculate_cagr(stock_code)
-    if cagr is None:
-        return jsonify({"error": "股票代號無效或無數據"})
-
-    final_value, profit = predict_future_value(initial_investment, cagr, months)
-    plot_url = plot_comparison(stock_code, months)
-
-    return jsonify({
-        "cagr": round(cagr, 2),
-        "final_value": round(final_value, 2),
-        "profit": round(profit, 2),
-        "plot_url": plot_url
-    })
-
+    return {
+        "start_price": start_price,
+        "end_price": end_price,
+        "final_value": final_value,
+        "roi": roi,
+        "plot_html": plot_div,
+        "desc": desc
+    }, None
 
 @app.route('/roi')
 def roi():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
     return render_template('roi.html')
+
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    stock_id = request.form.get('ticker', '').strip()
+    amount = request.form.get('amount', '').strip()
+    period = request.form.get('period', '1m')
+
+    if not stock_id or not amount:
+        return "請填寫完整欄位"
+
+    try:
+        investment = float(amount)
+    except ValueError:
+        return "金額格式錯誤，請輸入數字"
+
+    result, error = calculate_roi(stock_id, investment, period)
+    if error:
+        return f"<p>{error}</p><a href='/'>返回</a>"
+
+    return render_template("roi_result.html", stock_id=stock_id, investment=investment, period=period, result=result)
+
+
+
+
+
+
 
 
 @app.route('/simulation')
@@ -857,6 +947,12 @@ def news():
         return render_template('news.html', news_list=[], error=f"⚠️ 目前沒有 {stock_name} 的新聞，請稍後再試！")
 
     return render_template('news.html', news_list=news_list, stock_name=stock_name)
+
+
+@app.route("/news/loader")
+def news_loader():
+    
+    return render_template("news_loader_wrapper.html")
 
 
 #==============================================================================

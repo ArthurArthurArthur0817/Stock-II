@@ -12,7 +12,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 DATA_DIR = './data'
-STOCK_LIST = ['2330', '2344','0050','1301']
+STOCK_LIST = ['2330', '2344','1301']
 
 def get_random_stock():
     """隨機選擇一支股票"""
@@ -20,24 +20,38 @@ def get_random_stock():
 
 def fetch_stock_data(stock_code):
     """使用 yfinance 獲取股票數據並存成 CSV"""
-    stock_code_yf = stock_code + ".TW"  # 台股代碼需要加 .TW
+    csv_path = os.path.join(DATA_DIR, f"{stock_code}.csv")
+    if os.path.exists(csv_path):
+        print(f"{stock_code} 的資料已存在，不再重新下載。")
+        return True
+
+    stock_code_yf = stock_code + ".TW"
     stock = yf.Ticker(stock_code_yf)
-    df = stock.history(period="2y")  # 取最近 3 年數據
+    
+    try:
+        df = stock.history(period="2y")
+    except yf.exceptions.YFRateLimitError as e:
+        print(f"[RateLimitError] 嘗試太頻繁，請稍後再試：{e}")
+        return False
+    except Exception as e:
+        print(f"[錯誤] 無法獲取 {stock_code} 的數據: {e}")
+        return False
 
     if df.empty:
         print(f"無法獲取 {stock_code} 的數據")
         return False
-    
+
     df.reset_index(inplace=True)
     df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
-    
+
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
-    
-    csv_path = os.path.join(DATA_DIR, f"{stock_code}.csv")
+
     df.to_csv(csv_path, index=False)
     print(f"已儲存 {stock_code} 股票數據至 {csv_path}")
     return True
+
+
 
 def plot_stock_data(stock_code, start_index):
     """繪製股票走勢圖"""

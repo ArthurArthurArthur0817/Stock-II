@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>報酬率結果</title>
+  <style>
+    body {
+      background: #e0f0ff;
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .top-section {
+      display: flex;
+      justify-content: flex-end;   /* 全部向右對齊 */
+      align-items: flex-start;
+      gap: 80px;  /* 標題和卡片之間空隙 */
+    }
+
+    .title-block {
+    flex: 1;
+    padding-left: 10px;
+    padding-top: 8px;
+  }
+  .title-block h2 {
+    margin: 0;
+    font-size: 38px;
+    color: #003060;
+  }
+
+  h2 {
+  font-size: 28px;
+  margin: 0;
+  line-height: 1.4;
+  color: #003060;
+  }
+
+  .stock-id {
+    font-weight: 700;
+    font-size: 32px;
+    color: #003060;
+    }
+
+  .title-text {
+    font-weight: 700;
+    font-size: 48px;
+    color: #004080;
+  }
+
+
+    .info-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+      min-width: 300px;
+      margin-left: auto;
+      padding-right: 10px;
+    }
+
+
+    .result-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 16px 24px;
+      box-shadow: 0 4px 10px rgba(0, 96, 192, 0.1);
+      backdrop-filter: blur(8px);
+      width: fit-content;
+      transition: all 0.3s ease;
+    }
+
+    .result-card.highlight {
+      border: 2px solid #0066cc;
+      background: rgba(255, 255, 255, 0.85);
+    }
+
+    .result-card p {
+      margin: 0;
+      font-size: 20px;
+      color: #003060;
+      
+    }
+
+    .result-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 96, 192, 0.2);
+    background: rgba(255, 255, 255, 0.85);
+    border-color: #cce6ff;
+    }
+
+
+
+    .plot-card {
+    margin-top: 40px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 10px rgba(0, 96, 192, 0.1);
+    backdrop-filter: blur(8px);
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .plot-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 96, 192, 0.2);
+    background: rgba(255, 255, 255, 0.85);
+    border-color: #cce6ff;
+  }
+
+
+    a {
+      display: inline-block;
+      margin-top: 30px;
+      color: #0040cc;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .chart-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #003060;
+    margin: 30px 0 12px;
+    text-align: center;
+    }
+
+
+    .retry-button {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #003060;
+    text-decoration: none;
+    margin-top: 30px;
+    cursor: pointer;
+    display: inline-block;
+    padding: 14px 28px;
+  }
+
+  .retry-button:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 96, 192, 0.2);
+    background: rgba(255, 255, 255, 0.85);
+    border-color: #cce6ff;
+  }
+
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <div class="top-section">
+
+      <div class="title-block">
+        <h2>
+          <span class="stock-id">{{ stock_id }}</span><br>
+          <span class="title-text"><strong>投資報酬率試算結果</strong></span>
+        </h2>
+      </div>
+
+      <div class="info-block">
+        <div class="result-card">
+          <p>起始價：{{ result.start_price | round(2) }} 元</p>
+        </div>
+        <div class="result-card">
+          <p>結束價：{{ result.end_price | round(2) }} 元</p>
+        </div>
+        <div class="result-card">
+          <p>最終報酬：{{ result.final_value | round(2) }} 元</p>
+        </div>
+        <div class="result-card highlight">
+          <p><strong>報酬率：{{ result.roi | round(2) }}%</strong></p>
+        </div>
+        <div class="result-card">
+          <p>投資期間：{{ result.desc }}</p>
+        </div>
+      </div>
+
+    </div>
+
+  <h3 class="chart-title"> {{ stock_id }} 股價走勢</h3>
+    <!-- 載入 Plotly -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- 插入圖表 HTML -->
+    <div class="plot-card">
+      {{ result.plot_html | safe }}
+    </div>
+
+    <br><br>
+    <a href="/roi" class="result-card retry-button">重新試算</a>
+
+  </div>
+</body>
+
+</html>

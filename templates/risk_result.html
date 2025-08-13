@@ -186,7 +186,8 @@
                   <td>{{ stock_name }}</td>
                   <td>{{ risk }}</td>
                   <td>
-                    <a href="{{ url_for('news', stock_name=stock_name) }}" target="_blank">
+                    <a href="{{ url_for('news_loader', target=url_for('news', stock_name=stock_name)) }}"
+                      target="_blank" rel="noopener">
                       查看相關新聞
                     </a>
                   </td>
