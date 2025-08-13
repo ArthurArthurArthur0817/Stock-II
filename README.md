@@ -99,6 +99,29 @@ WHERE p1.id > p2.id;
 
 SET SQL_SAFE_UPDATES=0;
 
+
+
+
+
+
+ALTER TABLE ai_logs
+ADD COLUMN win_rate FLOAT DEFAULT 0,
+ADD COLUMN profit FLOAT DEFAULT 0;
+
+
+CREATE TABLE trading_history_rank AS
+SELECT 
+    u.username,
+    ROUND(AVG(a.win_rate), 4) AS avg_win_rate,
+    ROUND(SUM(a.profit), 2) AS total_profit
+FROM 
+    users u
+JOIN 
+    ai_logs a ON u.id = a.user_id
+GROUP BY 
+    u.username;
+
+
 ```
 
 
