@@ -101,6 +101,15 @@ SET SQL_SAFE_UPDATES=0;
 
 
 
+CREATE TABLE ai_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50),                      -- 使用者 ID
+    stock_code VARCHAR(10),                   -- 股票代號（如 2330）
+    simulation_start_date DATE,               -- 模擬開始日期（從歷史資料擷取）
+    content TEXT,                             -- AI 分析文字結果
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP  -- 紀錄建立時間
+);
+
 
 
 
