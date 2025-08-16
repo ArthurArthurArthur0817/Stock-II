@@ -96,10 +96,10 @@ def check_login():
     if 'user_id' in session:
         return jsonify({"logged_in": True})
     return jsonify({"logged_in": False})
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
-    session.pop('user_id', None)  # 清除 session
-    return redirect(url_for('login'))  # 重新導向到登入頁面
+    session.pop('user_id', None)  # 清除登入狀態
+    return redirect(url_for('main'))  # 回首頁（或要回 login 也行）
 
 
 
