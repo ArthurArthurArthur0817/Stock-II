@@ -1,573 +1,336 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-TW">
 <head>
-    <meta charset="utf-8">
-    <title>SafetyFirst - Security Guard Website Template</title>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="Free Website Template" name="keywords">
-    <meta content="Free Website Template" name="description">
+  <meta charset="utf-8" />
+  <title>Trade Nova</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="為新手打造的 AI 投資學習平台" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" >
+  <!-- 字體 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
 
-    <!-- Favicon -->
-    <link href="/static/img/favicon.ico" rel="icon">
+  <!-- 圖示 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* ===== Scoped 主題 ===== */
+    .tn{
+      --primary:#043b8f;
+      --primary-dark:#02347e;
+      --primary-light:#6499e9;
+      --secondary:#0b1f33;
+      --ink:#0f172a;
+      min-height:100%;
+      display:flex; flex-direction:column;
+      color:var(--ink);
+      line-height:1.65;
+    }
+    .tn, .tn *{ font-family:'Noto Serif TC',serif !important; }
 
-    <!-- Flaticon Font -->
-    <link href="/static/lib/flaticon/font/flaticon.css" rel="stylesheet">
+    /* 背景動畫 */
+    .tn::before{
+      content:""; position:fixed; inset:0;
+      background:url("https://bpic.588ku.com/video_listen/588ku_pic/21/08/09/d0e7a2b73c60fd3ef2710a74bbbaea89.jpg!/fw/800") center/cover no-repeat;
+      filter:grayscale(20%) brightness(0.55);
+      z-index:-2; animation:bgZoom 40s ease-in-out infinite alternate;
+    }
+    @keyframes bgZoom{from{transform:scale(1);}to{transform:scale(1.15);}}
 
-    <!-- Libraries Stylesheet -->
-    <link href="/static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    /* 基本排版 */
+    .tn h1,.tn h2,.tn h3,.tn h4,.tn h5,.tn h6{font-weight:700;margin:0 0 .6rem;}
+    .tn h1{font-size:2rem;}
+    .tn p{margin:0 0 1rem;}
+    .tn .container{max-width:1120px;margin:0 auto;padding:0 16px;}
+    .tn .section{padding:48px 0;}
 
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="/static/css/styles.css" rel="stylesheet">
+    /* Sticky Header */
+    .tn header{
+      position:sticky; top:0; z-index:1000;
+      backdrop-filter:saturate(140%) blur(8px);
+      background:rgba(255,255,255,.82);
+      box-shadow:0 6px 18px rgba(0,0,0,.08);
+      transition:box-shadow .25s ease;
+    }
+    .tn .brand{
+      overflow:hidden;
+      transition:max-height .35s ease, padding .35s ease, opacity .35s ease, transform .35s ease;
+      will-change:max-height, padding, opacity, transform;
+      padding:18px 0;
+      max-height:120px;
+    }
+    .tn .brand-inner{ display:flex; flex-direction:column; align-items:center; }
+    .tn .brand-title{ font-size:2rem; letter-spacing:.2px; transition:font-size .3s ease; }
+    .tn .tagline{ margin-top:4px; opacity:.9; font-size:1rem; transition:font-size .3s ease, opacity .3s ease; }
 
-    <link rel="stylesheet" href="/static/style.css"> <!-- 引入自訂樣式 -->
+    /* Nav */
+    .tn nav{ border-top:1px solid rgba(0,0,0,.06); }
+    .tn .nav-wrap{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+    .tn .nav{ display:flex; gap:6px; align-items:stretch; padding:10px 10px; min-height:56px; }
+    .tn .nav a{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:2px; color:var(--ink); text-decoration:none;
+      border-radius:10px; padding:.45rem .6rem;
+      transition:background .15s ease, transform .06s ease, color .15s ease, padding .25s ease;
+      white-space:normal; min-width:92px;
+    }
+    .tn .nav a .en{ font-weight:800; line-height:1.05; font-size:.98rem; }
+    .tn .nav a .zh{ opacity:.9; font-size:.82rem; line-height:1.05; }
+    .tn .nav a:hover{ color:var(--primary); background:rgba(100,153,233,.12); transform:translateY(-1px); }
+    .tn .nav a.active{ color:#fff; background:var(--primary); }
 
+    /* 讓「登出」按鈕看起來就像其他 <a> 項目，並且與其垂直對齊 */
+
+/* 1) form 容器要跟 <a> 一樣被撐高 */
+.tn .nav form{
+  display:flex;             /* 關鍵：讓裡面的 button 能撐高 */
+  align-items:stretch;      /* 拉滿 nav 的高度 */
+  margin:0;
+  padding:0;
+}
+
+/* 2) button 做成「像連結」：尺寸、對齊、行為都與 <a> 一致 */
+.tn .nav .linklike{
+  appearance:none; -webkit-appearance:none; -moz-appearance:none;
+  background:none;
+  border:0;                 /* 避免瀏覽器預設邊框撐高 */
+  margin:0;
+  padding:.45rem .6rem;     /* 與 .tn .nav a 一致 */
+  display:flex;
+  flex-direction:column;    /* 與你的 <a> 裡的文字縱向排版一致 */
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  color:var(--ink);
+  border-radius:10px;
+  cursor:pointer;
+  min-width:92px;
+  white-space:normal;
+  line-height:1.05;         /* 與 <a> 內文行高一致 */
+  align-self:stretch;       /* 關鍵：自身也撐滿父層高度 */
+  transition:background .15s ease, transform .06s ease, color .15s ease, padding .25s ease;
+}
+
+/* 3) hover 行為與 <a> 一致 */
+.tn .nav .linklike:hover{
+  color:var(--primary);
+  background:rgba(100,153,233,.12);
+  transform:translateY(-1px);
+}
+
+/* 4) 字級與 <a> 內部 class 一致 */
+.tn .nav .linklike .en{ font-weight:800; line-height:1.05; font-size:.98rem; }
+.tn .nav .linklike .zh{ opacity:.9; font-size:.82rem; line-height:1.05; }
+
+/* 5) compact 模式同步縮小 padding（與 <a> 同步） */
+.tn header.compact .nav .linklike{
+  padding:.35rem .5rem;
+}
+
+    /* Compact 狀態 */
+    .tn header.compact .brand{ max-height:0; padding:0; opacity:0; transform:translateY(-8px); }
+    .tn header.compact .nav{ padding:6px 8px; min-height:48px; }
+    .tn header.compact .nav a{ padding:.35rem .5rem; }
+    .tn header.compact .nav a .en{ font-size:.95rem; }
+    .tn header.compact .nav a .zh{ font-size:.78rem; opacity:.85; }
+    .tn header.compact .nav .linklike{ padding:.35rem .5rem; }
+
+    /* 內容卡片/按鈕 */
+    .tn .card{ background:rgba(255,255,255,.94); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.06); }
+    .tn .pad{ padding:22px 18px; }
+    .tn .lead{ font-size:1.1rem; }
+    .tn .btn{
+      display:inline-block; padding:.65rem 1.15rem; border:1.5px solid var(--primary);
+      background:transparent; color:var(--primary); border-radius:10px; text-decoration:none;
+      font-weight:700; cursor:pointer; transition:transform .06s ease, background .12s ease, color .12s ease;
+    }
+    .tn .btn:hover{ transform:translateY(-1px); }
+    .tn .btn:active{ transform:translateY(0); }
+    .tn .btn-primary:hover{ background:var(--primary); color:#fff; }
+
+    /* 服務卡 */
+    .tn .grid{ display:grid; gap:18px; grid-template-columns:repeat(3, minmax(0, 1fr)); }
+    @media (max-width: 992px){ .tn .grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px){ .tn .grid{ grid-template-columns:1fr; } }
+    .tn .service{ display:block; color:inherit; text-decoration:none; border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 10px 30px rgba(0,0,0,.06); transition:transform .12s ease, box-shadow .12s ease; }
+    .tn .service:hover{ transform:translateY(-3px); box-shadow:0 16px 36px rgba(0,0,0,.10); }
+    .tn .media{ height:180px; overflow:hidden; background:#e6eefc; }
+    .tn .media img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .tn .body{ display:flex; align-items:center; gap:12px; padding:14px 16px; background:#0f172a; color:#fff; }
+    .tn .badge{ width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--primary); }
+    .tn .title{ margin:0; font-size:1.05rem; }
+    .tn .desc{ padding:14px 16px; background:#fff; }
+
+    /* Footer */
+    .tn footer{ background:var(--secondary); color:#fff; text-align:center; margin-top:auto; }
+    .tn footer .container{ padding:28px 16px; }
+    .tn footer .copyright{ border-top:1px solid rgba(255,255,255,.72); padding-top:12px; color:#ccc; font-size:.92rem; }
+
+    @media (prefers-reduced-motion: reduce){
+      .tn .brand, .tn .brand-title, .tn .tagline, .tn .nav a, .tn header{ transition:none; }
+    }
+  </style>
 </head>
 
-<body class="bg-white">
-    <!-- Topbar Start -->
-    <div class="container-fluid">
-        <div class="row bg-secondary py-2 px-lg-5">
-            <div class="col-lg-6 text-center text-lg-left">
-                <div class="d-inline-flex align-items-center">
-                    <p class="mr-2 mb-2 mb-lg-0 text-white">Opening Hours:</p>
-                    <span class="mb-2 mb-lg-0 text-white">8.00AM - 9.00PM</span>
-                </div>
-            </div>
-            <div class="col-lg-6 text-center text-lg-right">
-                <div class="d-inline-flex align-items-center">
-                    <p class="m-0 mr-1 text-white">Follow Us:</p>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a class="text-white px-2" href="">
-                        <i class="fab fa-youtube"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="row py-3 px-lg-5">
-            <div class="col-lg-4">
-                <a href="" class="navbar-brand d-none d-lg-block">
-                    <div class="text-center">
-                        <h1 class="m-0 display-20 text-capitalize font-italic text-lightblue"><span class="text-primary">Trade</span>Nova</h1>
-                    </div>       
-                </a>
-            </div>
-            <div class="col-lg-8 text-center text-lg-right">
-                <div class="d-inline-flex align-items-center">
-                    <div class="d-inline-flex flex-column text-center px-3 border-right">
-                        <h6>Email Us</h6>
-                        <p class="m-0">info@example.com</p>
-                    </div>
-                    
-                </div>
-            </div>
-        </div>
+<body class="tn">
+  <header id="siteHeader">
+    <div class="brand">
+      <div class="brand-inner container">
+        <h1 class="brand-title"><span style="color:var(--primary);">Trade</span> Nova</h1>
+        <p class="tagline">結合GenAI的新手智慧投資平台</p>
+      </div>
     </div>
-    <!-- Topbar End -->
 
+    <nav>
+      <div class="nav-wrap">
+        <div class="nav container">
+          <a href="{{ url_for('main') }}" class="active"><span class="en">Home</span><span class="zh">首頁</span></a>
+          <a href="{{ url_for('account') }}"><span class="en">Account</span><span class="zh">AI分析師</span></a>
+          <a href="{{ url_for('risk') }}"><span class="en">Risk</span><span class="zh">風險類型分析</span></a>
+          <a href="{{ url_for('roi') }}"><span class="en">ROI</span><span class="zh">投資報酬率計算</span></a>
+          <a href="{{ url_for('journal') }}"><span class="en">Journal</span><span class="zh">學習歷程追蹤</span></a>
+          <a href="{{ url_for('dictionary') }}"><span class="en">Dictionary</span><span class="zh">股票字典</span></a>
+          <a href="{{ url_for('trading_history_rank') }}"><span class="en">Rank</span><span class="zh">排行榜</span></a>
+          <a href="{{ url_for('simulation') }}"><span class="en">Simulation</span><span class="zh">股票模擬交易</span></a>
+          <a href="{{ url_for('industry_select_stock') }}"><span class="en">Industry</span><span class="zh">市場情勢模擬</span></a>
 
-    <!-- Navbar Start -->
-    <div class="container-fluid p-0 nav-bar">
-        <nav class="navbar navbar-expand-lg bg-none navbar-dark py-0">
-            <a href="" class="navbar-brand d-block d-lg-none">
-                <h1 class="m-0 display-5 text-capitalize font-italic text-lightblue"><span class="text-primary">Smar</span>Investor</h1>
-            </a>
-            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                <span class="navbar-toggler-icon"></span>
+          {# ---- 登入 / 登出：伺服端判斷 ---- #}
+          {% if session.get('user_id') %}
+          <!-- 已登入：送 POST 登出；外觀做成像 <a> -->
+          <form action="{{ url_for('logout') }}" method="POST" class="d-inline">
+            <button type="submit" id="authLink" class="linklike">
+              <span class="en">Logout</span><span class="zh">登出</span>
             </button>
-            <div class="navbar-nav m-auto py-4">
-                <a href="{{ url_for('main') }}" class="nav-item nav-link active" style="font-size: 25px;">Home</a>
-                <a href="{{ url_for('account') }}" class="nav-item nav-link" style="font-size: 25px;">Account</a>
-                <a href="{{ url_for('risk') }}" class="nav-item nav-link" style="font-size: 25px;">Risk</a>
-                <a href="{{ url_for('roi') }}" class="nav-item nav-link" style="font-size: 25px;">Return on Investment</a>
-                <a href="{{ url_for('journal') }}" class="nav-item nav-link" style="font-size: 25px;">Journal</a>
-                <a href="{{ url_for('dictionary') }}" class="nav-item nav-link" style="font-size: 25px;">Dictionary</a>
-                <a href="{{ url_for('trading_history_rank') }}" class="nav-item nav-link" style="font-size: 25px;">Rank</a>
-                <a href="{{ url_for('simulation') }}" class="nav-item nav-link" style="font-size: 25px;">Simulation</a>
-                <a href="{{ url_for('industry_select_stock') }}" class="nav-item nav-link" style="font-size: 25px;">Industry</a>
-                <a href="#" id="authLink" class="nav-item nav-link" style="font-size: 25px;">Login</a>
-            </div>                      
-        </nav>
+          </form>
+        {% else %}
+          <!-- 未登入：導向登入頁 -->
+          <a href="{{ url_for('login') }}" id="authLink">
+            <span class="en">Login</span><span class="zh">登入</span>
+          </a>
+        {% endif %}
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- About -->
+    <section class="section">
+      <div class="container">
+        <article class="card pad">
+          <h5 style="color:var(--primary);margin-bottom:6px;">About Us</h5>
+          <h1 style="font-size:1.8rem;">建立宗旨</h1>
+          <p class="lead">
+            目前市面上缺乏針對零基礎使用者設計的模擬投資平台，導致許多初學者必須經歷多次嘗試與失敗，才能逐步累積投資經驗。
+            因此本專題旨在打造一個結合 Python Flask 與 Gemini AI 的智慧投資學習平台，協助新手投資者在無基礎的情況下也能有效入門投資，讓投資變得更簡單且可學習。
+          </p>
+          <h1 style="font-size:1.8rem;">網站特色</h1>
+          <p class="lead" style="margin-bottom:10px;">
+            使用者只需根據需求填寫表單，系統便會推薦合適股票，並提供報酬率模擬與模擬交易功能。透過 20 種交易策略，使用者可選擇策略並輸入股票，獲得對應的分析結果。
+            如有疑問，可提交給 AI 解釋分析內容，AI 也會反問使用者以確認理解，實現互動式學習。
+          </p>
+          <p class="lead">此外，平台提供歷史資料模擬交易，隨機選股且隱藏代號，使用者需依圖表與判斷操作。模擬結束後，AI 將分析操作表現並提供策略建議，幫助學習與反思。</p>
+          <a href="{{ url_for('dictionary') }}" class="btn btn-primary" style="margin-top:6px;">Learn More</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section class="section">
+      <div class="container">
+        <header class="pad card" style="margin-bottom:18px;">
+          <h5 style="color:var(--primary);margin-bottom:6px;">網站功能介紹</h5>
+          <h1>為新手打造，結合 AI 的投資學習平台</h1>
+        </header>
+
+        <div class="grid">
+          <a class="service" href="{{ url_for('risk') }}" aria-label="風險投資與推薦">
+            <figure class="media"><img src="/static/img/risk.jpg" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-shield-fill-check"></i></span><h6 class="title">風險投資與推薦</h6></div>
+            <p class="desc">將指定股票套用策略分析，或是分析投資行為，皆可配合程式所搭載的 Gemini 進行報告分析。</p>
+          </a>
+
+          <a class="service" href="{{ url_for('roi') }}" aria-label="投資報酬率計算">
+            <figure class="media"><img src="/static/img/risk.jpg" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-calculator"></i></span><h6 class="title">投資報酬率計算</h6></div>
+            <p class="desc">輸入投資與期間，快速估算與比較不同策略的報酬率表現。</p>
+          </a>
+
+          <a class="service" href="{{ url_for('journal') }}" aria-label="歷程追蹤">
+            <figure class="media"><img src="/static/img/journal.jpg" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-book"></i></span><h6 class="title">歷程追蹤</h6></div>
+            <p class="desc">將歷史模擬投資的每次交易詳細記錄，搭配股票代號與模擬時間，方便複習與回顧。</p>
+          </a>
+
+          <a class="service" href="{{ url_for('industry_select_stock') }}" aria-label="策略套用">
+            <figure class="media"><img src="/static/img/strategy.jpg" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-graph-up"></i></span><h6 class="title">策略套用</h6></div>
+            <p class="desc">超過 20 種股票策略，套用即時數據，顯示關鍵指標並提供判讀。</p>
+          </a>
+
+          <a class="service" href="{{ url_for('account') }}" aria-label="AI 即時數據投資">
+            <figure class="media"><img src="/static/img/account.jpg" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-bar-chart-line-fill"></i></span><h6 class="title">AI 即時數據投資</h6></div>
+            <p class="desc">串接即時報價，由 AI 提供輔助判讀，體驗接近真實的交易流程。</p>
+          </a>
+
+          <a class="service" href="{{ url_for('simulation') }}" aria-label="AI 歷史數據模擬">
+            <figure class="media"><img src="/static/img/history.jpg" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-currency-dollar"></i></span><h6 class="title">AI 歷史數據模擬</h6></div>
+            <p class="desc">使用隨機股票過往數據，加速時間進行買賣，結束後由 AI 反饋建議。</p>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p class="copyright">© 2025 Trade Nova</p>
     </div>
-    <!-- Navbar End -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const authLink = document.getElementById("authLink");
-        
-            fetch('/check_login')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.logged_in) {
-                        authLink.textContent = "Logout";
-                        authLink.href = "/logout";
-                    } else {
-                        authLink.textContent = "Login";
-                        authLink.href = "/login";
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
-    </script>
-        
+  </footer>
 
-    <!-- Carousel Start -->
-    <div class="container-fluid p-0">
-        <div id="blog-carousel" class="carousel slide" data-ride="carousel">
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img class="w-100" src="/static/img/1.jpg" alt="Image">
-                    <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                        <h4 class="display-4 m-0 mt-2 mt-md-3 text-white">Useful Website For Begginer</h4>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img class="w-100" src="/static/img/2.jpg" alt="Image">
-                    <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
-                        <h4 class="display-4 m-0 mt-2 mt-md-3 text-white">Intelligent tools for smarter investing</h4>
-                    </div>
-                </div>
-            </div>
-            <a class="carousel-control-prev" href="#blog-carousel" data-slide="prev">
-                <div class="btn btn-primary rounded-circle" style="width: 45px; height: 45px;">
-                    <span class="carousel-control-prev-icon mb-n2"></span>
-                </div>
-            </a>
-            <a class="carousel-control-next" href="#blog-carousel" data-slide="next">
-                <div class="btn btn-primary rounded-circle" style="width: 45px; height: 45px;">
-                    <span class="carousel-control-next-icon mb-n2"></span>
-                </div>
-            </a>
-        </div>
-    </div>
-    <!-- Carousel End -->
+  <script>
+    // Header compact 滑動控制（避免抖動）
+    (function () {
+      var header = document.getElementById('siteHeader');
+      if (!header) return;
+      var brand = header.querySelector('.brand');
+      var nav = header.querySelector('.nav');
+      var compact = false;
 
+      function computeThresholds() {
+        var expanded = brand ? brand.scrollHeight : 120;
+        var ENTER = Math.max(100, expanded + 8);
+        var EXIT = Math.max(24, Math.min(80, Math.round(ENTER * 0.4)));
+        return { ENTER: ENTER, EXIT: EXIT };
+      }
 
-    <!-- Features Start -->
-    <div class="container-fluid py-5 py-lg-0 feature">
-        <div class="row py-5 py-lg-0">
-            <div class="col-lg-4 p-0">
-                <div class="feature-item d-flex align-items-center border-right px-5 mb-4 mb-lg-0">
-                    <i class="flaticon-policeman display-3 text-primary mr-4"></i>
-                    <div class="">
-                        <h5 class="mb-3">Professional Staff</h5>
-                        <p class="m-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu suscipit orci velit id libero
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 p-0">
-                <div class="feature-item d-flex align-items-center border-right px-5 mb-4 mb-lg-0">
-                    <i class="flaticon-helmet display-3 text-primary mr-4"></i>
-                    <div class="">
-                        <h5 class="mb-3">Latest Equipments</h5>
-                        <p class="m-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu suscipit orci velit id libero
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 p-0">
-                <div class="feature-item d-flex align-items-center px-5">
-                    <i class="flaticon-surveillance display-3 text-primary mr-4"></i>
-                    <div class="">
-                        <h5 class="mb-3">24/7 Support</h5>
-                        <p class="m-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu suscipit orci velit id libero
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Features End -->
+      var TH = computeThresholds();
+      var ticking = false;
 
+      function onScroll() {
+        if (!ticking) {
+          window.requestAnimationFrame(function () {
+            var y = window.scrollY || document.documentElement.scrollTop || 0;
+            if (!compact && y > TH.ENTER) {
+              compact = true;
+              header.classList.add('compact');
+            } else if (compact && y < TH.EXIT) {
+              compact = false;
+              header.classList.remove('compact');
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }
 
-    <!-- About Start -->
-    <div class="container-fluid mb-5" style="background: #f6f6f6;">
-        <div class="row align-items-center">
-            <div class="col-lg-6 px-0">
-                <img width="100%" class="img-fluid" src="/static/img/study.jpg" alt="Image">
-            </div>
-            <div class="col-lg-6 py-5 py-lg-0 px-3 px-lg-5">
-                <h1 class="text-primary mb-3">About Us</h5>
-                <h1 class="mb-4" style="font-size:2.8em;">建立宗旨</h1>
-                <p style="font-size: 1.75em;">目前市面上缺乏針對零基礎使用者設計的模擬投資平台，導致許多初學者必須經歷多次嘗試與失敗，才能逐步累積投資經驗。因此本專題旨在打造一個結合Python Flask與Gemini AI的智慧投資學習平台，協助新手投資者在無基礎的情況下也能有效入門投資，讓投資變得更簡單且可學習。</p>
-                <h1 class="mb-4"style="font-size:2.8em;">網站特色</h1>
-                <p style="font-size: 1.75em;">使用者只需根據需求填寫表單，系統便會推薦合適股票，並提供報酬率模擬與模擬交易功能。透過 20 種交易策略，使用者可選擇策略並輸入股票，獲得對應的分析結果。如有疑問，可提交給 AI 解釋分析內容，AI 也會反問使用者以確認理解，實現互動式學習。
-此外，平台提供歷史資料模擬交易，隨機選股且隱藏代號，使用者需依圖表與判斷操作。模擬結束後，AI 將分析操作表現並提供策略建議，幫助學習與反思。</p>
-                <div class="row py-2">
-                    <div class="col-sm-6">
-                        <i class="flaticon-approved display-3 text-primary"></i>
-                        <h5 class="mt-2">Govt Approved</h5>
-                        <p>Ipsum sanctu dolor ipsum dolore sit et kasd duo</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <i class="flaticon-medal display-3 text-primary"></i>
-                        <h5 class="mt-2">Award Winning</h5>
-                        <p>Ipsum sanctu dolor ipsum dolore sit et kasd duo</p>
-                    </div>
-                </div>
-                <a href="" class="btn btn-lg px-4 btn-primary">Learn More</a>
-            </div>
-        </div>
-    </div>
-    <!-- About End -->
-
-
-    <!-- Services Start -->
-    <div class="container pt-5">
-        <div class="d-flex flex-column text-center mb-5">
-            <h5 class="text-primary mb-3">網站功能介紹</h5>
-            <h1 class="m-0">為新手打造，結合AI的投資學習平台</h1>
-        </div>
-        <div class="row pb-3">
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/risk.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-shield-fill-check"></i>
-                        </h3>                        
-                        <h6 class="card-title text-white text-truncate m-0">風險投資與推薦</h6>
-                    </div>
-                    <div class="card-footer">
-                        將指定股票套用策略分析，或是分析投資行為，皆可配合程式所搭載的Gemini進行報告分析
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/risk.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-calculator"></i>
-                        </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">投資報酬率計算</h6>
-                    </div>
-                    <div class="card-footer">
-                        動不動就壞掉的功能
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/journal.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-book"></i>
-                        </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">歷程追蹤</h6>
-                    </div>
-                    <div class="card-footer">
-                        將歷史模擬投資的每次交易，都詳細的紀錄，搭配股票代號與模擬的時間，讓使用者更好複習與紀錄!
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/strategy.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-graph-up"></i>
-                        </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">策略套用</h6>
-                    </div>
-                    <div class="card-footer">
-                        超過20種股票策略，套用即時的股票數據，告訴你在該策略下股票的相關指標是好是壞
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/account.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-bar-chart-line-fill"></i>
-                        </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">AI即時數據投資</h6>
-                    </div>
-                    <div class="card-footer">
-                        實際取得當前的股票買賣價格，搭配AI的參考意見，體驗真實的股票模擬投資，同時分析套用策略的各項指標意義
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card mb-2 p-3">
-                    <img class="card-img-top" src="/static/img/history.jpg" alt="">
-                    <div class="card-body bg-secondary d-flex align-items-center p-0">
-                        <h3 class="d-flex flex-shrink-0 align-items-center justify-content-center bg-primary text-white m-0 mr-3" style="width: 45px; height: 45px;">
-                            <i class="bi bi-currency-dollar"></i>
-                        </h3> 
-                        <h6 class="card-title text-white text-truncate m-0">AI歷史數據模擬</h6>
-                    </div>
-                    <div class="card-footer">
-                        利用隨機股票往年的數據，自行加速時間來買賣，立即知道交易結果是賺是賠，搭配AI反饋學習更即時
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Services End -->
-
-
-    <!-- Facts Start -->
-    <div class="container-fluid bg-primary my-5 py-5 text-center">
-        <div class="row pt-5">
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="fa fa-user-shield mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white" style="width: 50px; height: 50px;"></h5>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">6</h4>
-                <h6 class="text-white m-0">開發人員</h6>
-            </div>
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h3 class="bi bi-people-fill mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white"></i>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">243</h4>
-                <h6 class="text-white m-0">開發時間(天)</h6>
-            </div>
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="fa fa-shield-alt mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white" style="width: 50px; height: 50px;"></h5>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">22</h4>
-                <h6 class="text-white m-0">交易策略(種)</h6>
-            </div>
-            <div class="col-lg-3 col-sm-6 mb-5">
-                <h5 class="fa fa-award mb-4 d-inline-flex align-items-center justify-content-center border rounded-circle text-white" style="width: 50px; height: 50px;"></h5>
-                <h4 class="display-4 text-white mb-3" data-toggle="counter-up">997</h4>
-                <h6 class="text-white m-0">支援股票</h6>
-            </div>
-        </div>
-    </div>
-    <!-- Facts End -->
-
-
-    <!-- Features Start -->
-    <div class="container pt-5">
-        
-    </div>
-    <!-- Features End -->
-
-
-    <!-- Subscribe Start -->
-    
-    <!-- Subscribe End -->
-
-
-    <!-- Team Start -->
-    <div class="container pt-5 pb-3">
-        <div class="d-flex flex-column text-center mb-5">
-            <h5 class="text-primary mb-3">Security Officers</h5>
-            <h1 class="m-0">Meet Our Security Officers</h1>
-        </div>
-        <div class="row">
-            <div class="col-lg-6 mb-4">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-6 text-right">
-                        <h6>Officer Name</h6>
-                        <h6 class="text-muted font-weight-normal text-capitalize mb-2">Designation</h6>
-                        <p>Ipsum tempor tempor dolor no est diam duo dolore, dolor eos dolor amet erat clita amet.</p>
-                        <div class="d-flex justify-content-end">
-                            <a href=""><i class="fab fa-twitter mr-3"></i></a>
-                            <a href=""><i class="fab fa-facebook-f mr-3"></i></a>
-                            <a href=""><i class="fab fa-linkedin-in mr-3"></i></a>
-                            <a href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 mb-4">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
-                    </div>
-                    <div class="col-6 text-left">
-                        <h6>Officer Name</h6>
-                        <h6 class="text-muted font-weight-normal text-capitalize mb-2">Designation</h6>
-                        <p>Ipsum tempor tempor dolor no est diam duo dolore, dolor eos dolor amet erat clita amet.</p>
-                        <div class="d-flex justify-content-start">
-                            <a href=""><i class="fab fa-twitter mr-3"></i></a>
-                            <a href=""><i class="fab fa-facebook-f mr-3"></i></a>
-                            <a href=""><i class="fab fa-linkedin-in mr-3"></i></a>
-                            <a href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 mb-4">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-6 text-right">
-                        <h6>Officer Name</h6>
-                        <h6 class="text-muted font-weight-normal text-capitalize mb-2">Designation</h6>
-                        <p>Ipsum tempor tempor dolor no est diam duo dolore, dolor eos dolor amet erat clita amet.</p>
-                        <div class="d-flex justify-content-end">
-                            <a href=""><i class="fab fa-twitter mr-3"></i></a>
-                            <a href=""><i class="fab fa-facebook-f mr-3"></i></a>
-                            <a href=""><i class="fab fa-linkedin-in mr-3"></i></a>
-                            <a href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 mb-4">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
-                    </div>
-                    <div class="col-6 text-left">
-                        <h6>Officer Name</h6>
-                        <h6 class="text-muted font-weight-normal text-capitalize mb-2">Designation</h6>
-                        <p>Ipsum tempor tempor dolor no est diam duo dolore, dolor eos dolor amet erat clita amet.</p>
-                        <div class="d-flex justify-content-start">
-                            <a href=""><i class="fab fa-twitter mr-3"></i></a>
-                            <a href=""><i class="fab fa-facebook-f mr-3"></i></a>
-                            <a href=""><i class="fab fa-linkedin-in mr-3"></i></a>
-                            <a href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 mb-4">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-6 text-right">
-                        <h6>Officer Name</h6>
-                        <h6 class="text-muted font-weight-normal text-capitalize mb-2">Designation</h6>
-                        <p>Ipsum tempor tempor dolor no est diam duo dolore, dolor eos dolor amet erat clita amet.</p>
-                        <div class="d-flex justify-content-end">
-                            <a href=""><i class="fab fa-twitter mr-3"></i></a>
-                            <a href=""><i class="fab fa-facebook-f mr-3"></i></a>
-                            <a href=""><i class="fab fa-linkedin-in mr-3"></i></a>
-                            <a href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6 mb-4">
-                <div class="row mb-2 align-items-center">
-                    <div class="col-6">
-                        <img class="img-thumbnail p-3" src="/static/img/a.jpg" alt="Image">
-                    </div>
-                    <div class="col-6 text-left">
-                        <h6>Officer Name</h6>
-                        <h6 class="text-muted font-weight-normal text-capitalize mb-2">Designation</h6>
-                        <p>Ipsum tempor tempor dolor no est diam duo dolore, dolor eos dolor amet erat clita amet.</p>
-                        <div class="d-flex justify-content-start">
-                            <a href=""><i class="fab fa-twitter mr-3"></i></a>
-                            <a href=""><i class="fab fa-facebook-f mr-3"></i></a>
-                            <a href=""><i class="fab fa-linkedin-in mr-3"></i></a>
-                            <a href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Team End -->
-
-
-    <!-- Testimonial Start -->
-    
-    <!-- Testimonial End -->
-
-
-    <!-- Blog Start -->
-    <div class="container pt-5">
-        <div class="d-flex flex-column text-center mb-5">
-            <h5 class="text-primary mb-3">Github</h5>
-                <h1 class="m-0">
-                    <a href="https://github.com/ArthurArthurArthur0817/Stock-II" target="_blank" rel="noopener noreferrer">Latest update</a>
-                </h1>
-        </div>
-    </div>
-    <!-- Blog End -->
-
-
-    <!-- Footer Start -->
-    <div class="container-fluid bg-secondary text-white mt-5 py-5 px-sm-3 px-md-5">
-        <div class="row pt-5">
-            <div class="col-lg-4 col-md-12 mb-5">
-                <h1 class="mb-3 display-5 text-capitalize font-italic text-lightblue"><span class="text-primary">Trade</span>Nova</h1>
-                <p class="m-0">Ipsum amet sed vero et lorem stet eos ut, labore sed sed stet sea est ipsum ut. Volup amet ea sanct ipsum, dolore vero lorem no duo eirmod. Eirmod amet ipsum no ipsum lorem clita ut. Ut sed sit lorem ea lorem sed, amet stet sit sea ea diam tempor kasd kasd. Diam nonumy etsit tempor ut sed diam sed et ea</p>
-            </div>
-            <div class="col-lg-8 col-md-12">
-                <div class="row">
-                    <div class="col-md-4 mb-5">
-                        <h5 class="text-primary mb-4">Quick Links</h5>
-                        <div class="d-flex flex-column justify-content-start">
-                            <a class="text-white mb-2" href="{{ url_for('main') }}" ><i class="fa fa-angle-right mr-2" style="font-size: 20px;"></i>Home</a>
-                            <a class="text-white mb-2" href="{{ url_for('account') }}" href="#"><i class="fa fa-angle-right mr-2" style="font-size: 20px;"></i>Account</a>
-                            <a class="text-white mb-2" href="{{ url_for('risk') }}" href="#"><i class="fa fa-angle-right mr-2" style="font-size: 20px;"></i>Risk</a>
-                            <a class="text-white mb-2" href="{{ url_for('roi') }}" ><i class="fa fa-angle-right mr-2" style="font-size: 20px;"></i>Return on Investment</a>
-                            <a class="text-white mb-2" href="{{ url_for('simulation') }}" href="#"><i class="fa fa-angle-right mr-2" style="font-size: 20px;"></i>Simulation</a>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-5">
-                        <h5 class="text-primary mb-4">Get In Touch</h5>
-                        <p><i class="fa fa-map-marker-alt mr-2"></i>123 Street, New York, USA</p>
-                        <p><i class="fa fa-phone-alt mr-2"></i>+012 345 67890</p>
-                        <p><i class="fa fa-envelope mr-2"></i>info@example.com</p>
-                        <div class="d-flex justify-content-start mt-4">
-                            <a class="btn btn-outline-light rounded-circle text-center mr-2 px-0" style="width: 40px; height: 40px;" href="#"><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-outline-light rounded-circle text-center mr-2 px-0" style="width: 40px; height: 40px;" href="#"><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-outline-light rounded-circle text-center mr-2 px-0" style="width: 40px; height: 40px;" href="#"><i class="fab fa-linkedin-in"></i></a>
-                            <a class="btn btn-outline-light rounded-circle text-center mr-2 px-0" style="width: 40px; height: 40px;" href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row pt-3">
-            <div class="col-md-6 text-center text-md-left mb-3 mb-md-0">
-                <p class="m-0 text-white">					
-					<!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
-                </p>
-            </div>
-            <div class="col-md-6 text-center text-md-right">
-                <ul class="nav d-inline-flex">
-                </ul>
-            </div>
-        </div>
-    </div>
-    <!-- Footer End -->
-
-
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-secondary border back-to-top"><i class="fa fa-angle-double-up"></i></a>
-    
-
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/lib/easing/easing.min.js"></script>
-    <script src="/static/lib/waypoints/waypoints.min.js"></script>
-    <script src="/static/lib/counterup/counterup.min.js"></script>
-    <script src="/static/lib/owlcarousel/owl.carousel.min.js"></script>
-
-    <!-- Contact Javascript File -->
-    <script src="/static/mail/jqBootstrapValidation.min.js"></script>
-    <script src="/static/mail/contact.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="/static/js/main.js"></script>
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', function () { TH = computeThresholds(); onScroll(); }, { passive: true });
+      onScroll();
+    })();
+  </script>
 </body>
-
 </html>
