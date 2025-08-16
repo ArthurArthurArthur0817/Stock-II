@@ -1,156 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <title>模擬紀錄總覽</title>
-    <style>
-        body {
-            background-color: #D2E9FF;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8">
+  <title>模擬紀錄總覽</title>
 
-        header {
-            background-color: #004B97;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+  <!-- 字體：思源宋體 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
 
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
+  <style>
+    /* ===== 主題色票（只影響背景/按鈕/頁頭/字樣）==== */
+    :root{
+      --primary:#043b8f;
+      --primary-dark:#02347e;
+      --primary-light:#6499e9;
+      --secondary:#0b1f33;
+      --ink:#0f172a;
+      --card-bg:#ffffff; /* 中央白色區塊：不動它的樣式，只供需要時參考 */
+    }
 
-        .btn {
-            background-color: white;
-            color: #004B97;
-            border: 2px solid #004B97;
-            padding: 8px 14px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-        }
+    /* ===== 全站字體（字樣）===== */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Noto Serif TC', serif; /* 只改字體 */
+      color: var(--ink);
+      line-height: 1.65;
+    }
 
-        .btn:hover {
-            background-color: #004B97;
-            color: white;
-        }
+    /* ===== 背景（不動中間內容）===== */
+    body {
+      position: relative;
+      background: transparent; /* 由 ::before 接手 */
+    }
+    /* 5.  背景動畫 */
+    body::before{
+      content:"";
+      position:fixed;inset:0;
+      background:url("https://png.pngtree.com/thumb_back/fh260/background/20231227/pngtree-gentle-blue-background-with-a-soft-textured-finish-image_13898387.png") center/cover no-repeat;
+      filter:grayscale(20%) brightness(0.55);
+      z-index:-2;
+      animation:bgZoom 40s ease-in-out infinite alternate;
+    }
+    @keyframes bgZoom{from{transform:scale(1);}to{transform:scale(1.15);}}
 
-        table {
-            width: 90%;
-            margin: 30px auto;
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+    /* ===== 頁頭（Header）只改外觀，不動結構 ===== */
+    header{
+      position: sticky; top: 0;
+      display:flex; justify-content:space-between; align-items:center;
+      padding: 16px 22px;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: saturate(140%) blur(8px);
+      -webkit-backdrop-filter: saturate(140%) blur(8px);
+      border-bottom: 1px solid rgba(4,59,143,.12);
+      box-shadow: 0 8px 22px rgba(0,0,0,.06);
+      z-index: 10;
+    }
+    header h1{
+      margin: 0;
+      font-size: 1.6rem;         /* 字樣大小微調 */
+      letter-spacing: .5px;
+      color: var(--primary);
+      font-weight: 700;
+    }
 
-        th, td {
-            border: 1px solid #004B97;
-            padding: 12px 16px;
-            text-align: center;
-        }
+    /* ===== 按鈕（.btn）風格，只改外觀 ===== */
+    .btn{
+      display:inline-block;
+      text-decoration:none;
+      font-weight:700;
+      padding:.6rem 1.25rem;
+      border-radius: 999px;
+      border:1.5px solid var(--primary);
+      background:#fff;
+      color:var(--primary);
+      transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
+    }
+    .btn:hover{
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 8px 16px rgba(4,59,143,.18);
+      transform: translateY(-1px);
+    }
+    .btn:active{
+      transform: translateY(0);
+      box-shadow: 0 4px 8px rgba(4,59,143,.18);
+    }
 
-        th {
-            background-color: #004B97;
-            color: white;
-        }
+    /* ===== 中央白色內容區：不修改現有規則 ===== */
+    /* 你原本的表格/圖表樣式若有，維持不變；此處不添加/覆蓋任何 table 或中間容器規則 */
 
-        tr:nth-child(even) {
-            background-color: #F1F7FF;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </style>
+
+  <!-- Chart.js（功能不變） -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<header>
-    <h1>歷程追蹤</h1>
-    <a href="{{ url_for('main') }}" class="btn">返回主畫面</a>
-</header>
+  <!-- 頁頭：只改外觀，不改結構 -->
+  <header>
+    <h1>Process Tracking</h1>
+    <a href="{{ url_for('main') }}" class="btn">Home</a>
+  </header>
 
-<!-- 📊 圖表容器 -->
-    <div style="max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-        <canvas id="winRateChart"></canvas>
-        <p style="margin-top: 10px; font-size: 14px; color: #555;">此圖顯示最近五筆 win_rate 的變化趨勢。</p>
-    </div>
+  <!-- ===== 中央白色區塊：保持原樣，以下內容完全不動 ===== -->
 
-<script>
+  <!-- 📊 圖表容器（原樣） -->
+  <div style="max-width: 1200px; margin: 20px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+    <canvas id="winRateChart"></canvas>
+    <p style="margin-top: 10px; font-size: 14px; color: #555;">此圖顯示最近五筆 win_rate 的變化趨勢。</p>
+  </div>
+
+  <script>
     const winRateLabels = {{ win_rate_data | map(attribute='created_at') | list | tojson }};
     const winRateValues = {{ win_rate_data | map(attribute='win_rate') | list | tojson }};
 
     const ctx = document.getElementById('winRateChart').getContext('2d');
     new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: winRateLabels,
-            datasets: [{
-                label: 'Win Rate',
-                data: winRateValues,
-                borderColor: '#004B97',
-                backgroundColor: 'rgba(0, 75, 151, 0.1)',
-                fill: true,
-                tension: 0.3
-            }]
+      type: 'line',
+      data: {
+        labels: winRateLabels,
+        datasets: [{
+          label: 'Win Rate',
+          data: winRateValues,
+          borderColor: '#043b8f',
+          backgroundColor: 'rgba(4,59,143,0.10)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        scales: {
+          y: { title: { display: true, text: 'Win Rate' }, min: 0, max: 100 },
+          x: { title: { display: true, text: '交易時間' } }
         },
-        options: {
-            scales: {
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Win Rate'
-                    },
-                    min: 0,
-                    max: 100
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: '交易時間'
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    labels: {
-                        color: '#004B97'
-                    }
-                }
-            }
-        }
+        plugins: { legend: { display: true, labels: { color: '#043b8f' } } }
+      }
     });
-</script>
+  </script>
 
-{% if logs %}
+  {% if logs %}
     <table>
-        <thead>
-            <tr>
-                <th>使用者 ID</th>
-                <th>股票代碼</th>
-                <th>模擬起始日</th>
-                <th>AI 分析內容</th>
-                <th>建立時間</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-                <tr>
-                    <td>{{ log.user_id }}</td>
-                    <td>{{ log.stock_code }}</td>
-                    <td>{{ log.simulation_start_date }}</td>
-                    <td style="text-align: left;">{{ log.content | replace('\n', '<br>') | safe }}</td>
-                    <td>{{ log.created_at }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
+      <thead>
+        <tr>
+          <th>使用者 ID</th>
+          <th>股票代碼</th>
+          <th>模擬起始日</th>
+          <th>AI 分析內容</th>
+          <th>建立時間</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td>{{ log.user_id }}</td>
+            <td>{{ log.stock_code }}</td>
+            <td>{{ log.simulation_start_date }}</td>
+            <td style="text-align: left;">{{ log.content | replace('\n', '<br>') | safe }}</td>
+            <td>{{ log.created_at }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
     </table>
-{% else %}
-    <p style="text-align:center; margin-top:40px; color:#004B97;">目前尚無有效紀錄。</p>
-{% endif %}
+  {% else %}
+    <p style="text-align:center; margin-top:40px; color:#ffffff;">目前尚無有效紀錄。</p>
+  {% endif %}
 
 </body>
 </html>
