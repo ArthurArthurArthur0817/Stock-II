@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini 問答</title>
+
+  <!-- 全站字體：思源宋體 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 4.5 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.3/css/bootstrap.min.css">
+
+  <style>
+    :root{
+      --primary:#043b8f;
+      --primary-light:#6499e9;
+      --secondary:#0b1f33;
+    }
+
+    body {
+      font-family:'Noto Serif TC', serif;
+      line-height:1.6;
+      background:url("https://png.pngtree.com/thumb_back/fh260/background/20231227/pngtree-gentle-blue-background-with-a-soft-textured-finish-image_13898387.png") center/cover no-repeat fixed;
+      filter:grayscale(10%) brightness(0.8);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      padding:2rem;
+    }
+
+    h2 {
+      font-weight:700;
+      color: var(--primary);
+      text-align:center;
+      margin-bottom:2rem;
+    }
+
+    .card-wrapper {
+    background: #ffffff;             /* 純白色，不透背景 */
+    border-radius: 0.8rem;           /* 圓角 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);  /* 陰影稍微加強，讓卡片浮起來 */
+    padding: 2rem;                   /* 內距 */
+    max-width: 1000px;                /* 最大寬度 */
+    width: 100%;                     /* 滿版寬度 */
+    margin: 2rem auto;               /* 上下間距 + 置中 */
+    }
+
+
+    textarea {
+      width:100%;
+      min-height:120px;
+      font-size:1.125rem;
+      padding:1rem;
+      margin-bottom:1rem;
+      border-radius:0.5rem;
+      border:1px solid #ccc;
+      resize:vertical;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      font-weight:600;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      border-color: var(--primary-light);
+    }
+
+    #loading {
+      display:none;
+      text-align:center;
+      margin-top:15px;
+    }
+
+    #outputBox {
+      min-height:150px;
+      font-size:1.125rem;
+      padding:1rem;
+      border-radius:0.5rem;
+      border:1px solid #ccc;
+      resize:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="card-wrapper">
+    <h2>Gemini 問答系統</h2>
+
+    <label for="inputBox">輸入您的問題：</label>
+    <textarea id="inputBox" placeholder="輸入任意問題，如 '什麼是股票'"></textarea>
+
+    <div class="d-flex justify-content-between mb-3">
+      <button id="askBtn" class="btn btn-primary" onclick="sendQuestion()">提交問題</button>
+      <button class="btn btn-outline-primary" onclick="clearFields()">清空</button>
+    </div>
+
+    <!-- Loading 區塊 -->
+    <div id="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">分析中...</span>
+      </div>
+      <p style="margin-top:10px; font-weight:bold; color:#004B97;">分析中，請稍候...</p>
+    </div>
+
+    <label for="outputBox">回答：</label>
+    <textarea id="outputBox" readonly></textarea>
+  </div>
+
+  <script>
+    async function sendQuestion() {
+      const question = document.getElementById('inputBox').value.trim();
+      if(!question){
+        alert("請輸入問題！");
+        return;
+      }
+
+      // 顯示 loading
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('outputBox').value = "";
+      document.getElementById('askBtn').disabled = true;
+
+      try {
+        const res = await fetch('/question_ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+
+        if(data.error){
+          alert(data.error);
+        } else {
+          document.getElementById('outputBox').value = data.answer;
+        }
+      } catch(err){
+        alert("❌ 發生錯誤：" + err);
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('askBtn').disabled = false;
+      }
+    }
+
+    function clearFields(){
+      document.getElementById('inputBox').value = '';
+      document.getElementById('outputBox').value = '';
+    }
+  </script>
+</body>
+</html>
