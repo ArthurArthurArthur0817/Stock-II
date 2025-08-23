@@ -24,7 +24,8 @@ from datetime import datetime, timedelta
 from twstock import Stock
 import plotly.graph_objs as go
 from plotly.offline import plot
-
+import question 
+from question import get_gemini_response
 
 
 
@@ -95,10 +96,10 @@ def check_login():
     if 'user_id' in session:
         return jsonify({"logged_in": True})
     return jsonify({"logged_in": False})
-@app.route('/logout', methods=['POST'])
+@app.route('/logout')
 def logout():
-    session.pop('user_id', None)  # 清除登入狀態
-    return redirect(url_for('main'))  # 回首頁（或要回 login 也行）
+    session.pop('user_id', None)  # 清除 session
+    return redirect(url_for('login'))  # 重新導向到登入頁面
 
 
 
@@ -682,7 +683,7 @@ def get_latest_price():
 @app.route('/next_day')
 def next_day():
     session['start_index'] += 1
-    plot_path = plot_stock_data(session['stock_code'], session['start_index'])
+    plot_path = industry_plot_stock_data(session['stock_code'], session['start_index'])
 
     if not plot_path:
         return jsonify({'error': '已超出資料範圍'})
@@ -1112,7 +1113,7 @@ def industry_next_day():
     if idx >= len(df):
         return jsonify({'error': '已超出資料範圍'})
         
-    plot_path = plot_stock_data(stock_code, idx)
+    plot_path = industry_plot_stock_data(stock_code, idx)
         
     # 檢查圖片是否成功產生
     if plot_path is None:
@@ -1134,14 +1135,92 @@ def industry_next_day():
         'latest_price': safe_round(df.iloc[idx]['Close']),
         'rsi': safe_round(df.iloc[idx]['rsi']),
         'macd': safe_round(df.iloc[idx]['macd']),
+        'macd_signal': safe_round(df.iloc[idx]['macd_signal']),
         'adx': safe_round(df.iloc[idx]['adx']),
+        'plus_di': safe_round(df.iloc[idx]['plus_di']),
+        'minus_di': safe_round(df.iloc[idx]['minus_di']),
         'events': event_messages
     })
+    
+    
+    
+@app.route('/industry_next_month')
+def industry_next_month():
+    #跳轉 30 天
+    session['start_index'] += 30
+    stock_code = session.get('stock_code')
+    df = get_stock_dataframe(stock_code)
+    df = compute_indicators(df)
+    idx = session['start_index']
+        
+    if idx >= len(df):
+        return jsonify({'error': '已超出資料範圍'})
+        
+    plot_path = industry_plot_stock_data(stock_code, idx)
+        
+    # 檢查圖片是否成功產生
+    if plot_path is None:
+        return jsonify({'error': '圖片產生失敗'})
+        
+    event_messages = detect_upcoming_event(stock_code, df, idx)
+        
+    # 安全處理 NaN 值的函數
+    def safe_round(value, decimals=2):
+        if pd.isna(value) or math.isnan(value) or math.isinf(value):
+            return 0.0
+        try:
+            return round(float(value), decimals)
+        except:
+            return 0.0
+        
+    return jsonify({
+        'plot_path': plot_path,
+        'latest_price': safe_round(df.iloc[idx]['Close']),
+        'rsi': safe_round(df.iloc[idx]['rsi']),
+        'macd': safe_round(df.iloc[idx]['macd']),
+        'macd_signal': safe_round(df.iloc[idx]['macd_signal']),
+        'adx': safe_round(df.iloc[idx]['adx']),
+        'plus_di': safe_round(df.iloc[idx]['plus_di']),
+        'minus_di': safe_round(df.iloc[idx]['minus_di']),
+        'events': event_messages
+    })
+    
+    
 
 @app.route('/industry_get_stocks')
 def industry_get_stocks():
     return jsonify({'stocks': get_available_stocks()})
 
+
+#=========================================================
+
+@app.route("/question_ask", methods=["GET"])
+def question_ask_page():
+    return render_template("question.html")
+
+# POST 送問題到 Gemini
+@app.route("/question_ask", methods=["POST"])
+def question_ask_api():
+    data = request.get_json()
+    question = data.get("question", "").strip()
+    if not question:
+        return jsonify({"error": "請輸入問題"}), 400
+
+    # 將問題寫入 ai.txt
+    with open("ai.txt", "w", encoding="utf-8") as f:
+        f.write(question)
+
+    try:
+        # 呼叫後端函數取得回答
+        answer = get_gemini_response(question)
+
+        # 清空 ai.txt
+        with open("ai.txt", "w", encoding="utf-8") as f:
+            f.write("")
+
+        return jsonify({"answer": answer})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
