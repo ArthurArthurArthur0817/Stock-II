@@ -46,7 +46,7 @@ Stock/
 
 ## MySQL
 
-```
+
 use my_database;
 
 CREATE TABLE users (
