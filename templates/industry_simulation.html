@@ -23,6 +23,7 @@
         </div>
 
         <button class="industry_btn" id="next_day_btn" style="margin-top: 10px;">下一天</button>
+        <button class="industry_btn" id="next_month_btn" style="margin-top: 10px;">下個月</button>
         <div style="margin-top: 20px;">
             <button class="industry_btn" id="buy_btn">買入</button>
             <button class="industry_btn" id="sell_btn">賣出</button>
@@ -36,25 +37,51 @@
         <div id="indicators" class="industry_indicators">
             <div class="indicator_card">
                 <p>RSI: <span id="rsi_value">-</span></p>
-                <p class="indicator_description">這裡是 RSI 的簡要說明</p>
-                <!-- div class="indicator_content"-->
-                    <!-- 可放圖表、詳細分析等內容 -->
-                <!-- /div-->
+                <p class="indicator_description">
+                    （相對強弱指標）用於衡量近期價格漲跌強弱，其數值介於0到100之間。
+                </p>
+                <p class="indicator_description">
+                    RSI 高於 70: → 股票可能過多人買（超買），價格漲得過快，短期可能回落。
+                </p>
+                <p class="indicator_description">
+                    RSI 低於 30: → 股票可能過多人賣（超賣），價格跌得過多，短期可能反彈。
+                </p>
             </div>
             <div class="indicator_card">
-                <p>MACD: <span id="macd_value">-</span></p>
-                <p class="indicator_description">這裡是 MACD 的簡要說明</p>
-                <!-- div class="indicator_content"-->
-                    <!-- 可放圖表、詳細分析等內容 -->
-                <!-- /div-->
+                <div class="di_row">
+                    <span>MACD: <span id="macd_value">-</span></span>
+                    <span>Signal: <span id="macd_signal">-</span></span>
+                </div>
+                <p class="indicator_description">
+                    （移動平均收斂發散指標）用於衡量短期與長期價格平均線的差距，以判斷價格趨勢及變化速度，其數值沒有固定範圍，正值表示短期均線高於長期均線，負值表示短期均線低於長期均線。
+                </p>
+                <p class="indicator_description">
+                    若要判斷價格趨勢，可利用 MACD 與 Signal 線判斷:
+                </p>
+                <p class="indicator_description">
+                    MACD &gt; Signal: → 潛在上升趨勢；<br>
+                    MACD &lt; Signal: → 潛在下降趨勢；
+                </p>
             </div>
             <div class="indicator_card">
-                <p>ADX: <span id="adx_value">-</span></p>
-                <p class="indicator_description">這裡是 ADX 的簡要說明</p>
-                <div class="indicator_content">
-                    <!-- 可放圖表、詳細分析等內容 -->
+                <div class="di_row">
+                    <span>ADX: <span id="adx_value">-</span></span>
+                    <span>+DI: <span id="plus_di">-</span></span>
+                    <span>-DI: <span id="minus_di">-</span></span>
+                </div>
+                <p class="indicator_description">（平均趨向指標）用於衡量價格趨勢強弱的技術分析指標，其數值通常介於0到100之間。ADX 不告訴你價格方向，而是告訴你趨勢強度：數值越高表示趨勢越強（無論上升或下降），數值越低表示趨勢較弱或市場震盪</p>
+                <p class="indicator_description">若要判斷上升或下降，可利用+DI,-DI判斷:</p>
+                <p class="indicator_description">
+                        +DI &gt; -DI: → 上升趨勢；<br> 
+                        +DI &lt; -DI: → 下降趨勢；
+                </p>
+                <!-- 可放圖表、詳細分析等內容 -->
                 </div>
             </div>
+        </div>
+
+        <div class="indicator_costume_block">
+            <p>以上的三個交易策略(RSI/MACD/ADX)是用來提供使用者買進跟賣出的參考，搭配時間背景、時事與趨勢圖，完整還原當時的交易情境</p>
         </div>
     </div>
 
@@ -150,7 +177,10 @@ $(function() {
                 $("#latest_price").text(data.latest_price);
                 $("#rsi_value").text(data.rsi);
                 $("#macd_value").text(data.macd);
+                $("#macd_signal").text(data.macd_signal);
                 $("#adx_value").text(data.adx);
+                $("#plus_di").text(data.plus_di);
+                $("#minus_di").text(data.minus_di);
 
                 let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
                 $("#event_alerts").html(alerts);
@@ -165,6 +195,51 @@ $(function() {
             $("#next_day_btn").prop('disabled', false).text('下一天');
         });
     });
+
+
+
+
+    $("#next_month_btn").click(function() {
+        $(this).prop('disabled', true).text('載入中...');
+
+        $.get("/industry_next_month")
+        .done(function(data) {
+            if (!data.error) {
+                $("#stock_chart").attr("src", "");
+                setTimeout(function() {
+                    var timestamp = new Date().getTime();
+                    var randomNum = Math.random();
+                    var newSrc = data.plot_path + "?v=" + timestamp + "&r=" + randomNum;
+                    $("#stock_chart").attr("src", newSrc);
+                }, 50);
+
+                $("#latest_price").text(data.latest_price);
+                $("#rsi_value").text(data.rsi);
+                $("#macd_value").text(data.macd);
+                $("#macd_signal").text(data.macd_signal);
+                $("#adx_value").text(data.adx);
+                $("#plus_di").text(data.plus_di);
+                $("#minus_di").text(data.minus_di);
+
+                let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
+                $("#event_alerts").html(alerts);
+            } else {
+                alert(data.error);
+            }
+        })
+        .fail(function(xhr, status, error) {
+            alert('請求失敗: ' + error);
+        })
+        .always(function() {
+            $("#next_month_btn").prop('disabled', false).text('下個月');
+        });
+    });
+
+
+
+
+
+
 
     $("#stock_chart").on('error', function() {
         var currentSrc = $(this).attr('src');
