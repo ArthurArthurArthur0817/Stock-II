@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from db import get_connection
 from trade import get_stock_info, process_trade
 from news import fetch_news
-import datetime
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -185,7 +184,7 @@ def trade():
     current_price = None
     strategy_result = None  # **新增變數來儲存策略結果**
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     start_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
     end_time = now.replace(hour=13, minute=30, second=0, microsecond=0)
     is_trading_time = start_time <= now <= end_time
