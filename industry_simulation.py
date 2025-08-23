@@ -14,7 +14,8 @@ STOCK_LIST = [
 EVENTS = {
     '2610': [
         ('2020/01/10', '法說會'),
-        ('2020/02/01', '產品發布')
+        ('2020/03/19', '臺灣全面禁止外籍人士入境'),
+        ('2020/05/19', '疫情爆發，臺灣進入三級警戒')
     ],
     '5678': [
         ('2020/03/01', '高層異動'),
@@ -75,24 +76,39 @@ def get_stock_dataframe(stock_code):
 def compute_indicators(df):
     df = df.copy()
     
-    # 計算技術指標（不管資料量，讓 ta 庫自己處理）
+    # RSI
     df['rsi'] = ta.momentum.RSIIndicator(close=df['Close'], window=14).rsi()
-    df['macd'] = ta.trend.MACD(close=df['Close']).macd()
-    df['adx'] = ta.trend.ADXIndicator(high=df['High'], low=df['Low'], close=df['Close']).adx()
     
-    # 處理 NaN 值（兼容新舊版本的 pandas）
+    # MACD
+    macd_indicator = ta.trend.MACD(close=df['Close'])
+    df['macd'] = macd_indicator.macd()
+    
+    # ADX 與 DI
+    adx_indicator = ta.trend.ADXIndicator(high=df['High'], low=df['Low'], close=df['Close'], window=14)
+    df['adx'] = adx_indicator.adx()
+    df['plus_di'] = adx_indicator.adx_pos()  # +DI
+    df['minus_di'] = adx_indicator.adx_neg() # -DI
+    
+    # 處理 NaN 值
+# 假設你已經有 macd_indicator = ta.trend.MACD(close=df['Close'])
+
     try:
-        # 新版 pandas 語法
         df['rsi'] = df['rsi'].bfill().ffill().fillna(50.0)
         df['macd'] = df['macd'].bfill().ffill().fillna(0.0)
+        df['macd_signal'] = macd_indicator.macd_signal().bfill().ffill().fillna(0.0)  # 新增
         df['adx'] = df['adx'].bfill().ffill().fillna(25.0)
+        df['plus_di'] = df['plus_di'].bfill().ffill().fillna(25.0)
+        df['minus_di'] = df['minus_di'].bfill().ffill().fillna(25.0)
     except:
-        # 舊版 pandas 語法
         df['rsi'] = df['rsi'].fillna(method='bfill').fillna(method='ffill').fillna(50.0)
         df['macd'] = df['macd'].fillna(method='bfill').fillna(method='ffill').fillna(0.0)
+        df['macd_signal'] = macd_indicator.macd_signal().fillna(method='bfill').fillna(method='ffill').fillna(0.0)  # 新增
         df['adx'] = df['adx'].fillna(method='bfill').fillna(method='ffill').fillna(25.0)
-    
+        df['plus_di'] = df['plus_di'].fillna(method='bfill').fillna(method='ffill').fillna(25.0)
+        df['minus_di'] = df['minus_di'].fillna(method='bfill').fillna(method='ffill').fillna(25.0)
+
     return df
+
 
 def get_safe_start_index(df):
     """計算安全的開始索引，確保技術指標有意義的值"""
