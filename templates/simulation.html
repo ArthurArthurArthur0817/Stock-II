@@ -1,271 +1,459 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>股票模擬交易</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="\static\style.css">
-    <style>
-        /* AI 分析結果區塊 */
-        #ai_result {
-            display: none;
-            background-color: white;
-            padding: 15px;
-            margin-top: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            text-align: left;
-            white-space: pre-line; /* ✅ 確保換行 */
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>股票模擬交易</title>
 
-        /* 分析中 (Loading) 樣式 */
-        #loading {
-            display: none;
-            font-weight: bold;
-            color: blue;
-        }
-    </style>
+  <!-- jQuery & Bootstrap -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- 你原本用的是 BS 5.3.3，保留即可 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- 全站字體：思源宋體（Noto Serif TC）-->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- (可選) 你的外部樣式 -->
+  <link rel="stylesheet" href="\static\style.css">
+
+  <style>
+    /* ===== 1) 主題色票 ===== */
+    :root{
+      --primary:#043b8f;
+      --primary-dark:#02347e;
+      --primary-light:#6499e9;
+      --secondary:#0b1f33;
+      --ink:#0f172a;
+    }
+
+    /* ===== 2) 排版與背景 ===== */
+    html,body{height:100%;}
+    body{
+      display:flex;
+      flex-direction:column;
+      font-family:'Noto Serif TC',serif;
+      line-height:1.6;
+      color:var(--ink);
+      margin:0;
+      background:transparent;
+    }
+    /* 背景動畫 */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:url("https://png.pngtree.com/thumb_back/fh260/background/20231227/pngtree-gentle-blue-background-with-a-soft-textured-finish-image_13898387.png") center/cover no-repeat;
+      filter:grayscale(20%) brightness(0.55);
+      z-index:-2;
+      animation:bgZoom 40s ease-in-out infinite alternate;
+    }
+    @keyframes bgZoom{from{transform:scale(1);}to{transform:scale(1.15);}}
+
+    h1,h2,h3,h4,h5,h6{
+      font-family:'Noto Serif TC',serif;
+      font-weight:700;
+    }
+
+    /* ===== 3) 卡片容器 ===== */
+    .card-wrapper{
+      background:rgba(255,255,255,.94);
+      border-radius:.8rem;
+      box-shadow:0 10px 30px rgba(0,0,0,.05);
+      padding:2rem 2rem 2.5rem;
+      max-width:1100px;     /* 主卡片寬度 */
+      width:100%;
+      margin:3rem auto;
+    }
+
+    .stock-info h1{
+      font-size:1.6rem;
+      color:var(--primary);
+      margin-bottom:.5rem;
+      text-align:center;
+    }
+    .stock-info h3{
+      font-size:1.1rem;
+      margin:.25rem 0;
+      text-align:center;
+    }
+
+    /* ===== 4) 走勢圖區 ===== */
+    .chart-wrapper{
+      margin-top:1.5rem;
+      text-align:center;
+    }
+    #stock_chart{
+      max-width:100%;
+      height:auto;
+      border-radius:.5rem;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      background:#fff;
+    }
+
+    /* ===== 5) 按鈕列（統一藍色主題、去除橘色）===== */
+    .button-container{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:.6rem;
+      margin-top:1rem;
+    }
+    .button-simulation{
+      appearance:none;
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      padding:.6rem 1.25rem;
+      border-radius:2rem;
+      border:1.5px solid var(--primary);
+      background:#fff;
+      color:var(--primary);
+      font-weight:700;
+      transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
+      cursor:pointer;
+      box-shadow:none !important;
+      outline:none !important;
+    }
+    .button-simulation:hover{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 8px 16px rgba(4,59,143,.18);
+      transform:translateY(-1px);
+    }
+    .button-simulation:active,
+    .button-simulation:focus{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+      box-shadow:none !important;
+      outline:none !important;
+    }
+
+    /* ===== 6) Loading & AI 結果卡 ===== */
+    #loading{
+      display:none;
+      text-align:center;
+      margin-top:15px;
+    }
+    #loading p{margin-top:10px; font-weight:bold; color:#004B97;}
+
+    #ai_result{
+      display:none;
+      background-color:#fff;
+      padding:15px;
+      margin-top:20px;
+      border-radius:10px;
+      box-shadow:0 0 10px rgba(0,0,0,0.1);
+      width:100%;
+      max-width:900px;
+      margin-left:auto; margin-right:auto; /* 置中 */
+      text-align:left;
+      white-space:pre-line; /* 保留換行 */
+    }
+
+    /* ===== 7) 左上角 Home 按鈕 ===== */
+    .btn-home{
+      position:fixed;
+      top:20px; left:20px;
+      display:inline-block;
+      text-decoration:none;
+      font-weight:700;
+      padding:.6rem 1.25rem;
+      border-radius:999px;
+      border:1.5px solid var(--primary);
+      background:#fff;
+      color:var(--primary);
+      transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
+      z-index:1000;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-home:hover{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 8px 16px rgba(4,59,143,.18);
+      transform:translateY(-1px);
+    }
+    .btn-home:focus, .btn-home:active{
+      outline:none !important;
+      box-shadow:none !important;
+      border-color:var(--primary) !important;
+      background:var(--primary);
+      color:#fff;
+    }
+
+    /* ===== 8) 下方教學區：讓排版更好看（可保留/調整）===== */
+    .edu-section{
+      background:rgba(255,255,255,.94);
+      border-radius:.8rem;
+      box-shadow:0 10px 30px rgba(0,0,0,.05);
+      padding:1.5rem;
+      max-width:1100px;
+      width:100%;
+      margin:0 auto 3rem auto;
+    }
+    .edu-section h1{
+      font-size:1.5rem;
+      color:var(--primary);
+      text-align:center;
+      margin-bottom:.5rem;
+    }
+    .edu-section h2{
+      font-size:1.25rem;
+      color:var(--primary);
+      margin-top:1rem;
+      margin-bottom:.5rem;
+    }
+    .edu-section table{
+      width:100%;
+      background:#fff;
+      border:1px solid #e6ecf3;
+      border-collapse:collapse;
+    }
+    .edu-section td, .edu-section th{
+      border:1px solid #e6ecf3;
+      padding:.75rem;
+      vertical-align:top;
+    }
+    .edu-section img{
+      max-width:100%;
+      height:auto;
+    }
+  </style>
 </head>
 <body>
-    <div class="content-container">
+  <!-- 左上角：返回主畫面 -->
+  <a href="{{ url_for('main') }}" class="btn-home">Home</a>
+
+  <main class="flex-grow-1">
+    <div class="container">
+      <!-- 主卡片：走勢 & 操作區 -->
+      <div class="card-wrapper">
         <div class="stock-info">
-            <h1>當前顯示的股票：{{ stock_code }}</h1>
-            <h3>當前股價：<span id="latest_price">{{ latest_price }}</span></h3>
-            <h3>帳戶餘額：<span id="balance">{{ balance }}</span></h3>
-            <h3>當前持有股票數：<span id="stock_count">0</span></h3>
+          <h1>當前顯示的股票：{{ stock_code }}</h1>
+          <h3>當前股價：<span id="latest_price">{{ latest_price }}</span></h3>
+          <h3>帳戶餘額：<span id="balance">{{ balance }}</span></h3>
+          <h3>當前持有股票數：<span id="stock_count">0</span></h3>
         </div>
 
         <div class="chart-wrapper">
-            <img id="stock_chart" src="{{ plot_path }}" alt="股票走勢圖">
-
-            <div class="button-container">
-                <button id="next_day_btn" class="button-simulation">下一天</button>
-                <button id="buy_stock_btn" class="button-simulation">買入</button>
-                <button id="sell_stock_btn" class="button-simulation">賣出</button>
-                <button id="close_position_btn" class="button-simulation">平倉</button>
-                <button id="settle_btn" class="button-simulation">結算</button>  
-                <button id="ai_analysis_btn" class="button-simulation" style="display: none;">AI 分析</button>
-            </div>
-        </div>  
-
-        <!-- Loading 區塊 -->
-        <div id="loading" style="display:none; text-align:center; margin-top:15px;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">分析中...</span>
-            </div>
-            <p style="margin-top:10px; font-weight:bold; color:#004B97;">分析中，請稍候...</p>
+          <img id="stock_chart" src="{{ plot_path }}" alt="股票走勢圖">
+          <div class="button-container">
+            <button id="next_day_btn" class="button-simulation">下一天</button>
+            <button id="buy_stock_btn" class="button-simulation">買入</button>
+            <button id="sell_stock_btn" class="button-simulation">賣出</button>
+            <button id="close_position_btn" class="button-simulation">平倉</button>
+            <button id="settle_btn" class="button-simulation">結算</button>
+            <button id="ai_analysis_btn" class="button-simulation" style="display:none;">AI 分析</button>
+          </div>
         </div>
 
-        <!-- AI 分析結果區塊 -->
+        <!-- Loading -->
+        <div id="loading">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">分析中...</span>
+          </div>
+          <p>分析中，請稍候...</p>
+        </div>
+
+        <!-- AI 分析結果 -->
         <div id="ai_result">
-            <p id="analysis_content"></p>
+          <p id="analysis_content"></p>
+        </div>
+      </div>
+
+      <!-- 下方教學（原本內容移到美化後的卡片內） -->
+      <div class="edu-section">
+        <h1>K線組合型態</h1>
+        <hr>
+        <div>
+          <h2>陽線</h2>
+          <table>
+            <tr>
+              <td colspan="2"><h3 class="text-center">大陽線</h3></td>
+              <td colspan="2"><h3 class="text-center">小陽線</h3></td>
+            </tr>
+            <tr>
+              <td style="width:120px;"><div class="text-center"><img src="/static/img/picture/大陽線.png" width="55" height="187"></div></td>
+              <td style="width:40%;">開盤價即為最低價，隨後股價一路上攻，最後收在股價最高點，代表買盤力道強勁。</td>
+              <td style="width:120px;"><div class="text-center"><img src="/static/img/picture/小陽線.png" width="58" height="192"></div></td>
+              <td>股價跌到低點時有買盤支撐，但漲到高點又遇到賣壓……通常是一種反轉訊號。（略）</td>
+            </tr>
+            <tr>
+              <td colspan="2"><h3 class="text-center">光頭陽線</h3></td>
+              <td colspan="2"><h3 class="text-center">光腳陰線</h3></td>
+            </tr>
+            <tr>
+              <td><div class="text-center"><img src="/static/img/picture/螢幕擷取畫面 2025-01-08 191635.png" width="65" height="169"></div></td>
+              <td>開盤後股價一度下跌，但因有買盤支撐，推升股價一路走升，最終收在最高價位……</td>
+              <td><div class="text-center"><img src="/static/img/picture/螢幕擷取畫面 2025-01-08 191723.png" width="61" height="177"></div></td>
+              <td>開盤後股價一度衝至最高點，但在高檔區遭遇賣壓……</td>
+            </tr>
+            <tr>
+              <td colspan="2"><h3 class="text-center">陽線錘子</h3></td>
+              <td colspan="2"><h3 class="text-center">倒線錘子</h3></td>
+            </tr>
+            <tr>
+              <td><div class="text-center"><img src="/static/img/picture/陽錘.png" width="65" height="169"></div></td>
+              <td>股價大跌之後，空方力道減弱……可視為股價底部支撐的訊號。</td>
+              <td><div class="text-center"><img src="/static/img/picture/test.png" width="60" height="175" alt="A sample picture"></div></td>
+              <td>股價大漲之後，多方力道減弱……上影線越長，代表賣壓越大。</td>
+            </tr>
+          </table>
         </div>
 
-    </div>       
+        <br><br>
 
-    <script>
-         // 切換到下一天
-         $("#next_day_btn").click(function() {
-            $.get("/next_day", function(data) {
-                if (!data.error) {
-                    $("#stock_chart").attr("src", data.plot_path + "?t=" + new Date().getTime());
-                    $("#latest_price").text(data.latest_price);
-                }
-            });
-        });
-        
-        $(document).ready(function() {
-            updateStockCount();  // 頁面載入時獲取持股數量
-    
-            function updateStockCount() {
-                $.get("/get_stock_count", function(data) {
-                    if (!data.error) {
-                        $("#stock_count").text(data.stock_count);
-                    }
-                });
-            }
-    
-            $("#buy_stock_btn").click(function() {
-                $.post("/buy_stock", function(data) {
-                    if (data.success) {
-                        alert("買入成功！");
-                        $("#balance").text(data.balance);
-                        $("#stock_count").text(data.stock_count);  
-                    } else {
-                        alert(data.error);
-                    }
-                });
-            });
-    
-            $("#sell_stock_btn").click(function() {
-                $.post("/sell_stock", function(data) {
-                    if (data.success) {
-                        alert("賣出成功！");
-                        $("#balance").text(data.balance);
-                        $("#stock_count").text(data.stock_count);  
-                    } else {
-                        alert(data.error);
-                    }
-                });
-            });
-
-            $("#close_position_btn").click(function() {
-                $.post("/close_position", function(data) {
-                    if (data.success) {
-                        alert("已成功平倉！");
-                        $("#stock_count").text(0); // 平倉後持股一定是 0
-                        $("#balance").text(data.balance); // 更新餘額
-                    } else {
-                        alert(data.error);
-                    }
-                });
-            });
-
-
-            // 結算：按下後才顯示 "AI 分析" 按鈕
-            $("#settle_btn").click(function() {
-                alert("結算完成！");
-                $("#ai_analysis_btn").show();
-            });
-
-            // AI 分析
-            $("#ai_analysis_btn").click(function() {
-                $("#loading").show();  // ✅ 顯示 "分析中..."
-                $("#analysis_content").text("");  // 清空舊內容
-                $("#ai_analysis_btn").hide();  // 隱藏按鈕防止多次點擊
-
-                $.post("/run_ai_analysis", function(data) {
-                    $("#loading").hide();  // ✅ 隱藏 "分析中..."
-                    $("#ai_result").show();
-
-                    if (data.success) {
-                        $("#analysis_content").html(data.analysis_result.replace(/\n/g, "<br>")); // ✅ 換行處理
-                    } else {
-                        $("#analysis_content").text("AI 分析失敗！");
-                    }
-
-                    $("#ai_analysis_btn").show();  // ✅ 讓按鈕可以再次使用
-                });
-            });
-        });
-    </script>
-    
-    <p>
-        <h1>K線組合型態</h1>  
-        <hr>       
-        <br>
         <div>
-            <h2>陽線</h2>
-            <table width="1179" border="1">
+          <h2>陰線</h2>
+          <table>
             <tr>
-                <td colspan="2"><h3 align="center">大陽線</h3></td>
-                <td colspan="2"><h3 align="center">小陽線</h3></td>
+              <td colspan="2"><h3 class="text-center">大陰線</h3></td>
+              <td colspan="2"><h3 class="text-center">小陰線</h3></td>
             </tr>
             <tr>
-                <td width="115"><div align="center"><img src="/static/img/picture/大陽線.png" width="55" height="187"></div></td>
-                <td width="400"> 開盤價即為最低價，隨後股價一路上攻，最後收在股價最高點，代表買盤力道強勁。 </td>
-                <td width="115"><div align="center"><img src="/static/img/picture/小陽線.png" width="58" height="192"></div></td>
-                <td width="400">股價跌到低點時有買盤支撐，但漲到高點又遇到賣壓，最終由多方略勝一籌，推升股價呈現上漲狀態，K 線出現這樣的型態，通常是一種反轉訊號，如果在大漲後出現，表示高檔震盪﹔反之，如果在大跌後出現，可能表示股價已觸底，未來股價有望反彈。 </td>
+              <td style="width:120px;"><div class="text-center"><img src="/static/img/picture/大陰.png" width="55" height="187"></div></td>
+              <td style="width:40%;">開盤價即是最高價，隨後股價一路下滑，最後收在最低點……</td>
+              <td style="width:120px;"><div class="text-center"><img src="/static/img/picture/小陰線.png" width="58" height="192"></div></td>
+              <td>多空勢均力敵程度較高時，常見為弱勢盤整。（略）</td>
             </tr>
             <tr>
-                <td colspan="2"><h3 align="center">光頭陽線</h3></td>
-                <td colspan="2"><h3 align="center">光腳陰線</h3></td>
+              <td colspan="2"><h3 class="text-center">光頭陰線</h3></td>
+              <td colspan="2"><h3 class="text-center">光腳陰線</h3></td>
             </tr>
             <tr>
-                <td><div align="center"><img src="/static/img/picture/螢幕擷取畫面 2025-01-08 191635.png" width="65" height="169"></div></td>
-                <td> 開盤後股價一度下跌，但因有買盤支撐，推升股價一路走升，最終收在最高價位，當下影線越長，代表反彈的力道越大，屬於多頭上漲的訊號。 </td>
-                <td><div align="center"><img src="/static/img/picture/螢幕擷取畫面 2025-01-08 191723.png" width="61" height="177"></div></td>
-                <td> 開盤後股價一度衝至最高點，但在高檔區遭遇賣壓，最終由多方略勝一籌，收盤價仍高於開盤價，當上影線越長，代表賣盤力道較強、拉回程度越大。 </td>
+              <td><div class="text-center"><img src="/static/img/picture/光頭陰線.png" width="65" height="169"></div></td>
+              <td>開盤後一度下跌，最終收盤仍低於開盤價……</td>
+              <td><div class="text-center"><img src="picture/光腳陰線.png" width="61" height="177"></div></td>
+              <td>上檔賣壓沉重，最終拉回至最低價收盤……</td>
             </tr>
             <tr>
-                <td colspan="2"><h3 align="center"> 陽線錘子 </h3></td>
-                <td colspan="2"><h3 align="center">倒線錘子</h3></td>
+              <td colspan="2"><h3 class="text-center">陰線錘子</h3></td>
+              <td colspan="2"><h3 class="text-center">倒錘陰線</h3></td>
             </tr>
             <tr>
-                <td><div align="center"><img src="/static/img/picture/陽錘.png" width="65" height="169"></div></td>
-                <td> 股價大跌之後，空方力道減弱，隨後買盤一路買到最高價作收，如果在長期下跌的情況下，看到這樣的型態，代表買盤已積累一段時間後開始釋放，可以視為股價底部支撐的訊號。</td>
-                <td><div align="center"><img src="/static/img/picture/test.png" width="60" height="175" alt="A sample picture"></div></td>
-                <td> 股價大漲之後，多方力道減弱，隨後股價被賣盤拉回，但最終由多方略勝一籌，收盤價仍高於開盤價，上影線的長度表示拉回的程度，上影線越長，代表賣壓越大。</td>
+              <td><div class="text-center"><img src="picture/陰線槌子.png" width="65" height="169"></div></td>
+              <td>空頭轉向多頭或相反的常見訊號……</td>
+              <td><div class="text-center"><img src="picture/倒陰錘.png" width="60" height="175"></div></td>
+              <td>上影線越長，代表賣壓越沉重……</td>
             </tr>
-            </table>
+          </table>
         </div>
 
-        <br>
-        <br>
+        <br><br>
 
         <div>
-            <h2>陰線</h2>
-            <table width="1179" border="1">
+          <h2>十字線</h2>
+          <table>
             <tr>
-                <td colspan="2"><h3 align="center">大陰線</h3></td>
-                <td colspan="2"><h3 align="center">小陰線</h3></td>
+              <td colspan="2"><h3 class="text-center">十字線</h3></td>
+              <td colspan="2"><h3 class="text-center">T字線</h3></td>
             </tr>
             <tr>
-                <td width="115"><div align="center"><img src="/static/img/picture/大陰.png" width="55" height="187"></div></td>
-                <td width="400"> 開盤價即是最高價，隨後股價一路下滑，最後收在股價最低點，代表賣方力道強勁，下跌幅度越大，如果在長期下跌的情況下，又看到這樣的型態，股價可能會加速暴跌。 </td>
-                <td width="115"><div align="center"><img src="/static/img/picture/小陰線.png" width="58" height="192"></div></td>
-                <td width="400"> 股價跌到低點時有買盤支撐，但漲到高點又遇到賣壓，最終由空方略勝一籌，使得股價呈現下跌狀態，當中間實線長度越短，代表雙方勢均力敵的程度越高。K 線出現這樣的型態，通常代表市場進入弱勢盤整。 </td>
+              <td style="width:120px;"><div class="text-center"><img src="picture/十字線.png" width="55" height="187"></div></td>
+              <td style="width:40%;">多空勢均力敵……高點出現易轉弱，低點出現易反彈。</td>
+              <td style="width:120px;"><div class="text-center"><img src="picture/T字線.png" width="58" height="186"></div></td>
+              <td>下影線越長，反彈力道越強……</td>
             </tr>
             <tr>
-                <td colspan="2"><h3 align="center">光頭陰線</h3></td>
-                <td colspan="2"><h3 align="center">光腳陰線</h3></td>
+              <td colspan="2"><h3 class="text-center">一字線</h3></td>
+              <td colspan="2"><h3 class="text-center">倒T字線</h3></td>
             </tr>
             <tr>
-                <td><div align="center"><img src="/static/img/picture/光頭陰線.png" width="65" height="169"></div></td>
-                <td> 開盤後股價一度下跌，但有買盤支撐，推升股價回升，最終收盤價仍低於開盤價，如果在長期下跌的情況下，出現這樣的型態，可能為股價觸底的訊號。 </td>
-                <td><div align="center"><img src="picture/光腳陰線.png" width="61" height="177"></div></td>
-                <td> 開盤後股價一度衝至最高點，但因上檔賣壓沉重，最終由空方略勝一籌，拉回至最低價收盤。如果是在上漲末升段，K 線出現這樣的型態，通常被視為反轉下跌的訊號，多頭可能會陷入被套牢的窘境。 </td>
+              <td><div class="text-center"><img src="picture/一字線.png" width="54" height="181"></div></td>
+              <td>極端狀態或成交冷清時常見……</td>
+              <td><div class="text-center"><img src="picture/倒T字線.png" width="61" height="177"></div></td>
+              <td>若出現在上漲波段，代表轉弱機率大；上影線越長賣壓越重。</td>
             </tr>
-            <tr>
-                <td colspan="2"><h3 align="center"> 陰線錘子 </h3></td>
-                <td colspan="2"><h3 align="center">倒錘陰線</h3></td>
-            </tr>
-            <tr>
-                <td><div align="center"><img src="picture/陰線槌子.png" width="65" height="169"></div></td>
-                <td> 股價大跌之後，多頭力量慢慢凝聚，隨後買盤一路推升股價走升，最終仍由空方略勝一籌，如果在持續走空後的低檔區，看到這樣的型態，通常視為空頭轉向多頭的訊號﹔反之，出現在高檔區則可能由多轉空。 </td>
-                <td><div align="center"><img src="picture/倒陰錘.png" width="60" height="175"></div></td>
-                <td> 股價大漲之後，空方力量慢慢凝聚，隨後賣盤一路賣到最低價作收，上影線的長度表示拉回的程度，上影線越長，代表賣壓越大。 </td>
-            </tr>
-            </table>
+          </table>
         </div>
-        
-        <br>
-        <br>
-
-        <div>
-            <h2>十字線</h2>
-            <table width="1179" border="1">
-            <tr>
-                <td colspan="2"><h3 align="center">十字線</h3>
-                </td>
-                <td colspan="2"><h3 align="center">T字線</h3></td>
-            </tr>
-            <tr>
-                <td width="115"><div align="center"><img src="picture/十字線.png" width="55" height="187"></div></td>
-                <td width="400"> <p>（開盤價=收盤價） </p>
-                <p>十字線代表多空雙方勢均力敵，開盤價與收盤價一致，當十字線出現在近期波段的高點，則表示多方力量減弱，股價可能會下跌﹔反之，十字線出現在近期波段的低點，則表示空方力量轉弱，股價則有上漲的可能。 </p></td>
-                <td width="115"><div align="center"><img src="picture/T字線.png" width="58" height="186"></div></td>
-                <td width="400"> <p> （開盤價=收盤價=最高價） </p>
-                <p>雖然一開始賣壓較大，造成股價跌深，但隨後因買氣回升，股價一路回升到開盤時的價位，並收在最高點，當下影線越長，代表反彈力道更強勁，屬於多方勝利，如果 T 字線出現在上漲波段，表示股價可能已到頂部，投資人可能要考慮是否要賣出獲利了結。 </p></td>
-            </tr>
-            <tr>
-                <td colspan="2"><h3 align="center">一字線 </h3></td>
-                <td colspan="2"><h3 align="center"> 倒 T 字線 </h3></td>
-            </tr>
-            <tr>
-                <td><div align="center"><img src="picture/一字線.png" width="54" height="181"></div></td>
-                <td> <p> （開盤價=收盤價=最高價=最低價） </p>
-                <p>一字線通常屬於極端狀態，代表投資人非常看好或非常看壞，例如開盤直接跳空漲停直到收盤、開盤跳空跌停一直到收盤，這兩種情況都會呈現一字線，另一種情況，就是非常冷門的股票，一天只在同個價位成交一兩筆，這時也會出現一字線。 </p></td>
-                <td><div align="center"><img src="picture/倒T字線.png" width="61" height="177"></div></td>
-                <td> <p> （開盤價=收盤價=最低價） </p>
-                <p>雖然一開始的買氣很強，推升股價衝到最高點，但隨後因賣壓出現，一路跌至開盤時的價位，並收在最低點，如果倒 T 字線出現在上漲波段，代表股價可能已開始轉弱，當上影線越長、賣壓越沉重。 </p></td>
-            </tr>
-            </table>
+      </div>
     </div>
-    </p>
+  </main>
 
+  <script>
+    // 下一天
+    $("#next_day_btn").click(function() {
+      $.get("/next_day", function(data) {
+        if (!data.error) {
+          $("#stock_chart").attr("src", data.plot_path + "?t=" + new Date().getTime());
+          $("#latest_price").text(data.latest_price);
+        }
+      });
+    });
+
+    $(document).ready(function() {
+      updateStockCount();
+
+      function updateStockCount() {
+        $.get("/get_stock_count", function(data) {
+          if (!data.error) {
+            $("#stock_count").text(data.stock_count);
+          }
+        });
+      }
+
+      $("#buy_stock_btn").click(function() {
+        $.post("/buy_stock", function(data) {
+          if (data.success) {
+            alert("買入成功！");
+            $("#balance").text(data.balance);
+            $("#stock_count").text(data.stock_count);
+          } else {
+            alert(data.error);
+          }
+        });
+      });
+
+      $("#sell_stock_btn").click(function() {
+        $.post("/sell_stock", function(data) {
+          if (data.success) {
+            alert("賣出成功！");
+            $("#balance").text(data.balance);
+            $("#stock_count").text(data.stock_count);
+          } else {
+            alert(data.error);
+          }
+        });
+      });
+
+      $("#close_position_btn").click(function() {
+        $.post("/close_position", function(data) {
+          if (data.success) {
+            alert("已成功平倉！");
+            $("#stock_count").text(0);
+            $("#balance").text(data.balance);
+          } else {
+            alert(data.error);
+          }
+        });
+      });
+
+      // 結算 -> 顯示 AI 分析按鈕
+      $("#settle_btn").click(function() {
+        alert("結算完成！");
+        $("#ai_analysis_btn").show();
+      });
+
+      // AI 分析
+      $("#ai_analysis_btn").click(function() {
+        $("#loading").show();
+        $("#analysis_content").text("");
+        $("#ai_analysis_btn").hide();
+
+        $.post("/run_ai_analysis", function(data) {
+          $("#loading").hide();
+          $("#ai_result").show();
+
+          if (data.success) {
+            $("#analysis_content").html(
+              (data.analysis_result || "").replace(/\n/g, "<br>")
+            );
+          } else {
+            $("#analysis_content").text("AI 分析失敗！");
+          }
+
+          $("#ai_analysis_btn").show();
+        });
+      });
+    });
+  </script>
 </body>
 </html>
