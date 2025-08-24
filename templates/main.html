@@ -341,6 +341,83 @@
   }
 </style>
 
+
+<!-- RWD OVERRIDES -->
+<style data-rwd="v1">
+/* Fluid typography (desktop-first baseline, mobile will downscale) */
+  .tn { font-size: 16px; }
+  .tn h1 { font-size: clamp(1.2rem, 2vw + 0.8rem, 1.9rem); }
+  .tn h5 { font-size: clamp(0.9rem, 1vw + 0.6rem, 1.05rem); }
+  .tn .lead { font-size: clamp(0.98rem, 0.8vw + 0.85rem, 1.1rem); }
+
+  /* Brand title & tagline */
+  .tn .brand-title { font-size: clamp(1.3rem, 3vw + 0.7rem, 1.9rem); }
+  .tn .tagline { font-size: clamp(0.85rem, 1.1vw + 0.55rem, 0.98rem); }
+
+  /* Container breathing room on very small screens */
+  @media (max-width: 400px){
+    .tn .container { padding: 0 12px; }
+  }
+
+  /* Nav: base tightening on small widths */
+  @media (max-width: 720px){
+    .tn .nav { padding: 8px 6px; min-height: 50px; }
+    .tn .nav a, .tn .nav .linklike { padding: .32rem .5rem; min-width: 78px; }
+    .tn .nav a .en, .tn .nav .linklike .en { font-size: .9rem; }
+    .tn .nav a .zh, .tn .nav .linklike .zh { font-size: .76rem; opacity:.9; }
+  }
+
+  /* Further mobile downscale */
+  @media (max-width: 640px){
+    .tn { font-size: 15px; }
+    .tn h1 { font-size: clamp(1.08rem, 2vw + 0.6rem, 1.6rem); }
+    .tn h5 { font-size: clamp(0.85rem, 0.9vw + 0.5rem, 0.98rem); }
+    .tn .lead { font-size: clamp(0.92rem, 0.7vw + 0.78rem, 1.02rem); }
+
+    .tn .brand-title { font-size: clamp(1.15rem, 2.4vw + 0.6rem, 1.6rem); }
+    .tn .tagline { font-size: clamp(0.8rem, 1vw + 0.5rem, 0.92rem); }
+
+    .tn .pad { padding: 15px 12px; }
+    .tn .body, .tn .desc { padding: 12px 12px; }
+    .tn .badge { width:40px; height:40px; }
+    .tn .media { height: clamp(130px, 26vw, 180px); }
+  }
+
+  @media (max-width: 480px){
+    .tn { font-size: 14.5px; }
+    .tn h1 { font-size: clamp(1.02rem, 1.8vw + 0.55rem, 1.45rem); }
+    .tn .lead { font-size: clamp(0.9rem, 0.6vw + 0.75rem, 0.98rem); }
+
+    .tn .nav a, .tn .nav .linklike { padding: .3rem .46rem; min-width: 74px; }
+    .tn .nav a .en, .tn .nav .linklike .en { font-size: .86rem; }
+    .tn .nav a .zh, .tn .nav .linklike .zh { font-size: .72rem; }
+
+    .tn .btn { padding: .5rem .85rem; font-size: .92rem; }
+  }
+
+  @media (max-width: 400px){
+    .tn { font-size: 14px; }
+    .tn h1 { font-size: clamp(0.98rem, 1.6vw + 0.5rem, 1.35rem); }
+    .tn .nav a, .tn .nav .linklike { min-width: 72px; }
+  }
+
+  @media (max-width: 360px){
+    .tn { font-size: 13.5px; }
+    .tn .nav a, .tn .nav .linklike { padding: .28rem .42rem; min-width: 66px; }
+    .tn .nav a .en, .tn .nav .linklike .en { font-size: .82rem; }
+    .tn .nav a .zh, .tn .nav .linklike .zh { font-size: .68rem; }
+    .tn .btn { font-size: .9rem; padding: .46rem .8rem; }
+  }
+
+  /* Avoid overflow for long words/URLs */
+  .tn p, .tn .desc { overflow-wrap: anywhere; }
+
+  /* Maintain card readability on tiny phones */
+  @media (max-width: 360px){
+    .tn .desc { font-size: .92rem; }
+  }
+</style>
+
 </head>
 
 <body class="tn">
