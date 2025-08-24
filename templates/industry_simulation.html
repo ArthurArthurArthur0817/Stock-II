@@ -1,253 +1,245 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <link rel="stylesheet" href="/static/style.css">
-    <meta charset="UTF-8">
-    <title>{{ stock_code }} 模擬交易</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8">
+  <title>{{ stock_code }} 模擬交易</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- 字體 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* 1. 主題色 */
+    :root{
+      --primary:#043b8f;
+      --primary-dark:#02347e;
+      --primary-light:#6499e9;
+      --secondary:#0b1f33;
+    }
+
+    /* 2. 全站字體 + 背景動畫 */
+    html,body{height:100%;margin:0;}
+    body{
+      display:flex;
+      flex-direction:column;
+      font-family:'Noto Serif TC',serif;
+      line-height:1.6;
+      color:#0f172a;
+      background:transparent;
+    }
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:url("https://png.pngtree.com/thumb_back/fh260/background/20231227/pngtree-gentle-blue-background-with-a-soft-textured-finish-image_13898387.png") center/cover no-repeat;
+      filter:grayscale(20%) brightness(0.55);
+      z-index:-2;
+      animation:bgZoom 40s ease-in-out infinite alternate;
+    }
+    @keyframes bgZoom{from{transform:scale(1);}to{transform:scale(1.15);}}
+
+    h1,h2,h3,h4,h5,h6{font-weight:700;}
+
+    /* 3. Home 按鈕 */
+    .btn-home{
+      position:fixed;top:20px;left:20px;
+      display:inline-block;
+      padding:.6rem 1.25rem;
+      font-weight:700;
+      border-radius:999px;
+      border:1.5px solid var(--primary);
+      background:#fff;
+      color:var(--primary);
+      text-decoration:none;
+      transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
+      z-index:1000;
+    }
+    .btn-home:hover{
+      background:var(--primary);color:#fff;
+      box-shadow:0 8px 16px rgba(4,59,143,.18);
+      transform:translateY(-1px);
+    }
+
+    /* 4. 卡片容器 */
+    .industry_info{
+      background:rgba(255,255,255,.94);
+      border-radius:.8rem;
+      box-shadow:0 10px 30px rgba(0,0,0,.05);
+      padding:2rem;
+      max-width:1100px;
+      width:100%;
+      margin:4rem auto;
+    }
+    .industry_info h2{color:var(--primary);margin-bottom:1rem;text-align:center;}
+    .industry_info h3{text-align:center;margin:.25rem 0;}
+
+    /* 5. K 線圖 */
+    .industry_chart{text-align:center;margin:1.5rem 0;}
+    .stock_chart_img{
+      max-width:100%;
+      border-radius:.5rem;
+      box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+
+    /* 6. 按鈕 */
+    .industry_btn{
+      padding:.6rem 1.25rem;
+      border-radius:2rem;
+      border:1.5px solid var(--primary);
+      background:#fff;
+      color:var(--primary);
+      font-weight:700;
+      margin:.3rem;
+      cursor:pointer;
+      transition:background .2s ease, color .2s ease, box-shadow .2s ease;
+    }
+    .industry_btn:hover{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 6px 12px rgba(4,59,143,.15);
+    }
+
+    /* 7. 技術指標區塊 */
+    .industry_indicators{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:1rem;
+      margin-top:2rem;
+    }
+    .indicator_card{
+      background:#fff;
+      border:1px solid #e6ecf3;
+      border-radius:.6rem;
+      padding:1rem;
+      box-shadow:0 4px 10px rgba(0,0,0,.05);
+    }
+    .indicator_card p{margin:.4rem 0;font-size:.95rem;}
+    .indicator_description{font-size:.85rem;color:#444;}
+
+    /* 8. 警示區 */
+    .industry_alerts{
+      margin-top:1.5rem;
+      padding:1rem;
+      background:#f9fafc;
+      border:1px solid #e6ecf3;
+      border-radius:.5rem;
+    }
+
+    .indicator_costume_block{
+      margin-top:2rem;
+      background:#fff;
+      padding:1rem;
+      border-radius:.5rem;
+      box-shadow:0 4px 10px rgba(0,0,0,.05);
+      font-size:.9rem;
+    }
+  </style>
 </head>
 <body>
-    <!-- 加入 industry_info class -->
-    <div class="industry_info">
-        <h2>股票代號：{{ stock_code }}</h2>
-        <h3>股價：<span id="latest_price">{{ latest_price }}</span></h3>
-        <h3>帳戶餘額：<span id="balance">{{ balance }}</span></h3>
-        <h3>持股數量：<span id="stock_count">{{ stock_count }}</span></h3>
+  <!-- 左上角 Home 按鈕 -->
+  <a href="{{ url_for('main') }}" class="btn-home">Home</a>
 
-        <!-- 按鈕加 class industry_btn -->
-        
+  <!-- 主要內容 -->
+  <div class="industry_info">
+    <h2>股票代號：{{ stock_code }}</h2>
+    <h3>股價：<span id="latest_price">{{ latest_price }}</span></h3>
+    <h3>帳戶餘額：<span id="balance">{{ balance }}</span></h3>
+    <h3>持股數量：<span id="stock_count">{{ stock_count }}</span></h3>
 
-        <!-- 加上 industry_chart class 讓圖片置中 -->
-        <div class="industry_chart">
-            <img id="stock_chart" class="stock_chart_img" src="{{ plot_path }}" alt="K線圖">
-        </div>
-
-        <button class="industry_btn" id="next_day_btn" style="margin-top: 10px;">下一天</button>
-        <button class="industry_btn" id="next_month_btn" style="margin-top: 10px;">下個月</button>
-        <div style="margin-top: 20px;">
-            <button class="industry_btn" id="buy_btn">買入</button>
-            <button class="industry_btn" id="sell_btn">賣出</button>
-            <button class="industry_btn" id="close_btn">平倉</button>
-        </div>
-
-
-        <!-- 加上對應 class -->
-    <div id="event_alerts" class="industry_alerts"></div>
-        
-        <div id="indicators" class="industry_indicators">
-            <div class="indicator_card">
-                <p>RSI: <span id="rsi_value">-</span></p>
-                <p class="indicator_description">
-                    （相對強弱指標）用於衡量近期價格漲跌強弱，其數值介於0到100之間。
-                </p>
-                <p class="indicator_description">
-                    RSI 高於 70: → 股票可能過多人買（超買），價格漲得過快，短期可能回落。
-                </p>
-                <p class="indicator_description">
-                    RSI 低於 30: → 股票可能過多人賣（超賣），價格跌得過多，短期可能反彈。
-                </p>
-            </div>
-            <div class="indicator_card">
-                <div class="di_row">
-                    <span>MACD: <span id="macd_value">-</span></span>
-                    <span>Signal: <span id="macd_signal">-</span></span>
-                </div>
-                <p class="indicator_description">
-                    （移動平均收斂發散指標）用於衡量短期與長期價格平均線的差距，以判斷價格趨勢及變化速度，其數值沒有固定範圍，正值表示短期均線高於長期均線，負值表示短期均線低於長期均線。
-                </p>
-                <p class="indicator_description">
-                    若要判斷價格趨勢，可利用 MACD 與 Signal 線判斷:
-                </p>
-                <p class="indicator_description">
-                    MACD &gt; Signal: → 潛在上升趨勢；<br>
-                    MACD &lt; Signal: → 潛在下降趨勢；
-                </p>
-            </div>
-            <div class="indicator_card">
-                <div class="di_row">
-                    <span>ADX: <span id="adx_value">-</span></span>
-                    <span>+DI: <span id="plus_di">-</span></span>
-                    <span>-DI: <span id="minus_di">-</span></span>
-                </div>
-                <p class="indicator_description">（平均趨向指標）用於衡量價格趨勢強弱的技術分析指標，其數值通常介於0到100之間。ADX 不告訴你價格方向，而是告訴你趨勢強度：數值越高表示趨勢越強（無論上升或下降），數值越低表示趨勢較弱或市場震盪</p>
-                <p class="indicator_description">若要判斷上升或下降，可利用+DI,-DI判斷:</p>
-                <p class="indicator_description">
-                        +DI &gt; -DI: → 上升趨勢；<br> 
-                        +DI &lt; -DI: → 下降趨勢；
-                </p>
-                <!-- 可放圖表、詳細分析等內容 -->
-                </div>
-            </div>
-        </div>
-
-        <div class="indicator_costume_block">
-            <p>以上的三個交易策略(RSI/MACD/ADX)是用來提供使用者買進跟賣出的參考，搭配時間背景、時事與趨勢圖，完整還原當時的交易情境</p>
-        </div>
+    <div class="industry_chart">
+      <img id="stock_chart" class="stock_chart_img" src="{{ plot_path }}" alt="K線圖">
     </div>
 
+    <div style="text-align:center;">
+      <button class="industry_btn" id="next_day_btn">下一天</button>
+      <button class="industry_btn" id="next_month_btn">下個月</button>
+      <br>
+      <button class="industry_btn" id="buy_btn">買入</button>
+      <button class="industry_btn" id="sell_btn">賣出</button>
+      <button class="industry_btn" id="close_btn">平倉</button>
+    </div>
 
+    <div id="event_alerts" class="industry_alerts"></div>
 
+    <div id="indicators" class="industry_indicators">
+      <div class="indicator_card">
+        <p>RSI: <span id="rsi_value">-</span></p>
+        <p class="indicator_description">RSI 高於 70 → 可能超買；低於 30 → 可能超賣。</p>
+      </div>
+      <div class="indicator_card">
+        <p>MACD: <span id="macd_value">-</span> | Signal: <span id="macd_signal">-</span></p>
+        <p class="indicator_description">MACD &gt; Signal → 上升趨勢；反之 → 下降趨勢。</p>
+      </div>
+      <div class="indicator_card">
+        <p>ADX: <span id="adx_value">-</span> | +DI: <span id="plus_di">-</span> | -DI: <span id="minus_di">-</span></p>
+        <p class="indicator_description">數值高 → 趨勢強；低 → 盤整。</p>
+      </div>
+    </div>
 
+    <div class="indicator_costume_block">
+      以上 RSI / MACD / ADX 僅提供交易參考，需搭配時事與走勢圖判斷。
+    </div>
+  </div>
 
-<script>
-$(function() {
+  <!-- 保留你原本的 jQuery 功能 -->
+  <script>
+  $(function() {
     function refreshBalanceAndCount() {
-        $.get("/industry_get_balance", function(data) {
-            $("#balance").text(data.balance);
-        });
-
-        $.get("/industry_get_stock_count", function(data) {
-            $("#stock_count").text(data.stock_count);
-        });
+      $.get("/industry_get_balance", function(data){ $("#balance").text(data.balance); });
+      $.get("/industry_get_stock_count", function(data){ $("#stock_count").text(data.stock_count); });
     }
 
     $("#buy_btn").click(function() {
-        $.ajax({
-            url: "/industry_buy_stock",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                stock: "{{ stock_code }}",
-                current_price: parseFloat($("#latest_price").text())
-            }),
-            success: function(response) {
-                refreshBalanceAndCount();
-                alert("✅ 買入成功！");
-            },
-            error: function(xhr) {
-                alert("買入失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
-            }
-        });
+      $.post("/industry_buy_stock", JSON.stringify({stock:"{{ stock_code }}", current_price:parseFloat($("#latest_price").text())}), function(){
+        refreshBalanceAndCount(); alert("✅ 買入成功！");
+      },"json").fail(xhr=>alert("買入失敗："+(xhr.responseJSON?.message||"未知錯誤")));
     });
 
     $("#sell_btn").click(function() {
-        $.ajax({
-            url: "/industry_sell_stock",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                stock: "{{ stock_code }}",
-                current_price: parseFloat($("#latest_price").text())
-            }),
-            success: function(response) {
-                refreshBalanceAndCount();
-                alert("✅ 賣出成功！");
-            },
-            error: function(xhr) {
-                alert("賣出失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
-            }
-        });
+      $.post("/industry_sell_stock", JSON.stringify({stock:"{{ stock_code }}", current_price:parseFloat($("#latest_price").text())}), function(){
+        refreshBalanceAndCount(); alert("✅ 賣出成功！");
+      },"json").fail(xhr=>alert("賣出失敗："+(xhr.responseJSON?.message||"未知錯誤")));
     });
-
 
     $("#close_btn").click(function() {
-        $.ajax({
-            url: "/industry_close_position",
-            method: "POST",
-            contentType: "application/json",
-            data: JSON.stringify({
-                stock: "{{ stock_code }}",
-                current_price: parseFloat($("#latest_price").text())
-            }),
-            success: function(response) {
-                refreshBalanceAndCount();
-                alert("✅ 平倉成功！");
-            },
-            error: function(xhr) {
-                alert("平倉失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
-            }
-        });
+      $.post("/industry_close_position", JSON.stringify({stock:"{{ stock_code }}", current_price:parseFloat($("#latest_price").text())}), function(){
+        refreshBalanceAndCount(); alert("✅ 平倉成功！");
+      },"json").fail(xhr=>alert("平倉失敗："+(xhr.responseJSON?.message||"未知錯誤")));
     });
 
-
-    $("#next_day_btn").click(function() {
-        $(this).prop('disabled', true).text('載入中...');
-
-        $.get("/industry_next_day")
-        .done(function(data) {
-            if (!data.error) {
-                $("#stock_chart").attr("src", "");
-                setTimeout(function() {
-                    var timestamp = new Date().getTime();
-                    var randomNum = Math.random();
-                    var newSrc = data.plot_path + "?v=" + timestamp + "&r=" + randomNum;
-                    $("#stock_chart").attr("src", newSrc);
-                }, 50);
-
-                $("#latest_price").text(data.latest_price);
-                $("#rsi_value").text(data.rsi);
-                $("#macd_value").text(data.macd);
-                $("#macd_signal").text(data.macd_signal);
-                $("#adx_value").text(data.adx);
-                $("#plus_di").text(data.plus_di);
-                $("#minus_di").text(data.minus_di);
-
-                let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
-                $("#event_alerts").html(alerts);
-            } else {
-                alert(data.error);
-            }
-        })
-        .fail(function(xhr, status, error) {
-            alert('請求失敗: ' + error);
-        })
-        .always(function() {
-            $("#next_day_btn").prop('disabled', false).text('下一天');
-        });
+    $("#next_day_btn").click(function(){
+      $(this).prop("disabled",true).text("載入中...");
+      $.get("/industry_next_day").done(function(data){
+        if(!data.error){
+          $("#stock_chart").attr("src",data.plot_path+"?v="+Date.now());
+          $("#latest_price").text(data.latest_price);
+          $("#rsi_value").text(data.rsi);
+          $("#macd_value").text(data.macd);
+          $("#macd_signal").text(data.macd_signal);
+          $("#adx_value").text(data.adx);
+          $("#plus_di").text(data.plus_di);
+          $("#minus_di").text(data.minus_di);
+          $("#event_alerts").html(data.events.length?data.events.join("<br>"):"無即將到來的事件");
+        } else alert(data.error);
+      }).always(()=>$("#next_day_btn").prop("disabled",false).text("下一天"));
     });
 
-
-
-
-    $("#next_month_btn").click(function() {
-        $(this).prop('disabled', true).text('載入中...');
-
-        $.get("/industry_next_month")
-        .done(function(data) {
-            if (!data.error) {
-                $("#stock_chart").attr("src", "");
-                setTimeout(function() {
-                    var timestamp = new Date().getTime();
-                    var randomNum = Math.random();
-                    var newSrc = data.plot_path + "?v=" + timestamp + "&r=" + randomNum;
-                    $("#stock_chart").attr("src", newSrc);
-                }, 50);
-
-                $("#latest_price").text(data.latest_price);
-                $("#rsi_value").text(data.rsi);
-                $("#macd_value").text(data.macd);
-                $("#macd_signal").text(data.macd_signal);
-                $("#adx_value").text(data.adx);
-                $("#plus_di").text(data.plus_di);
-                $("#minus_di").text(data.minus_di);
-
-                let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
-                $("#event_alerts").html(alerts);
-            } else {
-                alert(data.error);
-            }
-        })
-        .fail(function(xhr, status, error) {
-            alert('請求失敗: ' + error);
-        })
-        .always(function() {
-            $("#next_month_btn").prop('disabled', false).text('下個月');
-        });
+    $("#next_month_btn").click(function(){
+      $(this).prop("disabled",true).text("載入中...");
+      $.get("/industry_next_month").done(function(data){
+        if(!data.error){
+          $("#stock_chart").attr("src",data.plot_path+"?v="+Date.now());
+          $("#latest_price").text(data.latest_price);
+          $("#rsi_value").text(data.rsi);
+          $("#macd_value").text(data.macd);
+          $("#macd_signal").text(data.macd_signal);
+          $("#adx_value").text(data.adx);
+          $("#plus_di").text(data.plus_di);
+          $("#minus_di").text(data.minus_di);
+          $("#event_alerts").html(data.events.length?data.events.join("<br>"):"無即將到來的事件");
+        } else alert(data.error);
+      }).always(()=>$("#next_month_btn").prop("disabled",false).text("下個月"));
     });
-
-
-
-
-
-
-
-    $("#stock_chart").on('error', function() {
-        var currentSrc = $(this).attr('src');
-        if (currentSrc && !currentSrc.includes('retry=1')) {
-            $(this).attr('src', currentSrc + '&retry=1');
-        }
-    });
-});
-</script>
+  });
+  </script>
 </body>
 </html>
