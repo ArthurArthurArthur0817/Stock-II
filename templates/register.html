@@ -84,6 +84,21 @@
       margin-bottom: 1.8rem;
     }
 
+    small.form-text {
+      display: block;
+      margin-top: .3rem;
+      color: #6c757d;
+      font-size: 0.85rem;
+    }
+
+    /* 錯誤提示 */
+    .error-message {
+      color: #c42030;
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+      display: none;
+    }
+
     /* 主要按鈕 */
     .btn {
       background-color: var(--primary);
@@ -103,7 +118,7 @@
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
     }
 
-    /* 次要按鈕：輪廓風格 */
+    /* 次要按鈕 */
     .btn-outline-primary {
       color: var(--primary);
       border-color: var(--primary);
@@ -131,15 +146,19 @@
   <div class="login-container">
     <h2>REGISTER</h2>
 
-    <form method="POST">
+    <form method="POST" onsubmit="return validateForm()">
       <div class="form-group">
         <label for="username"><i class="fas fa-user mr-1"></i>Username</label>
         <input type="text" name="username" id="username" class="form-control" required />
+        <small class="form-text">接受輸入英文或數字（或混合）</small>
+        <div class="error-message" id="username-error">❌ 帳號格式錯誤，請輸入英文或數字組成的帳號</div>
       </div>
 
       <div class="form-group">
         <label for="password"><i class="fas fa-lock mr-1"></i>Password</label>
         <input type="password" name="password" id="password" class="form-control" required />
+        <small class="form-text">密碼只接受輸入數字</small>
+        <div class="error-message" id="password-error">❌ 密碼格式錯誤</div>
       </div>
 
       <button type="submit" class="btn btn-primary btn-block">Register</button>
@@ -154,5 +173,44 @@
   <!-- jQuery & Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const usernameError = document.getElementById("username-error");
+    const passwordError = document.getElementById("password-error");
+
+    function validateUsername() {
+      const regex = /^[A-Za-z0-9]{1,}$/; // 英文或數字，至少3位
+      if (!regex.test(usernameInput.value)) {
+        usernameError.style.display = "block";
+        return false;
+      } else {
+        usernameError.style.display = "none";
+        return true;
+      }
+    }
+
+    function validatePassword() {
+      const regex = /^[0-9]{1,}$/; // 只能數字，至少4位
+      if (!regex.test(passwordInput.value)) {
+        passwordError.style.display = "block";
+        return false;
+      } else {
+        passwordError.style.display = "none";
+        return true;
+      }
+    }
+
+    function validateForm() {
+      const validUser = validateUsername();
+      const validPass = validatePassword();
+      return validUser && validPass;
+    }
+
+    // 即時檢查
+    usernameInput.addEventListener("input", validateUsername);
+    passwordInput.addEventListener("input", validatePassword);
+  </script>
 </body>
 </html>
