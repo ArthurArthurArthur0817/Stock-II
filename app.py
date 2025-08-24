@@ -683,7 +683,7 @@ def get_latest_price():
 @app.route('/next_day')
 def next_day():
     session['start_index'] += 1
-    plot_path = industry_plot_stock_data(session['stock_code'], session['start_index'])
+    plot_path = plot_stock_data(session['stock_code'], session['start_index'])
 
     if not plot_path:
         return jsonify({'error': '已超出資料範圍'})
