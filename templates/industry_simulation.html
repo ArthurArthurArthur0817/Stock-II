@@ -113,7 +113,7 @@
       box-shadow:0 4px 10px rgba(0,0,0,.05);
     }
     .indicator_card p{margin:.4rem 0;font-size:.95rem;}
-    .indicator_description{font-size:.85rem;color:#444;}
+    .indicator_description{font-size:.85rem;color:#080c73;}
 
     /* 8. 警示區 */
     .industry_alerts{
@@ -163,83 +163,205 @@
     <div id="indicators" class="industry_indicators">
       <div class="indicator_card">
         <p>RSI: <span id="rsi_value">-</span></p>
-        <p class="indicator_description">RSI 高於 70 → 可能超買；低於 30 → 可能超賣。</p>
+          <p class="indicator_description">
+              相對強弱指標）用於衡量近期價格漲跌強弱，其數值介於0到100之間。
+          </p>
+          <p class="indicator_description">
+              RSI &gt; 70: → 股票可能過多人買（超買），價格漲得過快，短期可能回落。
+          </p>
+           <p class="indicator_description">
+              RSI &lt; 30: → 股票可能過多人賣（超賣），價格跌得過多，短期可能反彈。
+          </p>      
       </div>
       <div class="indicator_card">
         <p>MACD: <span id="macd_value">-</span> | Signal: <span id="macd_signal">-</span></p>
-        <p class="indicator_description">MACD &gt; Signal → 上升趨勢；反之 → 下降趨勢。</p>
+        <p class="indicator_description">
+          移動平均收斂發散指標）用於衡量短期與長期價格平均線的差距，以判斷價格趨勢及變化速度，其數值沒有固定範圍，正值表示短期均線高於長期均線，負值表示短期均線低於長期均線。
+        </p>
+        <p class="indicator_description">
+          若要判斷價格趨勢，可利用 MACD 與 Signal 線判斷:
+        </p>
+        <p class="indicator_description">
+          MACD &gt; Signal: → 潛在上升趨勢；<br>
+          MACD &lt; Signal: → 潛在下降趨勢；
+        </p>
       </div>
       <div class="indicator_card">
         <p>ADX: <span id="adx_value">-</span> | +DI: <span id="plus_di">-</span> | -DI: <span id="minus_di">-</span></p>
-        <p class="indicator_description">數值高 → 趨勢強；低 → 盤整。</p>
+        <p class="indicator_description">（平均趨向指標）用於衡量價格趨勢強弱的技術分析指標，其數值通常介於0到100之間。ADX 不告訴你價格方向，而是告訴你趨勢強度：數值越高表示趨勢越強（無論上升或下降），數值越低表示趨勢較弱或市場震盪</p>
+        <p class="indicator_description">若要判斷上升或下降，可利用+DI,-DI判斷:</p>
+        <p class="indicator_description">
+          +DI &gt; -DI: → 上升趨勢；<br> 
+          +DI &lt; -DI: → 下降趨勢；
+        </p>
       </div>
     </div>
 
     <div class="indicator_costume_block">
-      以上 RSI / MACD / ADX 僅提供交易參考，需搭配時事與走勢圖判斷。
+      以上的三個交易策略(RSI/MACD/ADX)是用來提供使用者買進跟賣出的參考，搭配時間背景、時事與趨勢圖，完整還原當時的交易情境</p>
     </div>
   </div>
 
   <!-- 保留你原本的 jQuery 功能 -->
   <script>
-  $(function() {
+$(function() {
     function refreshBalanceAndCount() {
-      $.get("/industry_get_balance", function(data){ $("#balance").text(data.balance); });
-      $.get("/industry_get_stock_count", function(data){ $("#stock_count").text(data.stock_count); });
+        $.get("/industry_get_balance", function(data) {
+            $("#balance").text(data.balance);
+        });
+
+        $.get("/industry_get_stock_count", function(data) {
+            $("#stock_count").text(data.stock_count);
+        });
     }
 
     $("#buy_btn").click(function() {
-      $.post("/industry_buy_stock", JSON.stringify({stock:"{{ stock_code }}", current_price:parseFloat($("#latest_price").text())}), function(){
-        refreshBalanceAndCount(); alert("✅ 買入成功！");
-      },"json").fail(xhr=>alert("買入失敗："+(xhr.responseJSON?.message||"未知錯誤")));
+        $.ajax({
+            url: "/industry_buy_stock",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                stock: "{{ stock_code }}",
+                current_price: parseFloat($("#latest_price").text())
+            }),
+            success: function(response) {
+                refreshBalanceAndCount();
+                alert("✅ 買入成功！");
+            },
+            error: function(xhr) {
+                alert("買入失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
+            }
+        });
     });
 
     $("#sell_btn").click(function() {
-      $.post("/industry_sell_stock", JSON.stringify({stock:"{{ stock_code }}", current_price:parseFloat($("#latest_price").text())}), function(){
-        refreshBalanceAndCount(); alert("✅ 賣出成功！");
-      },"json").fail(xhr=>alert("賣出失敗："+(xhr.responseJSON?.message||"未知錯誤")));
+        $.ajax({
+            url: "/industry_sell_stock",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                stock: "{{ stock_code }}",
+                current_price: parseFloat($("#latest_price").text())
+            }),
+            success: function(response) {
+                refreshBalanceAndCount();
+                alert("✅ 賣出成功！");
+            },
+            error: function(xhr) {
+                alert("賣出失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
+            }
+        });
     });
+
 
     $("#close_btn").click(function() {
-      $.post("/industry_close_position", JSON.stringify({stock:"{{ stock_code }}", current_price:parseFloat($("#latest_price").text())}), function(){
-        refreshBalanceAndCount(); alert("✅ 平倉成功！");
-      },"json").fail(xhr=>alert("平倉失敗："+(xhr.responseJSON?.message||"未知錯誤")));
+        $.ajax({
+            url: "/industry_close_position",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                stock: "{{ stock_code }}",
+                current_price: parseFloat($("#latest_price").text())
+            }),
+            success: function(response) {
+                refreshBalanceAndCount();
+                alert("✅ 平倉成功！");
+            },
+            error: function(xhr) {
+                alert("平倉失敗：" + (xhr.responseJSON?.message || "未知錯誤"));
+            }
+        });
     });
 
-    $("#next_day_btn").click(function(){
-      $(this).prop("disabled",true).text("載入中...");
-      $.get("/industry_next_day").done(function(data){
-        if(!data.error){
-          $("#stock_chart").attr("src",data.plot_path+"?v="+Date.now());
-          $("#latest_price").text(data.latest_price);
-          $("#rsi_value").text(data.rsi);
-          $("#macd_value").text(data.macd);
-          $("#macd_signal").text(data.macd_signal);
-          $("#adx_value").text(data.adx);
-          $("#plus_di").text(data.plus_di);
-          $("#minus_di").text(data.minus_di);
-          $("#event_alerts").html(data.events.length?data.events.join("<br>"):"無即將到來的事件");
-        } else alert(data.error);
-      }).always(()=>$("#next_day_btn").prop("disabled",false).text("下一天"));
+
+    $("#next_day_btn").click(function() {
+        $(this).prop('disabled', true).text('載入中...');
+
+        $.get("/industry_next_day")
+        .done(function(data) {
+            if (!data.error) {
+                $("#stock_chart").attr("src", "");
+                setTimeout(function() {
+                    var timestamp = new Date().getTime();
+                    var randomNum = Math.random();
+                    var newSrc = data.plot_path + "?v=" + timestamp + "&r=" + randomNum;
+                    $("#stock_chart").attr("src", newSrc);
+                }, 50);
+
+                $("#latest_price").text(data.latest_price);
+                $("#rsi_value").text(data.rsi);
+                $("#macd_value").text(data.macd);
+                $("#macd_signal").text(data.macd_signal);
+                $("#adx_value").text(data.adx);
+                $("#plus_di").text(data.plus_di);
+                $("#minus_di").text(data.minus_di);
+
+                let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
+                $("#event_alerts").html(alerts);
+            } else {
+                alert(data.error);
+            }
+        })
+        .fail(function(xhr, status, error) {
+            alert('請求失敗: ' + error);
+        })
+        .always(function() {
+            $("#next_day_btn").prop('disabled', false).text('下一天');
+        });
     });
 
-    $("#next_month_btn").click(function(){
-      $(this).prop("disabled",true).text("載入中...");
-      $.get("/industry_next_month").done(function(data){
-        if(!data.error){
-          $("#stock_chart").attr("src",data.plot_path+"?v="+Date.now());
-          $("#latest_price").text(data.latest_price);
-          $("#rsi_value").text(data.rsi);
-          $("#macd_value").text(data.macd);
-          $("#macd_signal").text(data.macd_signal);
-          $("#adx_value").text(data.adx);
-          $("#plus_di").text(data.plus_di);
-          $("#minus_di").text(data.minus_di);
-          $("#event_alerts").html(data.events.length?data.events.join("<br>"):"無即將到來的事件");
-        } else alert(data.error);
-      }).always(()=>$("#next_month_btn").prop("disabled",false).text("下個月"));
+
+
+
+    $("#next_month_btn").click(function() {
+        $(this).prop('disabled', true).text('載入中...');
+
+        $.get("/industry_next_month")
+        .done(function(data) {
+            if (!data.error) {
+                $("#stock_chart").attr("src", "");
+                setTimeout(function() {
+                    var timestamp = new Date().getTime();
+                    var randomNum = Math.random();
+                    var newSrc = data.plot_path + "?v=" + timestamp + "&r=" + randomNum;
+                    $("#stock_chart").attr("src", newSrc);
+                }, 50);
+
+                $("#latest_price").text(data.latest_price);
+                $("#rsi_value").text(data.rsi);
+                $("#macd_value").text(data.macd);
+                $("#macd_signal").text(data.macd_signal);
+                $("#adx_value").text(data.adx);
+                $("#plus_di").text(data.plus_di);
+                $("#minus_di").text(data.minus_di);
+
+                let alerts = data.events.length ? data.events.join("<br>") : "無即將到來的事件";
+                $("#event_alerts").html(alerts);
+            } else {
+                alert(data.error);
+            }
+        })
+        .fail(function(xhr, status, error) {
+            alert('請求失敗: ' + error);
+        })
+        .always(function() {
+            $("#next_month_btn").prop('disabled', false).text('下個月');
+        });
     });
-  });
-  </script>
+
+
+
+
+
+
+
+    $("#stock_chart").on('error', function() {
+        var currentSrc = $(this).attr('src');
+        if (currentSrc && !currentSrc.includes('retry=1')) {
+            $(this).attr('src', currentSrc + '&retry=1');
+        }
+    });
+});
+</script>
 </body>
 </html>
