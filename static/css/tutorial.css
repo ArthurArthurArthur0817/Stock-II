@@ -1,0 +1,27 @@
+/* === Image Tutorial Overlay (v1.1) === */
+.imgtut{position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex;
+  align-items:center; justify-content:center; z-index:13000;}
+.imgtut.hidden{display:none}
+/* 放大一點 */
+.imgtut__frame{position:relative; max-width: 980px; width:94%;}
+.imgtut__img{width:100%; height:auto; display:block; border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35)}
+/* 導覽在圖片之外：置於圖片下方，靠右 */
+.imgtut__nav{position:absolute; right:12px; bottom:12px; display:flex; gap:10px; align-items:center}
+/* 無外框按鈕：透明背景、無邊框；保留 focus-visible */
+.imgtut__btn{border:0; background:transparent; color:#fff; font-weight:700;
+  padding:8px 10px; cursor:pointer; border-radius:10px}
+.imgtut__btn:hover{opacity:.9}
+.imgtut__btn:focus{outline:none}
+.imgtut__btn:focus-visible{box-shadow:0 0 0 3px rgba(255,255,255,.45);}
+/* 文字/圖示大小 */
+.imgtut__btn--prev, .imgtut__btn--next{font-size:22px; line-height:1}
+.imgtut__btn--done{display:none; font-size:14px; padding:10px 14px;
+  background:#111; border:0; border-radius:999px; box-shadow:0 6px 16px rgba(0,0,0,.2)}
+/* 計數在右上角 */
+.imgtut__counter{position:absolute; top:12px; right:16px; background:rgba(255,255,255,.9);
+  color:#111; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700}
+@media (prefers-reduced-motion: reduce){
+  .imgtut, .imgtut *{animation:none !important; transition:none !important}
+}
+.imgtut__btn--prev, .imgtut__btn--next{ text-shadow:0 1px 2px rgba(0,0,0,.6); }

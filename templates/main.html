@@ -66,7 +66,7 @@
 
     /* Nav */
     .tn nav{ border-top:1px solid rgba(0,0,0,.06); }
-    .tn .nav-wrap{ overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+    
     .tn .nav{ display:flex; justify-content: center; gap:6px; align-items:stretch; padding:10px 10px; min-height:56px; }
     .tn .nav a{
       display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -170,7 +170,177 @@
     @media (prefers-reduced-motion: reduce){
       .tn .brand, .tn .brand-title, .tn .tagline, .tn .nav a, .tn header{ transition:none; }
     }
-  </style>
+  
+/* --- Nav overflow controls & tutorial entry --- */
+
+.tn .nav.container{
+  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
+}
+.tn .nav.container::-webkit-scrollbar{ display:none; } /* hide scrollbar */
+
+.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
+.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
+
+
+/* Tutorial link styled like other nav items (inherit your existing nav link styles) */
+.tn .nav .nav-tutorial{ display:inline-flex; align-items:center; padding:8px 12px; border-radius:8px; }
+
+
+/* --- Nav overflow controls & tutorial entry (fixed) --- */
+
+.tn .nav.container{
+  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
+  padding: 0 56px; /* 留出左右箭頭空間，避免覆蓋最後/最前項 */
+  display:flex; align-items:center; gap:8px;
+}
+.tn .nav.container::-webkit-scrollbar{ display:none; } /* hide scrollbar */
+
+
+
+.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
+.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
+/* Tutorial link styled like other nav items */
+.tn .nav .nav-tutorial{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:8px; }
+.tn .nav .nav-tutorial .label{ font-size:inherit; line-height:1; }
+.tn .nav .nav-tutorial .q-badge{
+  width:1.25rem; height:1.25rem; border-radius:999px; display:inline-flex;
+  align-items:center; justify-content:center; font-weight:800; line-height:1; font-size:.9rem;
+  background:rgba(0,0,0,.06); color:var(--ink, #111);
+}
+
+
+/* --- Nav: flex arrows + inside tutorial link (zh-only) --- */
+
+.tn .nav.container{
+  flex:1 1 auto; overflow-x:auto; white-space:nowrap;
+  scrollbar-width:none; -ms-overflow-style:none;
+  display:flex; align-items:center; gap:8px;
+}
+.tn .nav.container::-webkit-scrollbar{ display:none; } /* hide scrollbar */
+/* Arrows as normal buttons (not overlay) to avoid clipping */
+
+.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
+.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
+/* Tutorial link: keep same typography as other nav items */
+.tn .nav .nav-tutorial{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:8px; text-decoration:none; color:inherit; }
+.tn .nav .nav-tutorial .label{ font-size:inherit; line-height:1; }
+.tn .nav .nav-tutorial .q-badge{
+  width:1.1rem; height:1.1rem; border-radius:999px; display:inline-flex;
+  align-items:center; justify-content:center; font-weight:800; line-height:1; font-size:.85rem;
+  background:rgba(0,0,0,.06); color:var(--ink, #111);
+}
+
+
+/* === Nav safety fixes: keep first item visible; consistent layout === */
+.tn nav, 
+.tn .nav.container{
+  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
+  display:flex; align-items:center; gap:8px;
+}
+.tn .nav.container::-webkit-scrollbar{ display:none; }
+
+/* Keep the very first nav item (Home) always visible even when scrolled */
+
+
+/* Avoid hover vertical shifts that can cause clipping in tight containers */
+.tn .nav a:hover{ transform:none !important; }
+
+
+/* === Responsive horizontal nav with arrows (no sticky) === */
+.tn nav, .tn .nav-wrap{ overflow: visible; }
+.tn .nav-wrap{ display:flex; align-items:center; gap:8px; }
+.tn .nav.container{
+  flex:1 1 auto; display:flex; align-items:center; gap:8px;
+  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
+}
+.tn .nav.container::-webkit-scrollbar{ display:none; }
+.tn .nav-arrow{
+  flex:0 0 auto;
+  width:32px; height:32px; border:0; border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.08); color:var(--ink, #111); line-height:1; font-size:18px;
+}
+.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
+.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
+/* Ensure nav items aren't vertically shifted on hover to avoid clipping at small widths */
+.tn .nav a:hover{ transform:none; }
+
+</style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
+
+<!-- NAV FIX: begin -->
+<style data-navfix="v1">
+/* ====== Nav：單一權威定義，避免互相覆蓋 ====== */
+.tn .nav-wrap{
+  display:flex; align-items:center; gap:8px; overflow:hidden;
+}
+
+/* 讓導覽列保持單行、可水平捲動；加入安全邊界，避免第一個按鈕貼邊被裁切 */
+.tn .nav.container{
+  flex:1 1 auto;
+  display:flex; align-items:center; gap:8px;
+  justify-content:flex-start !important;
+  overflow-x:auto; white-space:nowrap;
+  scrollbar-width:none; -ms-overflow-style:none;
+  scroll-behavior:smooth;
+
+  /* 左右內距：既保留你原本 .container 的 16px，也涵蓋瀏海/安全區域 */
+  padding-left: max(16px, env(safe-area-inset-left)) !important;
+  padding-right: max(16px, env(safe-area-inset-right)) !important;
+
+  /* （可選）滑動對齊，讓每個按鈕停在容器左緣，比較「順眼」 */
+  scroll-snap-type: x proximity;
+  /* 讓 scroll-snap 計算時也考慮左邊的內距，避免視覺上「被吃掉」 */
+  scroll-padding-left: max(16px, env(safe-area-inset-left));
+}
+.tn .nav.container::-webkit-scrollbar{ display:none; }
+
+/* 在最左邊塞一個不可見的「空白墊片」，確保捲到最左時不會貼邊 */
+.tn .nav.container::before{
+  content:""; display:block; flex:0 0 8px;
+}
+
+/* Nav 項目不縮小、維持最小寬度，並與 scroll-snap 對齊 */
+.tn .nav a,
+.tn .nav .linklike,
+.tn .nav .nav-tutorial{
+  flex:0 0 auto;
+  min-width:92px;
+  scroll-snap-align:start;
+}
+
+/* 避免 hover 的位移在窄寬下造成「被吃進去」的錯覺（維持顏色變化即可） */
+.tn .nav a:hover,
+.tn .nav .linklike:hover{
+  transform:none;  /* ← 取消 translateY(-1px) 以免邊界抖動 */
+}
+
+/* 箭頭按鈕存在於排版流程中，不覆蓋 nav 內容（就不會壓到第一顆） */
+.tn .nav-arrow{
+  flex:0 0 auto;
+  width:32px; height:32px; border:0; border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.08); color:var(--ink, #111); line-height:1; font-size:18px;
+}
+.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
+.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
+</style>
+<!-- NAV FIX: end -->
+
+
+<!-- FEATURES INTRO STICKY FIX -->
+<style data-features-intro-fix="v1">
+  /* 讓「為新手打造，結合 AI 的投資學習平台」區塊回到一般流佈局，不再 sticky */
+  #features-intro{
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    backdrop-filter: none !important;
+    background: var(--surface, #fff) !important;
+    box-shadow: none !important;
+  }
+</style>
+
 </head>
 
 <body class="tn">
@@ -184,7 +354,12 @@
 
     <nav>
       <div class="nav-wrap">
-        <div class="nav container">
+          
+          
+        
+          
+          <button type="button" class="nav-arrow left" aria-label="向左">‹</button>
+          <div class="nav container">
           <a href="{{ url_for('main') }}" class="active"><span class="en">Home</span><span class="zh">首頁</span></a>
           <a href="{{ url_for('account') }}"><span class="en">Account</span><span class="zh">AI帳戶分析師</span></a>
           <a href="{{ url_for('question_ask_api') }}"><span class="en">AI</span><span class="zh">AI問答</span></a>
@@ -195,6 +370,7 @@
           <a href="{{ url_for('trading_history_rank') }}"><span class="en">Rank</span><span class="zh">排行榜</span></a>
           <a href="{{ url_for('simulation') }}"><span class="en">Simulation</span><span class="zh">股票模擬交易</span></a>
           <a href="{{ url_for('industry_select_stock') }}"><span class="en">Industry</span><span class="zh">市場情勢模擬</span></a>
+          <a href="#" class="nav-tutorial" id="navTutorialLink"> <span class="q-badge">?</span> <span class="zh">網站功能介紹</span></a>
 
           {# ---- 登入 / 登出：伺服端判斷 ---- #}
           {% if session.get('user_id') %}
@@ -211,8 +387,12 @@
           </a>
         {% endif %}
         </div>
+          <button type="button" class="nav-arrow right" aria-label="向右">›</button>
+          
+          
       </div>
     </nav>
+          
   </header>
 
   <main>
@@ -240,7 +420,7 @@
     <!-- Services -->
     <section class="section">
       <div class="container">
-        <header class="pad card" style="margin-bottom:18px;">
+        <header id="features-intro" class="pad card" style="margin-bottom:18px;">
           <h5 style="color:var(--primary);margin-bottom:6px;">網站功能介紹</h5>
           <h1>為新手打造，結合 AI 的投資學習平台</h1>
         </header>
@@ -333,5 +513,164 @@
       onScroll();
     })();
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  
+  
+  <script>
+    // Initialize home tutorial (2 images), first-login auto show
+    const tutHome = initImageTutorial({
+      pageKey: 'home',
+      version: 'img-v1',
+      images: [
+        "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
+        "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
+      ],
+      autoShow: {{ session.pop('show_home_tut', False)|tojson }},
+      enableEsc: true
+    });
+
+    // Tutorial nav item: reopen tutorial
+    (function(){
+      const link = document.getElementById('navTutorialLink');
+      if(!link) return;
+      link.addEventListener('click', (e)=>{ e.preventDefault(); try{ tutHome.clear(); tutHome.show(); }catch(err){} });
+    })();
+
+    // Arrow scroll behavior
+    (function(){
+      const scroller = document.querySelector('.tn .nav.container');
+      const leftBtn = document.querySelector('.tn .nav-arrow.left');
+      const rightBtn = document.querySelector('.tn .nav-arrow.right');
+      if(!scroller || !leftBtn || !rightBtn) return;
+      const STEP = Math.max(160, Math.round(scroller.clientWidth * 0.4));
+      function update(){
+        const max = scroller.scrollWidth - scroller.clientWidth;
+        leftBtn.disabled = scroller.scrollLeft <= 0;
+        rightBtn.disabled = scroller.scrollLeft >= (max - 1);
+      }
+      leftBtn.onclick = ()=> scroller.scrollBy({left:-STEP, behavior:'smooth'});
+      rightBtn.onclick = ()=> scroller.scrollBy({left: STEP, behavior:'smooth'});
+      scroller.addEventListener('scroll', update);
+      window.addEventListener('resize', update);
+      setTimeout(update, 0);
+    })();
+  </script>
+
+
+  <script>
+    // Home tutorial (2 images), only on first login
+    const tutHome = initImageTutorial({
+      pageKey: 'home',
+      version: 'img-v1',
+      images: [
+        "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
+        "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
+      ],
+      autoShow: {{ session.pop('show_home_tut', False)|tojson }},
+      enableEsc: true
+    });
+
+    // 教學入口：插在「市場情勢模擬」之後
+    document.getElementById('navTutorialLink')?.addEventListener('click', function(e){
+      e.preventDefault(); try{ tutHome.clear(); tutHome.show(); }catch(_){};
+    });
+
+    // 確保進場與視窗改變時，導航捲動回最左（避免左側項目被吃掉）
+    (function(){
+      const scroller = document.querySelector('.tn .nav.container');
+      if(!scroller) return;
+      function snapLeft(){ scroller.scrollLeft = 0; }
+      window.addEventListener('load', snapLeft);
+      window.addEventListener('resize', snapLeft);
+      // 有些瀏覽器需延遲一點
+      setTimeout(snapLeft, 0);
+    })();
+  </script>
+
+
+  <script>
+    (function(){
+      const scroller = document.querySelector('.tn .nav.container');
+      const leftBtn = document.querySelector('.tn .nav-arrow.left');
+      const rightBtn = document.querySelector('.tn .nav-arrow.right');
+      if(!scroller || !leftBtn || !rightBtn) return;
+      const STEP = Math.max(160, Math.round(scroller.clientWidth * 0.4));
+      function update(){
+        const max = scroller.scrollWidth - scroller.clientWidth;
+        leftBtn.disabled = scroller.scrollLeft <= 0;
+        rightBtn.disabled = scroller.scrollLeft >= (max - 1);
+      }
+      leftBtn.onclick = ()=> scroller.scrollBy({left:-STEP, behavior:'smooth'});
+      rightBtn.onclick = ()=> scroller.scrollBy({left: STEP, behavior:'smooth'});
+      scroller.addEventListener('scroll', update);
+      window.addEventListener('resize', update);
+      setTimeout(update, 0);
+    })();
+  </script>
+
+
+<!-- NAV FIX JS: begin -->
+<script data-navfix="v1">
+(function(){
+  if (window.__navFixApplied) return;
+  window.__navFixApplied = true;
+
+  function onReady(fn){
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn, {once:true});
+    } else {
+      fn();
+    }
+  }
+
+  onReady(function(){
+    const scroller = document.querySelector('.tn .nav.container');
+    if(!scroller){ return; }
+
+    // 讓容器可被鍵盤 focus 操控
+    if(!scroller.hasAttribute('tabindex')) scroller.setAttribute('tabindex', '0');
+
+    const leftBtn  = document.querySelector('.tn .nav-arrow.left');
+    const rightBtn = document.querySelector('.tn .nav-arrow.right');
+
+    const STEP = () => Math.max(160, Math.round(scroller.clientWidth * 0.4));
+
+    function update(){
+      const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+      if (leftBtn)  leftBtn.disabled  = scroller.scrollLeft <= 0;
+      if (rightBtn) rightBtn.disabled = scroller.scrollLeft >= (max - 1);
+    }
+
+    function snapLeft(){
+      try { scroller.scrollLeft = 0; } catch(e){}
+      update();
+    }
+
+    // 綁定箭頭（若存在）
+    if (leftBtn)  leftBtn.addEventListener('click', () => scroller.scrollBy({ left: -STEP(), behavior: 'smooth' }));
+    if (rightBtn) rightBtn.addEventListener('click', () => scroller.scrollBy({ left:  STEP(), behavior: 'smooth' }));
+
+    scroller.addEventListener('scroll', update);
+    // 窗口縮放後回到最左，避免第一顆被吃進去
+    let rAF = 0;
+    window.addEventListener('resize', () => {
+      if (rAF) cancelAnimationFrame(rAF);
+      rAF = requestAnimationFrame(snapLeft);
+    });
+
+    // 鍵盤左右鍵也可操作（無障礙 & 桌機使用便利）
+    scroller.addEventListener('keydown', (e)=>{
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); scroller.scrollBy({ left: -STEP(), behavior:'smooth' }); }
+      if(e.key === 'ArrowRight'){ e.preventDefault(); scroller.scrollBy({ left:  STEP(), behavior:'smooth' }); }
+    });
+
+    // 初始執行
+    setTimeout(snapLeft, 0);
+  });
+})();
+</script>
+<!-- NAV FIX JS: end -->
+
 </body>
 </html>

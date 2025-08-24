@@ -129,6 +129,9 @@ JOIN
 GROUP BY 
     u.username;
 
+for使用教學:
+ALTER TABLE users ADD COLUMN home_tutorial_seen TINYINT(1) NOT NULL DEFAULT 0;
+
 
 ```
 

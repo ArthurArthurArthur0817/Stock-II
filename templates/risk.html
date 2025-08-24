@@ -81,6 +81,9 @@
       transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
       -webkit-tap-highlight-color: transparent;
     }
+
+/* 與 Home 同樣式，但縮小為圓形圖示 */
+.btn-home.btn-help{padding:0; width:2.2rem; height:2.2rem; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; line-height:1;}
     .btn-home:hover{
       background:var(--primary);
       color:#fff;
@@ -152,14 +155,14 @@
   
   
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
-<body>
+<body data-page-id="risk">
   <!-- 主要內容：用 <main> 撐開，使 footer 永遠在底 -->
   <main class="flex-grow-1">
     <div class="container mt-5 mb-5 card-wrapper">
-      <div class="mb-3">
-          <a href="{{ url_for('main') }}" class="btn-home">Home</a>
-      </div>
+      <div class="d-flex justify-content-between align-items-center mb-3"><a href="{{ url_for('main') }}" class="btn-home">Home</a><button type="button" class="btn-home btn-help" aria-label="重新查看使用教學" title="使用教學">?</button></div>
       <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
           <h1>投資風險評估問卷</h1>
@@ -412,5 +415,34 @@
       });
     });
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <script>
+    // 初始化共用圖片教學（risk 頁）
+    const tutRisk = initImageTutorial({
+      pageKey: 'risk',
+      version: 'img-v4', // 之後改內容改這個版本讓所有人再看到一次
+      images: [
+        "{{ url_for('static', filename='image/tutorial/01_risk_1.png') }}",
+        "{{ url_for('static', filename='image/tutorial/01_risk_2.png') }}",
+        "{{ url_for('static', filename='image/tutorial/01_risk_3.png') }}",
+        "{{ url_for('static', filename='image/tutorial/01_risk_4.png') }}",
+        "{{ url_for('static', filename='image/tutorial/01_risk_5.png') }}",
+      ],
+      autoShow: true,
+      enableEsc: true
+    });
+  </script>
+
+
+  <script>
+    (function(){
+      const btn = document.querySelector('.btn-help');
+      btn?.addEventListener('click', function(){
+        try { tutRisk.clear(); tutRisk.show(); } catch(e){ console.warn('reopen tutorial failed', e); }
+      });
+    })();
+  </script>
+
 </body>
 </html>

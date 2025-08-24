@@ -56,6 +56,14 @@ def login():
             user = cursor.fetchone()
             if user:
                 session['user_id'] = user['id']
+                # ✅ 只有「第一次登入」才讓首頁自動顯示教學
+                if not user.get('home_tutorial_seen', 0):
+                    session['show_home_tut'] = True  # 首頁會用這個來 autoShow
+
+                    # 立刻標記為已看過，之後不再觸發
+                    cursor.execute("UPDATE users SET home_tutorial_seen = 1 WHERE id = %s", (user['id'],))
+                    connection.commit()
+
                 return redirect(url_for('main'))
             else:
                 flash("Invalid username or password.")
