@@ -594,97 +594,7 @@
 
   
   
-  <script>
-    // Initialize home tutorial (2 images), first-login auto show
-    const tutHome = initImageTutorial({
-      pageKey: 'home',
-      version: 'img-v1',
-      images: [
-        "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
-        "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
-      ],
-      autoShow: {{ session.pop('show_home_tut', False)|tojson }},
-      enableEsc: true
-    });
-
-    // Tutorial nav item: reopen tutorial
-    (function(){
-      const link = document.getElementById('navTutorialLink');
-      if(!link) return;
-      link.addEventListener('click', (e)=>{ e.preventDefault(); try{ tutHome.clear(); tutHome.show(); }catch(err){} });
-    })();
-
-    // Arrow scroll behavior
-    (function(){
-      const scroller = document.querySelector('.tn .nav.container');
-      const leftBtn = document.querySelector('.tn .nav-arrow.left');
-      const rightBtn = document.querySelector('.tn .nav-arrow.right');
-      if(!scroller || !leftBtn || !rightBtn) return;
-      const STEP = Math.max(160, Math.round(scroller.clientWidth * 0.4));
-      function update(){
-        const max = scroller.scrollWidth - scroller.clientWidth;
-        leftBtn.disabled = scroller.scrollLeft <= 0;
-        rightBtn.disabled = scroller.scrollLeft >= (max - 1);
-      }
-      leftBtn.onclick = ()=> scroller.scrollBy({left:-STEP, behavior:'smooth'});
-      rightBtn.onclick = ()=> scroller.scrollBy({left: STEP, behavior:'smooth'});
-      scroller.addEventListener('scroll', update);
-      window.addEventListener('resize', update);
-      setTimeout(update, 0);
-    })();
-  </script>
-
-
-  <script>
-    // Home tutorial (2 images), only on first login
-    const tutHome = initImageTutorial({
-      pageKey: 'home',
-      version: 'img-v1',
-      images: [
-        "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
-        "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
-      ],
-      autoShow: {{ session.pop('show_home_tut', False)|tojson }},
-      enableEsc: true
-    });
-
-    // 教學入口：插在「市場情勢模擬」之後
-    document.getElementById('navTutorialLink')?.addEventListener('click', function(e){
-      e.preventDefault(); try{ tutHome.clear(); tutHome.show(); }catch(_){};
-    });
-
-    // 確保進場與視窗改變時，導航捲動回最左（避免左側項目被吃掉）
-    (function(){
-      const scroller = document.querySelector('.tn .nav.container');
-      if(!scroller) return;
-      function snapLeft(){ scroller.scrollLeft = 0; }
-      window.addEventListener('load', snapLeft);
-      window.addEventListener('resize', snapLeft);
-      // 有些瀏覽器需延遲一點
-      setTimeout(snapLeft, 0);
-    })();
-  </script>
-
-
-  <script>
-    (function(){
-      const scroller = document.querySelector('.tn .nav.container');
-      const leftBtn = document.querySelector('.tn .nav-arrow.left');
-      const rightBtn = document.querySelector('.tn .nav-arrow.right');
-      if(!scroller || !leftBtn || !rightBtn) return;
-      const STEP = Math.max(160, Math.round(scroller.clientWidth * 0.4));
-      function update(){
-        const max = scroller.scrollWidth - scroller.clientWidth;
-        leftBtn.disabled = scroller.scrollLeft <= 0;
-        rightBtn.disabled = scroller.scrollLeft >= (max - 1);
-      }
-      leftBtn.onclick = ()=> scroller.scrollBy({left:-STEP, behavior:'smooth'});
-      rightBtn.onclick = ()=> scroller.scrollBy({left: STEP, behavior:'smooth'});
-      scroller.addEventListener('scroll', update);
-      window.addEventListener('resize', update);
-      setTimeout(update, 0);
-    })();
-  </script>
+  
 
 
 <!-- NAV FIX JS: begin -->
@@ -749,5 +659,33 @@
 </script>
 <!-- NAV FIX JS: end -->
 
+<script>
+  (function(){
+    if (typeof initImageTutorial !== 'function') {
+      console.warn('[tutorial] tutorial.js not loaded'); return;
+    }
+    const tutHome = initImageTutorial({
+      pageKey: 'home',
+      version: 'img-v1',
+      images: [
+        "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
+        "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
+      ],
+      autoShow: {{ session.pop('show_home_tut', False)|tojson }},
+      enableEsc: true
+    });
+    document.getElementById('navTutorialLink')?.addEventListener('click', function(e){
+      e.preventDefault();
+      try { tutHome.clear(); tutHome.show(); } catch(err){ console.warn('[tutorial] reopen failed', err); }
+    });
+    // 也支援 .nav-help（若未來有加回來）
+    document.querySelectorAll('.nav-help').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.preventDefault();
+        try { tutHome.clear(); tutHome.show(); } catch(err){}
+      });
+    });
+  })();
+</script>
 </body>
 </html>
