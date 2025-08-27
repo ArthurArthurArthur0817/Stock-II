@@ -18,7 +18,8 @@ from history_trading import TradingHistory
 from risk_analysis import  process_stock_type
 import math
 from industry_simulation import trading_industry
-
+import mysql.connector
+from mysql.connector import errorcode
 from functools import lru_cache
 from datetime import datetime, timedelta
 from twstock import Stock
