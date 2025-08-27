@@ -78,7 +78,7 @@
 
     /* ===== 4) 走勢圖區 ===== */
     .chart-wrapper{
-      margin-top:1.5rem;
+      margin-top:0.5rem;
       text-align:center;
     }
     #stock_chart{
@@ -240,8 +240,7 @@
             <button id="buy_stock_btn" class="button-simulation">買入</button>
             <button id="sell_stock_btn" class="button-simulation">賣出</button>
             <button id="close_position_btn" class="button-simulation">平倉</button>
-            <button id="settle_btn" class="button-simulation">結算</button>
-            <button id="ai_analysis_btn" class="button-simulation" style="display:none;">AI 分析</button>
+            <button id="ai_analysis_btn" class="button-simulation" >結算與AI分析</button>
           </div>
         </div>
 
@@ -427,13 +426,12 @@
       });
 
       // 結算 -> 顯示 AI 分析按鈕
-      $("#settle_btn").click(function() {
-        alert("結算完成！");
-        $("#ai_analysis_btn").show();
-      });
-
-      // AI 分析
+      // AI 分析（合併版）
       $("#ai_analysis_btn").click(function() {
+        // 先執行結算
+        alert("正在結算中...即將分析您的交易成果!");
+
+        // 然後直接進行 AI 分析
         $("#loading").show();
         $("#analysis_content").text("");
         $("#ai_analysis_btn").hide();
