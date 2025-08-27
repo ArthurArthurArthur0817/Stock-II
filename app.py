@@ -198,6 +198,7 @@ def trade():
     stock_info = session.get("stock_info")  # 嘗試從 session 取回上次選擇的股票
     current_price = None
     strategy_result = None  # **新增變數來儲存策略結果**
+    trade_feedback = None
 
     now = datetime.now()
     start_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
@@ -245,9 +246,14 @@ def trade():
             success, message = process_trade(
                 session['user_id'], stock, quantity, price, trade_type
             )
+
+            if success:
+                trade_feedback = ("success", "交易成功！已記錄在帳戶中")
+            else:
+                trade_feedback = ("danger", "交易失敗")
             flash(message)
 
-    return render_template('trade.html', stock_info=stock_info, is_trading_time=is_trading_time, strategy_result=strategy_result)
+    return render_template('trade.html', stock_info=stock_info, is_trading_time=is_trading_time, strategy_result=strategy_result,trade_feedback=trade_feedback)
 
 
 
