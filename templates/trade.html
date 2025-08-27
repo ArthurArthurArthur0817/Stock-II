@@ -4,243 +4,468 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trade</title>
-    <link rel="stylesheet" href="\static\style.css"> <!-- 引入自訂樣式 -->
+      <!-- Font: Noto Serif TC -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet"/>
+
+  <!-- Bootstrap 4.5 -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.3/css/bootstrap.min.css"/>
+
+  <!-- (可選) 你的外部樣式 -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
+
+  <style>
+    /* 1) 全域配色（與 account.html 一致） */
+    :root{
+      --primary:#043b8f;
+      --primary-dark:#02347e;
+      --primary-light:#6499e9;
+      --secondary:#0b1f33;
+    }
+
+    /* 2) 版面字型與結構 */
+    html,body{height:100%;}
+    body{
+      display:flex;
+      flex-direction:column;
+      font-family:'Noto Serif TC',serif;
+      line-height:1.6;
+      background:transparent;
+      margin:0;
+    }
+    h1,h2,h3,h4,h5,h6{
+      font-family:'Noto Serif TC',serif;
+      font-weight:700;
+    }
+
+    /* 3) 背景動畫 */
+    body::before{
+      content:"";
+      position:fixed;inset:0;
+      background:url("https://png.pngtree.com/thumb_back/fh260/background/20231227/pngtree-gentle-blue-background-with-a-soft-textured-finish-image_13898387.png") center/cover no-repeat;
+      filter:grayscale(20%) brightness(0.55);
+      z-index:-1;
+      animation:bgZoom 40s ease-in-out infinite alternate;
+    }
+    @keyframes bgZoom{from{transform:scale(1);}to{transform:scale(1.15);}}
+
+    /* 4) 主要內容卡片 */
+    .card-wrapper{
+      background:rgba(255,255,255,.94);
+      border-radius:.8rem;
+      box-shadow:0 10px 30px rgba(0,0,0,.05);
+      padding:2rem 2rem 2.5rem;
+      margin-top:3rem;
+      margin-bottom:3rem;
+    }
+
+    /* 5) 標題與區塊 */
+    h1{
+      font-size:2rem;
+      margin:1.2rem 0 1.8rem;
+      text-align:center;
+      color:var(--primary);
+      letter-spacing:.03rem;
+    }
+    .section-title{
+      font-size:1.25rem;
+      color:var(--primary);
+      margin-top:1.5rem;
+      margin-bottom:.75rem;
+    }
+
+    /* 6) 表單控制項 */
+    .form-control{
+      border:1px solid #cbd3e0;
+      border-radius:.5rem;
+      text-align:left;
+      box-shadow:none;
+      padding:.75rem 1rem;
+    }
+    .form-group small{
+      color:#6c757d;
+    }
+
+    /* 7) 表格樣式（策略結果） */
+    .table{
+      background:#fff;
+      border-radius:.5rem;
+      overflow:hidden;
+    }
+    .table thead th{
+      background:#f4f7fb;
+      border-bottom:1px solid #e6ecf3;
+      color:#223;
+    }
+    .table td, .table th{
+      vertical-align:middle;
+    }
+
+    /* 8) 按鈕樣式 */
+    .btn{
+      border-radius:2rem;
+      font-weight:600;
+    }
+    .btn-primary{
+      background-color:var(--primary);
+      border-color:var(--primary);
+      box-shadow:0 4px 8px rgba(0,0,0,.08);
+      transition:box-shadow .3s ease, background-color .3s ease, border-color .3s ease;
+    }
+    .btn-primary:hover{
+      background-color:var(--primary-dark);
+      border-color:var(--primary-dark);
+      box-shadow:0 6px 12px rgba(0,0,0,.12);
+    }
+    .btn-outline-primary{
+      color:var(--primary);
+      border-color:var(--primary);
+      background-color:transparent;
+      transition: background-color .3s ease, box-shadow .3s ease;
+    }
+    .btn-outline-primary:hover{
+      background-color:var(--primary);
+      color:#fff;
+      box-shadow:0 6px 12px rgba(0,0,0,.1);
+    }
+    a.btn, button.btn { -webkit-tap-highlight-color: transparent; }
+    .btn,
+    .btn:focus,
+    .btn.focus,
+    .btn:active,
+    .btn.active,
+    .btn:focus:active,
+    .btn:active:focus,
+    .btn:focus-visible,
+    .btn-primary,
+    .btn-primary:focus,
+    .btn-primary.focus,
+    .btn-primary:active,
+    .btn-primary.active,
+    .btn-outline-primary,
+    .btn-outline-primary:focus,
+    .btn-outline-primary.focus,
+    .btn-outline-primary:active,
+    .btn-outline-primary.active,
+    .show > .btn.dropdown-toggle,
+    .show > .btn-primary.dropdown-toggle,
+    .show > .btn-outline-primary.dropdown-toggle {
+      outline: none !important;
+      box-shadow: none !important;
+      border-color: var(--primary) !important;
+    }
+
+    /* 9) 卡片內資訊區 */
+    .info-box{
+      background:#fff;
+      border:1px solid #e6edf3;
+      border-radius:.5rem;
+      padding:1rem 1.25rem;
+    }
+
+    /* 10) AI區塊 */
+    .analysis-container{
+      background:#fff;
+      border:1px solid #e6edf3;
+      border-radius:.5rem;
+      padding:1rem 1.25rem;
+      margin-top:1rem;
+      white-space:pre-wrap;
+    }
+
+    /* 讓「Submit / Back」之間距離更大（此頁 .actions 是 flex-column，所以 gap 表示縱向間距） */
+    .actions {
+    gap: 1.25rem;         /* 現代瀏覽器皆支援 */
+    }
+
+    /* 保險：若瀏覽器不支援 flex gap，備援用 margin */
+    @supports not (gap: 1rem) {
+    .actions .btn + .btn { margin-top: 1.25rem; }
+    }
+
+    /* 讓 5 個欄位那一行能水平置中（總寬 < 12 欄時置中對齊） */
+    .form-row.justify-content-center {
+    justify-content: center;
+    }
+  </style>
+</head>
+
 </head>
 <body>
-    <h1>Trade Stocks</h1>
+    <main class="flex-grow-1">
+        <div class="container">
+          <div class="card-wrapper">
+            <h1>Trade Stocks</h1>
 
-    <!-- 股票資訊顯示 -->
-    <div class="stock-info">
+            <!-- flash 訊息（可選） -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div aria-live="polite" aria-atomic="true" class="mb-3">
+                        {% for category, msg in messages %}
+                            <div class="alert alert-{{ 'danger' if category=='danger' else category }}" role="alert">
+                                {{ msg }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <!-- 股票查詢表單 -->
+        <h4 class="section-title">Stock Name</h4>
+        <form method="POST" class="mb-3">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <input type="text" class="form-control" id="stock" name="stock" required placeholder="Enter 4-digit Taiwan stock code">
+              <small class="form-text">Only 4-digit Taiwan stock codes are supported (e.g., 2330).</small>
+            </div>
+          </div>
+            <div class="actions mt-3 d-flex flex-column align-items-center">
+              <button type="submit" name="get_stock_info" class="btn btn-primary px-5 mb-2" >Get Stock Info</button>
+            </div>
+          
+        </form>
+
+            <!-- 股票資訊顯示 -->
+            <h4 class="section-title">Stock Information</h4>
+            <div class="info-box mb-3">
+              {% if stock_info %}
+                <div><strong>Name:</strong> {{ stock_info['name'] }}</div>
+                <div><strong>Symbol:</strong> {{ stock_info['symbol'] }}</div>
+                <div><strong>Sector:</strong> {{ stock_info['sector'] }}</div>
+                <div><strong>Market Cap:</strong> {{ stock_info['market_cap'] }}</div>
+                <div><strong>Current Price:</strong> {{ stock_info['current_price'] }}</div>
+              {% else %}
+                <div class="text-muted">No stock information available. Please search for a stock symbol.</div>
+              {% endif %}
+            </div>
+            
+
+            <!-- 交易表單 -->
         {% if stock_info %}
-            <h2>Stock Information</h2>
-            <p><strong>Name:</strong> {{ stock_info['name'] }}</p>
-            <p><strong>Symbol:</strong> {{ stock_info['symbol'] }}</p>
-            <p><strong>Sector:</strong> {{ stock_info['sector'] }}</p>
-            <p><strong>Market Cap:</strong> {{ stock_info['market_cap'] }}</p>
-            <p><strong>Current Price:</strong> {{ stock_info['current_price'] }}</p>
-        {% else %}
-            <p>No stock information available. Please search for a stock symbol.</p>
-        {% endif %}
-    </div>
-
-    <!-- 股票查詢表單 -->
-    <form method="POST">
-        <label for="stock">Stock Name:</label>
-        <input type="text" name="stock" required placeholder="Enter 4-digit Taiwan stock code">
-        <button type="submit" name="get_stock_info">Get Stock Info</button>
-        <p style="font-size: 0.9em; color: gray;">Only 4-digit Taiwan stock codes are supported (e.g., 2330).</p>
-    </form>
-
-    <!-- 交易表單 -->
-    {% if stock_info %}
         <form method="POST">
-            <input type="hidden" name="stock" value="{{ stock_info['symbol'] }}">
-            <input type="hidden" name="current_price" value="{{ stock_info['current_price'] }}">
+          <input type="hidden" name="stock" value="{{ stock_info['symbol'] }}">
+          <input type="hidden" name="current_price" value="{{ stock_info['current_price'] }}">
 
-            <!-- 交易類型 -->
-            <label for="type">Trade Type:</label>
-            <select name="type">
+          <div class="form-row justify-content-center">
+            <div class="form-group col-md-2">
+              <label for="type"><strong>Trade Type</strong></label>
+              <select class="form-control" name="type" id="type">
                 <option value="BUY">Buy</option>
                 <option value="SELL">Sell</option>
-            </select>
+              </select>
+            </div>
 
-            <!-- 交易方式 -->
-            <label for="trade_category">Trade Category:</label>
-            <select name="trade_category">
+            <div class="form-group col-md-2">
+              <label for="trade_category"><strong>Trade Category</strong></label>
+              <select class="form-control" name="trade_category" id="trade_category">
                 <option value="CASH">現股</option>
-            </select>
+              </select>
+            </div>
 
-            <!-- 盤別 -->
-            <label for="market_session">Market Session:</label>
-            <select name="market_session">
-                <option value="REGULAR">普通</option>
-            </select>
+            <div class="form-group col-md-2">
+              <label for="market_session"><strong>Market Session</strong></label>
+              <select class="form-control" name="market_session" id="market_session">
+                 <option value="REGULAR">普通</option>
+              </select>
+            </div>
 
-            <!-- 價格 -->
-            <label for="price">Price:</label>
-            <input type="number" step="0.01" name="price" required value="{{ stock_info['current_price'] }}">
+            <div class="form-group col-md-2">
+               <label for="price"><strong>Price</strong></label>
+               <input type="number" step="0.01" class="form-control" name="price" id="price" required value="{{ stock_info['current_price'] }}">
+            </div>
+           
 
-            <!-- 數量 -->
-            <label for="quantity">Quantity:</label>
-            <input type="number" name="quantity" required placeholder="Enter quantity">
+           <div class="form-group col-md-2">
+            <label for="quantity"><strong>Quantity</strong></label>
+            <input type="number" class="form-control" name="quantity" id="quantity" required placeholder="Enter quantity" min="1" step="1">
+          </div>
+        </div>
+      
+        <!-- ✅ 把交易時段提示移到 form-row 外，避免被撐爆 -->
+        <div class="form-group">
+          <small class="form-text">Trading is only allowed from 9:00 AM to 1:30 PM.</small>
+          {% if not is_trading_time %}
+            <div class="text-danger mt-1">Currently not within trading hours. </div>
+          {% endif %}
+        </div>
 
-            <!-- 提交交易 -->
-            <button type="submit" name="submit_trade" {% if not is_trading_time %} disabled {% endif %}>Submit Trade</button>
-            {% if not is_trading_time %}
-                <p style="color: red;">Currently not within trading hours. Trading is only allowed from 9:00 AM to 1:30 PM.</p>
-            {% endif %}
-        </form>
-    {% endif %}
+            <!-- Submit & Back to Account（按鈕群組，Back 置於 Submit 下方） -->
+            <div class="actions mt-3 d-flex flex-column align-items-center">
+              <button type="submit" name="submit_trade" class="btn btn-primary px-5 mb-4" {% if not is_trading_time %} disabled {% endif %}>Submit Trade</button>
+              <a href="{{ url_for('account') }}" class="btn btn-outline-primary mb-4">Back to Account</a>
+                
+              {% if trade_feedback %}
+                {% set status, msg = trade_feedback %}
+                <div class="mt-3 alert alert-{{ 'success' if status=='success' else 'danger' }} text-center" role="alert" style="min-width:260px;">
+                    {{ msg }}
+                </div>
+                {% endif %}
+            </div>
+          </form>
+        {% endif %}
+
+
+
     
-    <!-- 策略選擇 -->
-    {% if stock_info %}
-        <form method="POST">
-            <label for="strategy">Select Strategy:</label>
-            <select name="strategy">
-                <option value="momentum">Momentum Strategy</option>
-                <!--option value="mean_reversion">Mean Reversion Strategy</option-->
-                <option value="breakout">Breakout Strategy</option>
-                <option value="fundamental">Fundamental Analysis</option>
-                <option value="rsi">RSI Strategy</option>
-                <option value="adx">ADX Strategy</option>
-                <option value="macd">MACD Strategy</option>
-                <option value="greedy">Greedy Strategy</option>
-                <option value="pricechannel">Price Channel Strategy</option>
-                <option value="bollingerbands">Bollinger Bands Strategy</option>
-                <option value="bollingerbandsdirected">Bollinger Bands Strategy Directed</option>
-                <option value="channelbreakout">Channel Break Out Strategy</option>
-                <option value="keltnerchannel">Keltner Channel Strategy</option>
-                <option value="sar">SAR Strategy</option>
-                <option value="ma">MA Strategy</option>
-                <option value="super">Super Trend Strategy</option>
-            </select>
+        <!-- 策略選擇 -->
+        {% if stock_info %}
+            <form method="POST" class="mb-3">
+                <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="strategy"><strong>Select Strategy</strong></label>
+                    <select class="form-control" name="strategy" id="strategy">
+                    <option value="momentum">Momentum Strategy</option>
+                    <!-- <option value="mean_reversion">Mean Reversion Strategy</option> -->
+                    <option value="breakout">Breakout Strategy</option>
+                    <option value="fundamental">Fundamental Analysis</option>
+                    <option value="rsi">RSI Strategy</option>
+                    <option value="adx">ADX Strategy</option>
+                    <option value="macd">MACD Strategy</option>
+                    <option value="greedy">Greedy Strategy</option>
+                    <option value="pricechannel">Price Channel Strategy</option>
+                    <option value="bollingerbands">Bollinger Bands Strategy</option>
+                    <option value="bollingerbandsdirected">Bollinger Bands Strategy Directed</option>
+                    <option value="channelbreakout">Channel Break Out Strategy</option>
+                    <option value="keltnerchannel">Keltner Channel Strategy</option>
+                    <option value="sar">SAR Strategy</option>
+                    <option value="ma">MA Strategy</option>
+                    <option value="super">Super Trend Strategy</option>
+                    </select>
+                </div>
 
-            <!-- 投資金額 -->
-            <label for="investment_amount">Investment Amount:</label>
-            <input type="number" name="investment_amount" required placeholder="Enter investment amount">
+                <!-- 投資金額 -->
+                <div class="form-group col-md-6">
+                    <label for="investment_amount"><strong>Investment Amount</strong></label>
+                    <input type="number" class="form-control" name="investment_amount" id="investment_amount" required placeholder="Enter investment amount" min="0" step="1">
+                </div>
+                </div>
+                <button type="submit" name="apply_strategy" class="btn btn-outline-primary px-4">Apply Strategy Analysis</button>
+            </form>
+            {% endif %}
 
-            <button type="submit" name="apply_strategy">Apply Strategy Analysis</button>
-        </form>
-    {% endif %}
-
-    <!-- **策略分析結果顯示在畫面下方** -->
-    {% if strategy_result %}
-        <div class="strategy-result">
-            <h2>Strategy Analysis Result</h2>
-            <table class="strategy-table">
-                <thead>
-                    <tr>
-                        <th>項目</th>
-                        <th>數值</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <!-- **策略分析結果顯示在畫面下方** -->
+        {% if strategy_result %}
+            <div class="analysis-container">
+                <h5 class="mb-3">Strategy Analysis Result</h5>
+                <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr><th>項目</th><th>數值</th></tr>
+                    </thead>
+                    <tbody>
                     {% for key, value in strategy_result.items() %}
-                    <tr>
+                        <tr>
                         <td>{{ key }}</td>
                         <td>{{ value }}</td>
-                    </tr>
+                        </tr>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% endif %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        {% endif %}
 
 
-    {% if stock_info %}    
-        <div class="center">
-            <button type="button" id="aiAnalysisBtn">AI 分析</button>
-        </div>
-        
-        <div id="ai_result_1" class="analysis-container">
-            <h2>AI 分析結果</h2>
-            <pre id="analysis-text">🔹 尚未進行AI策略分析</pre>
-        </div>
-    
+        <!-- AI 分析與問答（僅在有 stock_info 時顯示） -->
+        {% if stock_info %}
+            <div class="text-center mt-4">
+                <button type="button" id="aiAnalysisBtn" class="btn btn-outline-primary px-4">AI 分析</button>
+            </div>
 
-        <!-- 使用者輸入區 (在 AI 分析結果下方) -->
-        <div id="user-response-container" style="display: none; text-align: center; margin-top: 20px;">
-            <h3>請輸入您的回答：</h3>
-            <textarea id="user-response" placeholder="請輸入您的回答..." style="width: 80%; height: 100px; padding: 5px;"></textarea>
-            <br>
-            <button id="submit-response">提交</button>
-        </div>
+            <div id="ai_result_1" class="analysis-container" style="display:none;">
+                <h5 class="mb-2">AI 分析結果</h5>
+                <pre id="analysis-text">🔹 尚未進行AI策略分析</pre>
+            </div>
 
-            <!-- AI 分析結果顯示區 -->
-        <div id="ai_result_2" class="analysis-container">  
-            <h2>AI 分析結果：</h2>
-            <pre id="ai-response-text" >🔹 尚未進行AI問答分析</pre>
-        </div>
-    {% endif %}
-    
-    <!-- JavaScript 處理 -->
-    <script>
-        document.getElementById("aiAnalysisBtn").addEventListener("click", function() {
-            let aiButton = this; // 取得按鈕元素
-            aiButton.style.display = "none"; // 🔹 按鈕點擊後隱藏
-            let textarea = document.getElementById("user-response");
-            let button = document.getElementById("submit-response");
+            <!-- 使用者輸入區 -->
+            <div id="user-response-container" class="analysis-container" style="display:none;">
+                <h5 class="mb-2">請輸入您的回答：</h5>
+                <textarea id="user-response" placeholder="請輸入您的回答..." class="form-control" style="height: 120px;"></textarea>
+                <div class="mt-2">
+                <button id="submit-response" class="btn btn-primary px-4">提交</button>
+                </div>
+            </div>
 
-            if (textarea && button) {
-                textarea.disabled = true;  
-                button.disabled = true;  
+            <!-- AI 問答結果 -->
+            <div id="ai_result_2" class="analysis-container" style="display:none;">
+                <h5 class="mb-2">AI 分析結果：</h5>
+                <pre id="ai-response-text">🔹 尚未進行AI問答分析</pre>
+            </div>
+        {% endif %}
+
+    </div>
+  </div>
+</main>
+
+    <!-- jQuery & Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // AI 分析：保持你原本的流程，但配合新的顯示容器
+    (function(){
+      const aiBtn = document.getElementById("aiAnalysisBtn");
+      if (!aiBtn) return;
+
+      aiBtn.addEventListener("click", function() {
+        const textarea = document.getElementById("user-response");
+        const button = document.getElementById("submit-response");
+        const aiResult1 = document.getElementById("ai_result_1");
+        const analysisText = document.getElementById("analysis-text");
+        const responseContainer = document.getElementById("user-response-container");
+
+        aiBtn.style.display = "none";
+        if (textarea && button) { textarea.disabled = true; button.disabled = true; }
+
+        fetch("/ai_analysis", { method: "POST" })
+          .then(r => r.json())
+          .then(data => {
+            if (analysisText && data.analysis_result){
+              analysisText.textContent = data.analysis_result;
+              if (aiResult1) aiResult1.style.display = "block";
             }
-
-            fetch("/ai_analysis", {
-                method: "POST",
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("AI 分析結果:", data.analysis_result); // ✅ 檢查是否有回傳結果
-
-                let aiResultContainer = document.getElementById("ai_result_1");
-                let analysisText = document.getElementById("analysis-text");
-
-                if (aiResultContainer && data.analysis_result) {
-                    analysisText.textContent = data.analysis_result;  // ✅ 設定文字內容
-                    aiResultContainer.style.display = "block";  // ✅ 顯示區塊
-                }
-
-
-                // 🔹 確保輸入框區塊存在，然後顯示
-                let responseContainer = document.getElementById("user-response-container");
-                if (responseContainer) {
-                    responseContainer.style.display = "block"; 
-                }
-
-                // ✅ AI 分析完成後，恢復輸入框
-                if (textarea && button) {
-                    textarea.disabled = false;
-                    button.disabled = false;
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                aiButton.style.display = "block"; // 🔹 發生錯誤時，也讓按鈕重新顯示
-            });
-        });
-        
-    
-        document.getElementById("submit-response").addEventListener("click", function() {
-            let userResponse = document.getElementById("user-response").value.trim();
-    
-            if (userResponse === "") {
-                alert("❌ 請輸入您的回答！");
-                return;
+            if (responseContainer){
+              responseContainer.style.display = "block";
             }
-    
-            fetch("/save_question", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: userResponse })  
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);  
-                document.getElementById("user-response").value = "";  
-    
-                // 🔹 問題儲存成功後，呼叫 AI 分析
-                return fetch("/process_question", { method: "POST" });
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("🔹 Gemini AI 回應:", data.response);  
-                
-                let aiResultContainer = document.getElementById("ai_result_2");
-                let aiResponseElement = document.getElementById("ai-response-text");
-                if (aiResponseElement && aiResultContainer) {
-                    aiResponseElement.textContent = data.response;  // ✅ 顯示 learn.txt 內容
-                    aiResultContainer.style.display = "block";  // ✅ 顯示區塊
-                } else {
-                    console.error("❌ 找不到 ai-response-text 元素！");
-                }
-            })
-            .catch(error => console.error("❌ Error:", error));
+            if (textarea && button) { textarea.disabled = false; button.disabled = false; }
+          })
+          .catch(err => {
+            console.error("Error:", err);
+            aiBtn.style.display = "inline-block";
+          });
+      });
+
+      // 送出使用者回覆 → 儲存 → 觸發 AI 問答
+      const submitBtn = document.getElementById("submit-response");
+      if (submitBtn){
+        submitBtn.addEventListener("click", function(){
+          const textarea = document.getElementById("user-response");
+          const text = (textarea?.value || '').trim();
+          if (!text){ alert("❌ 請輸入您的回答！"); return; }
+
+          fetch("/save_question", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: text })
+          })
+          .then(r => r.json())
+          .then(data => {
+            alert(data.message || "Saved.");
+            if (textarea) textarea.value = "";
+            return fetch("/process_question", { method: "POST" });
+          })
+          .then(r => r.json())
+          .then(data => {
+            const aiResBox = document.getElementById("ai_result_2");
+            const aiResText = document.getElementById("ai-response-text");
+            if (aiResBox && aiResText){
+              aiResText.textContent = data.response || "(no response)";
+              aiResBox.style.display = "block";
+            }
+          })
+          .catch(err => console.error("❌ Error:", err));
         });
-    </script>
-    
-        
-    
-    <a href="{{ url_for('account') }}" class="btn">Back to Account</a>
+      }
+    })();
+  </script>
 </body>
 </html>

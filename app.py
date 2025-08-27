@@ -18,7 +18,8 @@ from history_trading import TradingHistory
 from risk_analysis import  process_stock_type
 import math
 from industry_simulation import trading_industry
-
+import mysql.connector
+from mysql.connector import errorcode
 from functools import lru_cache
 from datetime import datetime, timedelta
 from twstock import Stock
@@ -66,7 +67,7 @@ def login():
 
                 return redirect(url_for('main'))
             else:
-                flash("Invalid username or password.")
+                flash("帳號或密碼有誤，若尚未註冊請先註冊帳號", "danger")
         finally:
             if 'cursor' in locals():
                 cursor.close()
@@ -86,17 +87,22 @@ def register():
             cursor = connection.cursor()
             cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
             connection.commit()
-            #flash("Registration successful. Please log in.")
+            #flash("註冊成功！請返回登入頁面")
             return redirect(url_for('login'))
-        except Exception as e:
-            flash(f"Error: {e}")
+        except mysql.connector.Error as e:
+            if e.errno == errorcode.ER_DUP_ENTRY:
+                # ✅ 這就是你要的訊息
+                flash('此帳號已註冊，請更換帳號名稱', 'danger')
+                return render_template('register.html'), 409
+            # 其他 DB 錯誤 → 給通用訊息（或記錄 log）
+            flash('系統繁忙，請稍後再試。', 'danger')
+            return render_template('register.html'), 500
         finally:
             if 'cursor' in locals():
                 cursor.close()
             if 'connection' in locals():
                 connection.close()
     return render_template('register.html')
-
 
 
 @app.route('/check_login')
@@ -192,10 +198,11 @@ def trade():
     stock_info = session.get("stock_info")  # 嘗試從 session 取回上次選擇的股票
     current_price = None
     strategy_result = None  # **新增變數來儲存策略結果**
+    trade_feedback = None
 
     now = datetime.now()
     start_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
-    end_time = now.replace(hour=13, minute=30, second=0, microsecond=0)
+    end_time = now.replace(hour=23, minute=30, second=0, microsecond=0)
     is_trading_time = start_time <= now <= end_time
 
     if request.method == 'POST':
@@ -229,7 +236,24 @@ def trade():
             else:
                 flash("Stock information is not available or incomplete.")
 
-    return render_template('trade.html', stock_info=stock_info, is_trading_time=is_trading_time, strategy_result=strategy_result)
+        # ✅ 新增：提交交易（買入 / 賣出）
+        elif 'submit_trade' in request.form:
+            trade_type = request.form['type']   # BUY 或 SELL
+            stock = request.form['stock']
+            price = float(request.form['price'])
+            quantity = int(request.form['quantity'])
+
+            success, message = process_trade(
+                session['user_id'], stock, quantity, price, trade_type
+            )
+
+            if success:
+                trade_feedback = ("success", "交易成功！已記錄在帳戶中")
+            else:
+                trade_feedback = ("danger", "交易失敗")
+            flash(message)
+
+    return render_template('trade.html', stock_info=stock_info, is_trading_time=is_trading_time, strategy_result=strategy_result,trade_feedback=trade_feedback)
 
 
 
