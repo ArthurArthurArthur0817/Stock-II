@@ -195,7 +195,7 @@ def trade():
 
     now = datetime.now()
     start_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
-    end_time = now.replace(hour=13, minute=30, second=0, microsecond=0)
+    end_time = now.replace(hour=23, minute=30, second=0, microsecond=0)
     is_trading_time = start_time <= now <= end_time
 
     if request.method == 'POST':
@@ -228,6 +228,18 @@ def trade():
                     flash("Strategy module does not contain a 'run' function.")
             else:
                 flash("Stock information is not available or incomplete.")
+
+        # ✅ 新增：提交交易（買入 / 賣出）
+        elif 'submit_trade' in request.form:
+            trade_type = request.form['type']   # BUY 或 SELL
+            stock = request.form['stock']
+            price = float(request.form['price'])
+            quantity = int(request.form['quantity'])
+
+            success, message = process_trade(
+                session['user_id'], stock, quantity, price, trade_type
+            )
+            flash(message)
 
     return render_template('trade.html', stock_info=stock_info, is_trading_time=is_trading_time, strategy_result=strategy_result)
 
