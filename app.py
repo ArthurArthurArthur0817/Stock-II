@@ -66,7 +66,7 @@ def login():
 
                 return redirect(url_for('main'))
             else:
-                flash("Invalid username or password.")
+                flash("帳號或密碼有誤，若尚未註冊請先註冊帳號", "danger")
         finally:
             if 'cursor' in locals():
                 cursor.close()
@@ -86,17 +86,22 @@ def register():
             cursor = connection.cursor()
             cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
             connection.commit()
-            #flash("Registration successful. Please log in.")
+            #flash("註冊成功！請返回登入頁面")
             return redirect(url_for('login'))
-        except Exception as e:
-            flash(f"Error: {e}")
+        except mysql.connector.Error as e:
+            if e.errno == errorcode.ER_DUP_ENTRY:
+                # ✅ 這就是你要的訊息
+                flash('此帳號已註冊，請更換帳號名稱', 'danger')
+                return render_template('register.html'), 409
+            # 其他 DB 錯誤 → 給通用訊息（或記錄 log）
+            flash('系統繁忙，請稍後再試。', 'danger')
+            return render_template('register.html'), 500
         finally:
             if 'cursor' in locals():
                 cursor.close()
             if 'connection' in locals():
                 connection.close()
     return render_template('register.html')
-
 
 
 @app.route('/check_login')
