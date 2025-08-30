@@ -29,7 +29,7 @@
     }
     .tn, .tn *{ font-family:'Noto Serif TC',serif !important; }
 
-    /* 背景動畫 */
+    /* 背景動畫（可自行換圖） */
     .tn::before{
       content:""; position:fixed; inset:0;
       background:url("https://bpic.588ku.com/video_listen/588ku_pic/21/08/09/d0e7a2b73c60fd3ef2710a74bbbaea89.jpg!/fw/800") center/cover no-repeat;
@@ -45,8 +45,8 @@
     .tn .container{max-width:1120px;margin:0 auto;padding:0 16px;}
     .tn .section{padding:48px 0;}
 
-    /* Sticky Header */
-    .tn header{
+    /* Sticky Header：品牌 + 導覽；捲動時只留導覽 */
+    #siteHeader{
       position:sticky; top:0; z-index:1000;
       backdrop-filter:saturate(140%) blur(8px);
       background:rgba(255,255,255,.82);
@@ -61,82 +61,76 @@
       max-height:120px;
     }
     .tn .brand-inner{ display:flex; flex-direction:column; align-items:center; }
-    .tn .brand-title{ font-size:2rem; letter-spacing:.2px; transition:font-size .3s ease; }
-    .tn .tagline{ margin-top:4px; opacity:.9; font-size:1rem; transition:font-size .3s ease, opacity .3s ease; }
+    .tn .brand-title{ font-size:2rem; letter-spacing:.2px; }
+    .tn .tagline{ margin-top:4px; opacity:.9; font-size:1rem; }
 
-    /* Nav */
+    /* ===== 導覽列（單排雙語；不足寬度時可水平捲動） ===== */
     .tn nav{ border-top:1px solid rgba(0,0,0,.06); }
-    
-    .tn .nav{ display:flex; justify-content: center; gap:6px; align-items:stretch; padding:10px 10px; min-height:56px; }
-    .tn .nav a{
+    .tn .nav-wrap{
+      display:flex; align-items:center; gap:8px;
+      overflow:hidden; /* 預設不露出捲動條；真正捲動的是內部 .nav */
+    }
+    .tn .nav{
+      flex:1 1 auto;
+      display:flex; align-items:center; gap:8px;
+      justify-content:flex-start !important;     /* 預設靠左（不足時可水平捲動） */
+      overflow-x:auto; white-space:nowrap;
+      scrollbar-width:none; -ms-overflow-style:none;
+      scroll-behavior:smooth;
+      padding-left:max(16px, env(safe-area-inset-left)) !important;
+      padding-right:max(16px, env(safe-area-inset-right)) !important;
+      min-height:56px; padding-top:10px; padding-bottom:10px;
+    }
+    .tn .nav::-webkit-scrollbar{ display:none; }
+
+    /* Nav 連結樣式 */
+    .tn .nav a,
+    .tn .nav .linklike{
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       gap:2px; color:var(--ink); text-decoration:none;
       border-radius:10px; padding:.45rem .6rem;
-      transition:background .15s ease, transform .06s ease, color .15s ease, padding .25s ease;
       white-space:normal; min-width:92px;
+      transition:background .15s ease, color .15s ease;
+      scroll-snap-align:start;
     }
-    .tn .nav a .en{ font-weight:800; line-height:1.05; font-size:.98rem; }
-    .tn .nav a .zh{ opacity:.9; font-size:.82rem; line-height:1.05; }
-    .tn .nav a:hover{ color:var(--primary); background:rgba(100,153,233,.12); transform:translateY(-1px); }
+    .tn .nav a .en, .tn .nav .linklike .en{ font-weight:800; line-height:1.05; font-size:.98rem; }
+    .tn .nav a .zh, .tn .nav .linklike .zh{ opacity:.9; font-size:.82rem; line-height:1.05; }
+    .tn .nav a:hover, .tn .nav .linklike:hover{ color:var(--primary); background:rgba(100,153,233,.12); }
     .tn .nav a.active{ color:#fff; background:var(--primary); }
 
-    /* 讓「登出」按鈕看起來就像其他 <a> 項目，並且與其垂直對齊 */
+    /* 登出按鈕做成「像連結」 */
+    .tn .nav form{ display:flex; align-items:stretch; margin:0; padding:0; }
+    .tn .nav .linklike{ appearance:none; background:none; border:0; cursor:pointer; }
 
-/* 1) form 容器要跟 <a> 一樣被撐高 */
-.tn .nav form{
-  display:flex;             /* 關鍵：讓裡面的 button 能撐高 */
-  align-items:stretch;      /* 拉滿 nav 的高度 */
-  margin:0;
-  padding:0;
-}
+    /* 小幅縮排（compact 狀態） */
+    #siteHeader.compact .brand{ max-height:0; padding:0; opacity:0; transform:translateY(-8px); }
+    #siteHeader.compact .nav{ min-height:48px; padding-top:6px; padding-bottom:6px; }
+    #siteHeader.compact .nav a, #siteHeader.compact .nav .linklike{ padding:.35rem .5rem; }
+    #siteHeader.compact .nav .en{ font-size:.95rem; }
+    #siteHeader.compact .nav .zh{ font-size:.78rem; opacity:.85; }
 
-/* 2) button 做成「像連結」：尺寸、對齊、行為都與 <a> 一致 */
-.tn .nav .linklike{
-  appearance:none; -webkit-appearance:none; -moz-appearance:none;
-  background:none;
-  border:0;                 /* 避免瀏覽器預設邊框撐高 */
-  margin:0;
-  padding:.45rem .6rem;     /* 與 .tn .nav a 一致 */
-  display:flex;
-  flex-direction:column;    /* 與你的 <a> 裡的文字縱向排版一致 */
-  align-items:center;
-  justify-content:center;
-  gap:2px;
-  color:var(--ink);
-  border-radius:10px;
-  cursor:pointer;
-  min-width:92px;
-  white-space:normal;
-  line-height:1.05;         /* 與 <a> 內文行高一致 */
-  align-self:stretch;       /* 關鍵：自身也撐滿父層高度 */
-  transition:background .15s ease, transform .06s ease, color .15s ease, padding .25s ease;
-}
+    /* —— 自動置中：當「內容全部放得下」時 —— */
+    .tn .nav-wrap.nav-fit .nav{
+      justify-content:center !important;   /* 置中 */
+      overflow-x:visible;                  /* 關掉水平捲動 */
+      scroll-snap-type:none;
+    }
+    .tn .nav-wrap.nav-fit .nav-arrow{
+      display:none !important;             /* 箭頭隱藏 */
+    }
 
-/* 3) hover 行為與 <a> 一致 */
-.tn .nav .linklike:hover{
-  color:var(--primary);
-  background:rgba(100,153,233,.12);
-  transform:translateY(-1px);
-}
+    /* 箭頭按鈕（放不下時可用） */
+    .tn .nav-arrow{
+      flex:0 0 auto;
+      width:32px; height:32px; border:0; border-radius:999px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.08); color:var(--ink); line-height:1; font-size:18px;
+      user-select:none;
+    }
+    .tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
+    .tn .nav-arrow:disabled{ opacity:.35; cursor:default }
 
-/* 4) 字級與 <a> 內部 class 一致 */
-.tn .nav .linklike .en{ font-weight:800; line-height:1.05; font-size:.98rem; }
-.tn .nav .linklike .zh{ opacity:.9; font-size:.82rem; line-height:1.05; }
-
-/* 5) compact 模式同步縮小 padding（與 <a> 同步） */
-.tn header.compact .nav .linklike{
-  padding:.35rem .5rem;
-}
-
-    /* Compact 狀態 */
-    .tn header.compact .brand{ max-height:0; padding:0; opacity:0; transform:translateY(-8px); }
-    .tn header.compact .nav{ padding:6px 8px; min-height:48px; }
-    .tn header.compact .nav a{ padding:.35rem .5rem; }
-    .tn header.compact .nav a .en{ font-size:.95rem; }
-    .tn header.compact .nav a .zh{ font-size:.78rem; opacity:.85; }
-    .tn header.compact .nav .linklike{ padding:.35rem .5rem; }
-
-    /* 內容卡片/按鈕 */
+    /* 內容卡片 */
     .tn .card{ background:rgba(255,255,255,.94); border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.06); }
     .tn .pad{ padding:22px 18px; }
     .tn .lead{ font-size:1.1rem; }
@@ -167,257 +161,25 @@
     .tn footer .container{ padding:28px 16px; }
     .tn footer .copyright{ border-top:1px solid rgba(255,255,255,.72); padding-top:12px; color:#ccc; font-size:.92rem; }
 
-    @media (prefers-reduced-motion: reduce){
-      .tn .brand, .tn .brand-title, .tn .tagline, .tn .nav a, .tn header{ transition:none; }
+    /* RWD */
+    @media (max-width: 720px){
+      .tn .nav{ min-height:50px; padding-top:8px; padding-bottom:8px; }
+      .tn .nav a, .tn .nav .linklike{ padding:.32rem .5rem; min-width:78px; }
+      .tn .nav .en{ font-size:.9rem; }
+      .tn .nav .zh{ font-size:.76rem; }
+    }
+    @media (max-width: 480px){
+      .tn .nav a, .tn .nav .linklike{ padding:.3rem .46rem; min-width:74px; }
+      .tn .nav .en{ font-size:.86rem; }
+      .tn .nav .zh{ font-size:.72rem; }
+      .tn .btn { padding:.5rem .85rem; font-size:.92rem; }
     }
   
-/* --- Nav overflow controls & tutorial entry --- */
-
-.tn .nav.container{
-  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
-}
-.tn .nav.container::-webkit-scrollbar{ display:none; } /* hide scrollbar */
-
-.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
-.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
-
-
-/* Tutorial link styled like other nav items (inherit your existing nav link styles) */
-.tn .nav .nav-tutorial{ display:inline-flex; align-items:center; padding:8px 12px; border-radius:8px; }
-
-
-/* --- Nav overflow controls & tutorial entry (fixed) --- */
-
-.tn .nav.container{
-  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
-  padding: 0 56px; /* 留出左右箭頭空間，避免覆蓋最後/最前項 */
-  display:flex; align-items:center; gap:8px;
-}
-.tn .nav.container::-webkit-scrollbar{ display:none; } /* hide scrollbar */
-
-
-
-.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
-.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
-/* Tutorial link styled like other nav items */
-.tn .nav .nav-tutorial{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:8px; }
-.tn .nav .nav-tutorial .label{ font-size:inherit; line-height:1; }
-.tn .nav .nav-tutorial .q-badge{
-  width:1.25rem; height:1.25rem; border-radius:999px; display:inline-flex;
-  align-items:center; justify-content:center; font-weight:800; line-height:1; font-size:.9rem;
-  background:rgba(0,0,0,.06); color:var(--ink, #111);
-}
-
-
-/* --- Nav: flex arrows + inside tutorial link (zh-only) --- */
-
-.tn .nav.container{
-  flex:1 1 auto; overflow-x:auto; white-space:nowrap;
-  scrollbar-width:none; -ms-overflow-style:none;
-  display:flex; align-items:center; gap:8px;
-}
-.tn .nav.container::-webkit-scrollbar{ display:none; } /* hide scrollbar */
-/* Arrows as normal buttons (not overlay) to avoid clipping */
-
-.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
-.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
-/* Tutorial link: keep same typography as other nav items */
-.tn .nav .nav-tutorial{ display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:8px; text-decoration:none; color:inherit; }
-.tn .nav .nav-tutorial .label{ font-size:inherit; line-height:1; }
-.tn .nav .nav-tutorial .q-badge{
-  width:1.1rem; height:1.1rem; border-radius:999px; display:inline-flex;
-  align-items:center; justify-content:center; font-weight:800; line-height:1; font-size:.85rem;
-  background:rgba(0,0,0,.06); color:var(--ink, #111);
-}
-
-
-/* === Nav safety fixes: keep first item visible; consistent layout === */
-.tn nav, 
-.tn .nav.container{
-  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
-  display:flex; align-items:center; gap:8px;
-}
-.tn .nav.container::-webkit-scrollbar{ display:none; }
-
-/* Keep the very first nav item (Home) always visible even when scrolled */
-
-
-/* Avoid hover vertical shifts that can cause clipping in tight containers */
-.tn .nav a:hover{ transform:none !important; }
-
-
-/* === Responsive horizontal nav with arrows (no sticky) === */
-.tn nav, .tn .nav-wrap{ overflow: visible; }
-.tn .nav-wrap{ display:flex; align-items:center; gap:8px; }
-.tn .nav.container{
-  flex:1 1 auto; display:flex; align-items:center; gap:8px;
-  overflow-x:auto; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;
-}
-.tn .nav.container::-webkit-scrollbar{ display:none; }
-.tn .nav-arrow{
-  flex:0 0 auto;
-  width:32px; height:32px; border:0; border-radius:999px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.08); color:var(--ink, #111); line-height:1; font-size:18px;
-}
-.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
-.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
-/* Ensure nav items aren't vertically shifted on hover to avoid clipping at small widths */
-.tn .nav a:hover{ transform:none; }
-
+    /* 停用 Scroll Anchoring 防止瀏覽器自行校正造成跳動 */
+    html, body, #siteHeader, main { overflow-anchor: none; }
 </style>
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
-
-<!-- NAV FIX: begin -->
-<style data-navfix="v1">
-/* ====== Nav：單一權威定義，避免互相覆蓋 ====== */
-.tn .nav-wrap{
-  display:flex; align-items:center; gap:8px; overflow:hidden;
-}
-
-/* 讓導覽列保持單行、可水平捲動；加入安全邊界，避免第一個按鈕貼邊被裁切 */
-.tn .nav.container{
-  flex:1 1 auto;
-  display:flex; align-items:center; gap:8px;
-  justify-content:flex-start !important;
-  overflow-x:auto; white-space:nowrap;
-  scrollbar-width:none; -ms-overflow-style:none;
-  scroll-behavior:smooth;
-
-  /* 左右內距：既保留你原本 .container 的 16px，也涵蓋瀏海/安全區域 */
-  padding-left: max(16px, env(safe-area-inset-left)) !important;
-  padding-right: max(16px, env(safe-area-inset-right)) !important;
-
-  /* （可選）滑動對齊，讓每個按鈕停在容器左緣，比較「順眼」 */
-  scroll-snap-type: x proximity;
-  /* 讓 scroll-snap 計算時也考慮左邊的內距，避免視覺上「被吃掉」 */
-  scroll-padding-left: max(16px, env(safe-area-inset-left));
-}
-.tn .nav.container::-webkit-scrollbar{ display:none; }
-
-/* 在最左邊塞一個不可見的「空白墊片」，確保捲到最左時不會貼邊 */
-.tn .nav.container::before{
-  content:""; display:block; flex:0 0 8px;
-}
-
-/* Nav 項目不縮小、維持最小寬度，並與 scroll-snap 對齊 */
-.tn .nav a,
-.tn .nav .linklike,
-.tn .nav .nav-tutorial{
-  flex:0 0 auto;
-  min-width:92px;
-  scroll-snap-align:start;
-}
-
-/* 避免 hover 的位移在窄寬下造成「被吃進去」的錯覺（維持顏色變化即可） */
-.tn .nav a:hover,
-.tn .nav .linklike:hover{
-  transform:none;  /* ← 取消 translateY(-1px) 以免邊界抖動 */
-}
-
-/* 箭頭按鈕存在於排版流程中，不覆蓋 nav 內容（就不會壓到第一顆） */
-.tn .nav-arrow{
-  flex:0 0 auto;
-  width:32px; height:32px; border:0; border-radius:999px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.08); color:var(--ink, #111); line-height:1; font-size:18px;
-}
-.tn .nav-arrow:hover{ background:rgba(0,0,0,.12); }
-.tn .nav-arrow:disabled{ opacity:.35; cursor:default }
-</style>
-<!-- NAV FIX: end -->
-
-
-<!-- FEATURES INTRO STICKY FIX -->
-<style data-features-intro-fix="v1">
-  /* 讓「為新手打造，結合 AI 的投資學習平台」區塊回到一般流佈局，不再 sticky */
-  #features-intro{
-    position: static !important;
-    top: auto !important;
-    z-index: auto !important;
-    backdrop-filter: none !important;
-    background: var(--surface, #fff) !important;
-    box-shadow: none !important;
-  }
-</style>
-
-
-<!-- RWD OVERRIDES -->
-<style data-rwd="v1">
-/* Fluid typography (desktop-first baseline, mobile will downscale) */
-  .tn { font-size: 16px; }
-  .tn h1 { font-size: clamp(1.2rem, 2vw + 0.8rem, 1.9rem); }
-  .tn h5 { font-size: clamp(0.9rem, 1vw + 0.6rem, 1.05rem); }
-  .tn .lead { font-size: clamp(0.98rem, 0.8vw + 0.85rem, 1.1rem); }
-
-  /* Brand title & tagline */
-  .tn .brand-title { font-size: clamp(1.3rem, 3vw + 0.7rem, 1.9rem); }
-  .tn .tagline { font-size: clamp(0.85rem, 1.1vw + 0.55rem, 0.98rem); }
-
-  /* Container breathing room on very small screens */
-  @media (max-width: 400px){
-    .tn .container { padding: 0 12px; }
-  }
-
-  /* Nav: base tightening on small widths */
-  @media (max-width: 720px){
-    .tn .nav { padding: 8px 6px; min-height: 50px; }
-    .tn .nav a, .tn .nav .linklike { padding: .32rem .5rem; min-width: 78px; }
-    .tn .nav a .en, .tn .nav .linklike .en { font-size: .9rem; }
-    .tn .nav a .zh, .tn .nav .linklike .zh { font-size: .76rem; opacity:.9; }
-  }
-
-  /* Further mobile downscale */
-  @media (max-width: 640px){
-    .tn { font-size: 15px; }
-    .tn h1 { font-size: clamp(1.08rem, 2vw + 0.6rem, 1.6rem); }
-    .tn h5 { font-size: clamp(0.85rem, 0.9vw + 0.5rem, 0.98rem); }
-    .tn .lead { font-size: clamp(0.92rem, 0.7vw + 0.78rem, 1.02rem); }
-
-    .tn .brand-title { font-size: clamp(1.15rem, 2.4vw + 0.6rem, 1.6rem); }
-    .tn .tagline { font-size: clamp(0.8rem, 1vw + 0.5rem, 0.92rem); }
-
-    .tn .pad { padding: 15px 12px; }
-    .tn .body, .tn .desc { padding: 12px 12px; }
-    .tn .badge { width:40px; height:40px; }
-    .tn .media { height: clamp(130px, 26vw, 180px); }
-  }
-
-  @media (max-width: 480px){
-    .tn { font-size: 14.5px; }
-    .tn h1 { font-size: clamp(1.02rem, 1.8vw + 0.55rem, 1.45rem); }
-    .tn .lead { font-size: clamp(0.9rem, 0.6vw + 0.75rem, 0.98rem); }
-
-    .tn .nav a, .tn .nav .linklike { padding: .3rem .46rem; min-width: 74px; }
-    .tn .nav a .en, .tn .nav .linklike .en { font-size: .86rem; }
-    .tn .nav a .zh, .tn .nav .linklike .zh { font-size: .72rem; }
-
-    .tn .btn { padding: .5rem .85rem; font-size: .92rem; }
-  }
-
-  @media (max-width: 400px){
-    .tn { font-size: 14px; }
-    .tn h1 { font-size: clamp(0.98rem, 1.6vw + 0.5rem, 1.35rem); }
-    .tn .nav a, .tn .nav .linklike { min-width: 72px; }
-  }
-
-  @media (max-width: 360px){
-    .tn { font-size: 13.5px; }
-    .tn .nav a, .tn .nav .linklike { padding: .28rem .42rem; min-width: 66px; }
-    .tn .nav a .en, .tn .nav .linklike .en { font-size: .82rem; }
-    .tn .nav a .zh, .tn .nav .linklike .zh { font-size: .68rem; }
-    .tn .btn { font-size: .9rem; padding: .46rem .8rem; }
-  }
-
-  /* Avoid overflow for long words/URLs */
-  .tn p, .tn .desc { overflow-wrap: anywhere; }
-
-  /* Maintain card readability on tiny phones */
-  @media (max-width: 360px){
-    .tn .desc { font-size: .92rem; }
-  }
-</style>
-
 </head>
 
 <body class="tn">
@@ -430,13 +192,9 @@
     </div>
 
     <nav>
-      <div class="nav-wrap">
-          
-          
-        
-          
-          <button type="button" class="nav-arrow left" aria-label="向左">‹</button>
-          <div class="nav container">
+      <div class="nav-wrap" id="navWrap">
+        <button type="button" class="nav-arrow left" aria-label="向左" id="navLeft">‹</button>
+        <div class="nav container" id="navScroller">
           <a href="{{ url_for('main') }}" class="active"><span class="en">Home</span><span class="zh">首頁</span></a>
           <a href="{{ url_for('account') }}"><span class="en">Account</span><span class="zh">AI帳戶分析師</span></a>
           <a href="{{ url_for('question_ask_api') }}"><span class="en">AI</span><span class="zh">AI問答</span></a>
@@ -447,29 +205,26 @@
           <a href="{{ url_for('trading_history_rank') }}"><span class="en">Rank</span><span class="zh">排行榜</span></a>
           <a href="{{ url_for('simulation') }}"><span class="en">Simulation</span><span class="zh">股票模擬交易</span></a>
           <a href="{{ url_for('industry_select_stock') }}"><span class="en">Industry</span><span class="zh">市場情勢模擬</span></a>
-          <a href="#" class="nav-tutorial" id="navTutorialLink"> <span class="q-badge">?</span> <span class="zh">網站功能介紹</span></a>
-
-          {# ---- 登入 / 登出：伺服端判斷 ---- #}
-          {% if session.get('user_id') %}
-          <!-- 已登入：送 POST 登出；外觀做成像 <a> -->
-          <form action="{{ url_for('logout') }}" method="POST" class="d-inline">
-            <button type="submit" id="authLink" class="linklike">
-              <span class="en">Logout</span><span class="zh">登出</span>
-            </button>
-          </form>
-        {% else %}
-          <!-- 未登入：導向登入頁 -->
-          <a href="{{ url_for('login') }}" id="authLink">
-            <span class="en">Login</span><span class="zh">登入</span>
+          <a href="#" class="nav-tutorial" id="navTutorialLink">
+            <span class="en">Tutorial</span>
+            <span class="zh">網站功能介紹</span>
           </a>
-        {% endif %}
+
+          {% if session.get('user_id') %}
+            <form action="{{ url_for('logout') }}" method="POST" class="d-inline">
+              <button type="submit" id="authLink" class="linklike">
+                <span class="en">Logout</span><span class="zh">登出</span>
+              </button>
+            </form>
+          {% else %}
+            <a href="{{ url_for('login') }}" id="authLink">
+              <span class="en">Login</span><span class="zh">登入</span>
+            </a>
+          {% endif %}
         </div>
-          <button type="button" class="nav-arrow right" aria-label="向右">›</button>
-          
-          
+        <button type="button" class="nav-arrow right" aria-label="向右" id="navRight">›</button>
       </div>
     </nav>
-          
   </header>
 
   <main>
@@ -498,43 +253,43 @@
     <section class="section">
       <div class="container">
         <header id="features-intro" class="pad card" style="margin-bottom:18px;">
-          <h5 style="color:var(--primary);margin-bottom:6px;">網站功能介紹</h5>
+          <h5 style="color:var(--primary);margin-bottom:6px;">網站功能特色</h5>
           <h1>為新手打造，結合 AI 的投資學習平台</h1>
         </header>
 
         <div class="grid">
           <a class="service" href="{{ url_for('risk') }}" aria-label="風險投資與推薦">
-            <figure class="media"><img src="/static/img/risk.jpg" alt=""></figure>
+            <figure class="media"><img src="/static/image/mainpage/risk3.png" alt=""></figure>
             <div class="body"><span class="badge"><i class="bi bi-shield-fill-check"></i></span><h6 class="title">風險投資與推薦</h6></div>
-            <p class="desc">將指定股票套用策略分析，或是分析投資行為，皆可配合程式所搭載的 Gemini 進行報告分析。</p>
+            <p class="desc">透過精心設計的風險評估問卷，完成準確的分析與推薦適合的投資方向。</p>
           </a>
 
           <a class="service" href="{{ url_for('roi') }}" aria-label="投資報酬率計算">
-            <figure class="media"><img src="/static/img/risk.jpg" alt=""></figure>
+            <figure class="media"><img src="/static/image/mainpage/roi2.png" alt=""></figure>
             <div class="body"><span class="badge"><i class="bi bi-calculator"></i></span><h6 class="title">投資報酬率計算</h6></div>
             <p class="desc">輸入投資與期間，快速估算與比較不同策略的報酬率表現。</p>
           </a>
 
           <a class="service" href="{{ url_for('journal') }}" aria-label="歷程追蹤">
-            <figure class="media"><img src="/static/img/journal.jpg" alt=""></figure>
+            <figure class="media"><img src="/static/image/mainpage/journal2.png" alt=""></figure>
             <div class="body"><span class="badge"><i class="bi bi-book"></i></span><h6 class="title">歷程追蹤</h6></div>
             <p class="desc">將歷史模擬投資的每次交易詳細記錄，搭配股票代號與模擬時間，方便複習與回顧。</p>
           </a>
 
-          <a class="service" href="{{ url_for('industry_select_stock') }}" aria-label="策略套用">
-            <figure class="media"><img src="/static/img/strategy.jpg" alt=""></figure>
-            <div class="body"><span class="badge"><i class="bi bi-graph-up"></i></span><h6 class="title">策略套用</h6></div>
-            <p class="desc">超過 20 種股票策略，套用即時數據，顯示關鍵指標並提供判讀。</p>
+          <a class="service" href="{{ url_for('trade') }}" aria-label="策略套用">
+            <figure class="media"><img src="/static/image/mainpage/strategies.png" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-graph-up"></i></span><h6 class="title">策略套用 × AI 即時數據投資</h6></div>
+            <p class="desc">超過 15 種股票策略，套用即時數據，顯示關鍵指標並提供AI輔助判讀，體驗接近真實的交易流程。</p>
           </a>
 
-          <a class="service" href="{{ url_for('account') }}" aria-label="AI 即時數據投資">
-            <figure class="media"><img src="/static/img/account.jpg" alt=""></figure>
-            <div class="body"><span class="badge"><i class="bi bi-bar-chart-line-fill"></i></span><h6 class="title">AI 即時數據投資</h6></div>
-            <p class="desc">串接即時報價，由 AI 提供輔助判讀，體驗接近真實的交易流程。</p>
+          <a class="service" href="{{ url_for('industry_select_stock') }}" aria-label="AI 即時數據投資">
+            <figure class="media"><img src="/static/image/mainpage/industry.png" alt=""></figure>
+            <div class="body"><span class="badge"><i class="bi bi-bar-chart-line-fill"></i></span><h6 class="title">市場情勢模擬</h6></div>
+            <p class="desc">利用特定產業，搭配三種策略與當時時空背景，感受不同市場情境下的策略與交易情形</p>
           </a>
 
           <a class="service" href="{{ url_for('simulation') }}" aria-label="AI 歷史數據模擬">
-            <figure class="media"><img src="/static/img/history.jpg" alt=""></figure>
+            <figure class="media"><img src="/static/image/mainpage/simulation.png" alt=""></figure>
             <div class="body"><span class="badge"><i class="bi bi-currency-dollar"></i></span><h6 class="title">AI 歷史數據模擬</h6></div>
             <p class="desc">使用隨機股票過往數據，加速時間進行買賣，結束後由 AI 反饋建議。</p>
           </a>
@@ -550,34 +305,67 @@
   </footer>
 
   <script>
-    // Header compact 滑動控制（避免抖動）
+    
+// Header compact：品牌區在滑動後收合（雙段 scrollBy 補償 + 轉場結束調平 + 擴大量測遲滯 + 停用 scroll anchoring）
     (function () {
       var header = document.getElementById('siteHeader');
       if (!header) return;
       var brand = header.querySelector('.brand');
-      var nav = header.querySelector('.nav');
       var compact = false;
+      var lockUntil = 0;
+
+      function now(){ return (window.performance && performance.now) ? performance.now() : Date.now(); }
 
       function computeThresholds() {
         var expanded = brand ? brand.scrollHeight : 120;
-        var ENTER = Math.max(100, expanded + 8);
-        var EXIT = Math.max(24, Math.min(80, Math.round(ENTER * 0.4)));
+        var ENTER = Math.max(140, expanded + 12);
+        var EXIT  = Math.max(32, ENTER - 160);
         return { ENTER: ENTER, EXIT: EXIT };
       }
-
       var TH = computeThresholds();
-      var ticking = false;
 
+      function finalizeAdjust(hBefore, hMid){
+        var hAfter = header.getBoundingClientRect().height;
+        var dy2 = hAfter - hMid;
+        if (dy2 !== 0) window.scrollBy(0, -dy2);
+      }
+
+      function setCompact(next) {
+        if (compact === next) return;
+        var t = now();
+        if (t < lockUntil) return;
+        lockUntil = t + 180;
+
+        var h0 = header.getBoundingClientRect().height;
+        compact = next;
+        header.classList.toggle('compact', next);
+
+        window.requestAnimationFrame(function(){
+          var h1 = header.getBoundingClientRect().height;
+          var dy1 = h1 - h0;
+          if (dy1 !== 0) window.scrollBy(0, -dy1);
+
+          var done = false;
+          function onEnd(){
+            if (done) return;
+            done = true;
+            header.removeEventListener('transitionend', onEnd, true);
+            finalizeAdjust(h0, h1);
+          }
+          header.addEventListener('transitionend', onEnd, true);
+          setTimeout(onEnd, 460);
+        });
+      }
+
+      var ticking = false;
       function onScroll() {
         if (!ticking) {
           window.requestAnimationFrame(function () {
             var y = window.scrollY || document.documentElement.scrollTop || 0;
             if (!compact && y > TH.ENTER) {
-              compact = true;
-              header.classList.add('compact');
+              setCompact(true);
             } else if (compact && y < TH.EXIT) {
-              compact = false;
-              header.classList.remove('compact');
+              setCompact(false);
             }
             ticking = false;
           });
@@ -586,106 +374,82 @@
       }
 
       window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', function () { TH = computeThresholds(); onScroll(); }, { passive: true });
+      window.addEventListener('resize', function(){
+        TH = computeThresholds();
+        onScroll();
+      }, { passive:true });
       onScroll();
     })();
+
+    // 導覽列：內容放得下 -> 置中 & 關閉水平捲動；放不下 -> 靠左 & 可捲動（箭頭顯示）
+    (function(){
+      var wrap = document.getElementById('navWrap');
+      var scroller = document.getElementById('navScroller');
+      var leftBtn = document.getElementById('navLeft');
+      var rightBtn = document.getElementById('navRight');
+      if(!wrap || !scroller) return;
+
+      function applyFitMode(){
+        var fits = scroller.scrollWidth <= scroller.clientWidth + 1;
+        if (fits){
+          wrap.classList.add('nav-fit');
+          scroller.scrollLeft = 0;
+        } else {
+          wrap.classList.remove('nav-fit');
+        }
+        updateArrows();
+      }
+
+      function updateArrows(){
+        if (!leftBtn || !rightBtn) return;
+        if (wrap.classList.contains('nav-fit')){
+          leftBtn.style.display = rightBtn.style.display = 'none';
+          return;
+        }
+        leftBtn.style.display = rightBtn.style.display = '';
+        var max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+        leftBtn.disabled  = scroller.scrollLeft <= 0;
+        rightBtn.disabled = scroller.scrollLeft >= (max - 1);
+      }
+
+      // 箭頭捲動
+      function step(){ return Math.max(160, Math.round(scroller.clientWidth * 0.4)); }
+      leftBtn && leftBtn.addEventListener('click', function(){ scroller.scrollBy({left:-step(), behavior:'smooth'}); });
+      rightBtn && rightBtn.addEventListener('click', function(){ scroller.scrollBy({left: step(), behavior:'smooth'}); });
+      scroller.addEventListener('scroll', updateArrows, { passive:true });
+
+      // 初次與 resize、字體載入後都判斷一次
+      applyFitMode();
+      var rAF = 0;
+      window.addEventListener('resize', function(){
+        if (rAF) cancelAnimationFrame(rAF);
+        rAF = requestAnimationFrame(applyFitMode);
+      }, { passive:true });
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(applyFitMode); }
+    })();
   </script>
+
   <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
-
-  
-  
-  
-
-
-<!-- NAV FIX JS: begin -->
-<script data-navfix="v1">
-(function(){
-  if (window.__navFixApplied) return;
-  window.__navFixApplied = true;
-
-  function onReady(fn){
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn, {once:true});
-    } else {
-      fn();
-    }
-  }
-
-  onReady(function(){
-    const scroller = document.querySelector('.tn .nav.container');
-    if(!scroller){ return; }
-
-    // 讓容器可被鍵盤 focus 操控
-    if(!scroller.hasAttribute('tabindex')) scroller.setAttribute('tabindex', '0');
-
-    const leftBtn  = document.querySelector('.tn .nav-arrow.left');
-    const rightBtn = document.querySelector('.tn .nav-arrow.right');
-
-    const STEP = () => Math.max(160, Math.round(scroller.clientWidth * 0.4));
-
-    function update(){
-      const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-      if (leftBtn)  leftBtn.disabled  = scroller.scrollLeft <= 0;
-      if (rightBtn) rightBtn.disabled = scroller.scrollLeft >= (max - 1);
-    }
-
-    function snapLeft(){
-      try { scroller.scrollLeft = 0; } catch(e){}
-      update();
-    }
-
-    // 綁定箭頭（若存在）
-    if (leftBtn)  leftBtn.addEventListener('click', () => scroller.scrollBy({ left: -STEP(), behavior: 'smooth' }));
-    if (rightBtn) rightBtn.addEventListener('click', () => scroller.scrollBy({ left:  STEP(), behavior: 'smooth' }));
-
-    scroller.addEventListener('scroll', update);
-    // 窗口縮放後回到最左，避免第一顆被吃進去
-    let rAF = 0;
-    window.addEventListener('resize', () => {
-      if (rAF) cancelAnimationFrame(rAF);
-      rAF = requestAnimationFrame(snapLeft);
-    });
-
-    // 鍵盤左右鍵也可操作（無障礙 & 桌機使用便利）
-    scroller.addEventListener('keydown', (e)=>{
-      if(e.key === 'ArrowLeft'){ e.preventDefault(); scroller.scrollBy({ left: -STEP(), behavior:'smooth' }); }
-      if(e.key === 'ArrowRight'){ e.preventDefault(); scroller.scrollBy({ left:  STEP(), behavior:'smooth' }); }
-    });
-
-    // 初始執行
-    setTimeout(snapLeft, 0);
-  });
-})();
-</script>
-<!-- NAV FIX JS: end -->
-
-<script>
-  (function(){
-    if (typeof initImageTutorial !== 'function') {
-      console.warn('[tutorial] tutorial.js not loaded'); return;
-    }
-    const tutHome = initImageTutorial({
-      pageKey: 'home',
-      version: 'img-v1',
-      images: [
-        "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
-        "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
-      ],
-      autoShow: {{ session.pop('show_home_tut', False)|tojson }},
-      enableEsc: true
-    });
-    document.getElementById('navTutorialLink')?.addEventListener('click', function(e){
-      e.preventDefault();
-      try { tutHome.clear(); tutHome.show(); } catch(err){ console.warn('[tutorial] reopen failed', err); }
-    });
-    // 也支援 .nav-help（若未來有加回來）
-    document.querySelectorAll('.nav-help').forEach(function(el){
-      el.addEventListener('click', function(e){
-        e.preventDefault();
-        try { tutHome.clear(); tutHome.show(); } catch(err){}
+  <script>
+    (function(){
+      if (typeof initImageTutorial !== 'function') {
+        console.warn('[tutorial] tutorial.js not loaded'); return;
+      }
+      const tutHome = initImageTutorial({
+        pageKey: 'home',
+        version: 'img-v1',
+        images: [
+          "{{ url_for('static', filename='image/tutorial/00_main_1.png') }}",
+          "{{ url_for('static', filename='image/tutorial/00_main_2.png') }}"
+        ],
+        autoShow: {{ session.pop('show_home_tut', False)|tojson }},
+        enableEsc: true
       });
-    });
-  })();
-</script>
+      document.getElementById('navTutorialLink')?.addEventListener('click', function(e){
+        e.preventDefault();
+        try { tutHome.clear(); tutHome.show(); } catch(err){ console.warn('[tutorial] reopen failed', err); }
+      });
+    })();
+  </script>
 </body>
 </html>
