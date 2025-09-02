@@ -959,7 +959,7 @@ def trading_history_rank():
             INSERT INTO trading_history_rank (username, avg_win_rate, total_profit)
             SELECT 
                 u.username,
-                ROUND(AVG(a.win_rate), 4),
+                ROUND(AVG(a.win_rate) * 100, 2),  
                 ROUND(SUM(a.profit), 2)
             FROM 
                 users u
@@ -1022,6 +1022,9 @@ from industry_simulation import (
 
 @app.route('/industry_select_stock', methods=['GET', 'POST'])
 def industry_select_stock():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
     if request.method == 'POST':
         stock_code = request.form['stock']
         session['stock_code'] = stock_code
@@ -1228,6 +1231,8 @@ def industry_get_stocks():
 
 @app.route("/question_ask", methods=["GET"])
 def question_ask_page():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     return render_template("question.html")
 
 # POST 送問題到 Gemini
