@@ -108,7 +108,7 @@
         <a href="{{ url_for('main') }}" class="btn-home">Home</a>
       </div>
 
-      <h1>RANK</h1>
+      <h1>交易模擬排行</h1>
 
       <div class="table-responsive">
         <table class="table table-hover table-striped table-bordered mb-0">
@@ -125,7 +125,7 @@
             <tr>
               <td><span class="badge-rank">{{ loop.index }}</span></td>
               <td>{{ row.username }}</td>
-              <td>{{ row.avg_win_rate }}</td>
+              <td>{{ row.avg_win_rate }}%</td>
               <td>{{ row.total_profit }}</td>
             </tr>
             {% endfor %}
