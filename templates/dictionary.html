@@ -7,7 +7,7 @@
 
   <!-- 思源宋體 -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Bootstrap 4.5 -->
+  <!-- Bootstrap 4.5（保留相容性） -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.3/css/bootstrap.min.css">
 
   <style>
@@ -16,22 +16,25 @@
       --primary-dark:#02347e;
       --primary-light:#6499e9;
       --secondary:#0b1f33;
-      --gap:12px;                 /* 9 宮格間距 */
-      --card-base:220px;          /* 每張卡片的「基準」邊長 */
+      --gap:12px;
+      /* 用 clamp 讓卡片尺寸自適應：手機 120px ～ 桌機 220px */
+      --card-size: clamp(120px, 28vw, 220px);
       --glass-bg: rgba(255,255,255,.26);
-      --glass-br: rgba(255,255,255,.70);   /* 亮邊 */
-      --glass-inner: rgba(255,255,255,.45);/* 內描邊 */
+      --glass-br: rgba(255,255,255,.70);
+      --glass-inner: rgba(255,255,255,.45);
       --ink:#0b1733;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
     }
     html,body{height:100%;margin:0;}
     body{
       display:flex;flex-direction:column;
       font-family:'Noto Serif TC',serif;
-      line-height:1.6;
-      color:#0b1733;
+      line-height:1.6;color:#0b1733;
     }
-    h1{font-size:2rem;margin:0 0 .25rem;text-align:center;font-weight:700;}
-    .subheading{font-size:1rem;opacity:.8;margin-bottom:1.5rem;text-align:center}
+    h1{font-size:clamp(1.5rem, 2.6vw, 2rem);margin:.25rem 0;text-align:center;font-weight:700;}
+    .subheading{font-size:clamp(.9rem, 1.6vw, 1rem);opacity:.85;margin-bottom:1.25rem;text-align:center}
 
     /* 背景：柔和藍底 + 細微縮放 */
     body::before{
@@ -40,7 +43,7 @@
       filter:grayscale(15%) brightness(0.62);
       z-index:-3;animation:bgZoom 40s ease-in-out infinite alternate;
     }
-    /* 疊一層光暈讓中央更聚焦 */
+    /* 光暈聚焦 */
     body::after{
       content:"";position:fixed;inset:0;pointer-events:none;z-index:-2;
       background:
@@ -49,209 +52,185 @@
         radial-gradient(700px 600px at 10% 80%, rgba(255,255,255,.10), transparent 60%);
     }
     @keyframes bgZoom{from{transform:scale(1);}to{transform:scale(1.12);}}
-
-/* ===================== 白色外框（頁面主卡） ===================== */
-.page-shell{
-  padding: 40px 16px;            /* 手機到桌機皆有呼吸感 */
-}
-.page-frame{
-  max-width: 1160px;
-  margin: 0 auto;
-  background: rgba(255,255,255,.42);        /* 半透明白 */
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 22px;
-  border: 1px solid var(--glass-br);        /* 外框亮邊 */
-  box-shadow:
-    0 24px 48px rgba(0,0,0,.10),
-    inset 0 0 0 1px var(--glass-inner);     /* 內描邊 */
-  position: relative;
-  overflow: clip;
-}
-/* 角落光暈裝飾（低調） */
-.page-frame::before,
-.page-frame::after{
-  content:""; position:absolute; pointer-events:none;
-  width: 220px; height: 220px; border-radius: 50%;
-  filter: blur(30px); opacity:.25;
-}
-.page-frame::before{ top:-60px; left:-60px; background: #cfe6ff; }
-.page-frame::after{ bottom:-60px; right:-60px; background:#d9f1ff; }
-
-/* 內部玻璃分區（標題區＋內容區） */
-.header-strip{
-  padding: 18px 22px;
-  border-bottom:1px solid rgba(255,255,255,.75);
-  background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.22));
-}
-.header-strip .topbar{
-  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
- position:relative; }
-.topbar .titlewrap{ position:absolute; left:50%; transform:translateX(-50%); text-align:center; }
-.header-strip .titlewrap{
-  flex:1 1 auto; display:flex; flex-direction:column; align-items:center; min-width:260px;
-}
-
-/* 內層卡片包裝（網格容器外的淡玻璃） */
-.card-wrapper{
-  background: var(--glass-bg);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border-radius: 18px;
-  box-shadow: 0 10px 26px rgba(0,0,0,.06), inset 0 0 0 1px var(--glass-inner);
-  border: 1px solid var(--glass-br);
-  padding: 22px 22px 28px;
-  margin: 18px;
-}
-
-/* Home 按鈕 */
-.btn-home{
-  display:inline-block;text-decoration:none;font-weight:700;
-  padding:.6rem 1.25rem;border-radius:999px;
-  border:1.5px solid var(--primary);background:#fff;color:var(--primary);
-  transition:background .2s ease,color .2s ease,box-shadow .2s ease,transform .05s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn-home:hover{background:var(--primary);color:#fff;box-shadow:0 8px 16px rgba(4,59,143,.18);transform:translateY(-1px);}
-.btn-home:active{transform:translateY(0);box-shadow:0 4px 8px rgba(4,59,143,.18);}
-.btn-home:focus-visible{outline:3px solid rgba(100,153,233,.6);outline-offset:2px}
-
-/* ===================== 版面：側欄＋九宮格 ===================== */
-.main-container{
-  display:flex; justify-content:center; align-items:flex-start; gap:16px;
-}
-.sidebar{width:220px}          /* 與需求一致 */
-.content{
-  display:flex; flex-direction:column; align-items:center; overflow:visible;
-}
-.card-scaler{
-  --grid-scale:1;
-  transform: scale(var(--grid-scale));
-  transform-origin: top center;
-  width: calc(3 * var(--card-base) + 2 * var(--gap));
-}
-
-/* 9 宮格 */
-.card-container{
-  display:grid;
-  grid-template-columns: repeat(3, var(--card-base));
-  gap: var(--gap);
-  justify-content:start;
-  overflow: visible;
-}
-
-/* ===== 字卡（避免旋轉撐出排版） ===== */
-.card{
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  height: auto;
-  perspective:1200px;
-  contain: layout style;
-  isolation: isolate;
-  will-change: transform;
-  overflow: visible;
-}
-.card-inner{
-  position: relative;
-  width: 100%; height: 100%;
-  transform-style: preserve-3d;
-  will-change: transform;
-  transform: rotateY(var(--rot, 0deg)) scale(var(--s, 1)) translateZ(0);
-  transition: transform 1100ms cubic-bezier(.22,.72,.18,1) var(--delay,80ms);
-}
-.card:hover { z-index: 5; }
-.card:hover .card-inner{
-  --rot: 180deg;
-  --s: 1.03;
-}
-
-/* 文字卡外觀：加上淡淡玻璃投影，與背景更融合 */
-.card-front, .card-back{
-  position: absolute; inset: 0;
-  display:flex; justify-content:center; align-items:center;
-  border-radius: 14px; padding: 20px;
-  color: #fff; text-align: center; font-weight: 700; font-size: 1rem;
-  box-shadow: 0 8px 16px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.08);
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
-  transform: translateZ(0.5px);
-  -webkit-font-smoothing: antialiased;
-  transition: box-shadow .28s ease .48s;
-  background-image: linear-gradient( to bottom, rgba(255,255,255,.08), rgba(0,0,0,.06) );
-  border:1px solid rgba(255,255,255,.35);
-}
-.card-back{ transform: rotateY(180deg) translateZ(0.5px); font-weight: 500; font-size: .98rem; }
-.card:hover .card-front, .card:hover .card-back { box-shadow: 0 14px 28px rgba(0,0,0,.18); }
-
-/* Fallback：不支援 aspect-ratio */
-@supports not (aspect-ratio: 1 / 1){
-  .card::before{ content:""; display:block; padding-top:100%; }
-  .card-inner{ position:absolute; inset:0; }
-}
-
-/* 側邊欄按鈕美化（與白框風格一致） */
-.sidebar button{
-  width:100%;margin-bottom:10px;padding:10px 12px;
-  background:#fff;color:var(--primary);border:1px solid var(--primary);
-  border-radius:10px;cursor:pointer;font-weight:700;
-  transition: transform .06s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
-  box-shadow:0 4px 10px rgba(4,59,143,.08);
-}
-.sidebar button:hover{background:var(--primary);color:#fff;transform: translateY(-1px);box-shadow:0 10px 18px rgba(4,59,143,.18);}
-.sidebar button:focus-visible{outline:3px solid rgba(100,153,233,.6);outline-offset:2px}
-
-/* 分頁 */
-.pagination{
-  margin-top:40px;display:flex;justify-content:center;align-items:center;gap:20px;
-}
-.pagination button{
-  padding:8px 16px;font-size:1rem;cursor:pointer;border-radius:999px;
-  border:1px solid var(--primary);background:#fff;color:var(--primary);
-  transition: background .2s ease, color .2s ease, transform .06s ease, box-shadow .2s ease;
-  box-shadow:0 4px 10px rgba(4,59,143,.06);
-}
-.pagination button:hover{background:var(--primary);color:#fff;transform: translateY(-1px);box-shadow:0 10px 18px rgba(4,59,143,.18);}
-.pagination button:disabled{opacity:.45; cursor:not-allowed; transform:none;}
-
-/* 頁腳（如未使用可略） */
-footer{background:var(--secondary);color:#fff;text-align:center;}
-footer h5{font-size:1.125rem;margin-bottom:1rem;}
-footer ul{list-style:none;padding-left:0;margin-bottom:1.5rem;}
-footer li{margin-bottom:.25rem;}
-footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;padding-top:1rem;font-size:.875rem;color:#ccc;}
-  
-    /* 圓形「?」重看教學（放在 Home 左邊） */
-    .nav-help--circle{
-      width:40px; height:40px; border-radius:999px; padding:0;
-      display:inline-flex; align-items:center; justify-content:center;
-      font-weight:800; line-height:1; font-size:18px;
-      background:#fff; color:var(--primary);
-      border:1.5px solid var(--primary);
-      text-decoration:none;
-      box-shadow:0 6px 16px rgba(0,0,0,.12);
+    @media (prefers-reduced-motion: reduce){
+      body::before{animation:none}
     }
-    .nav-help--circle:hover{ background:#fff; color:var(--primary-dark); text-decoration:none; }
-    .nav-help--circle:focus{ outline:none; }
-    .nav-help--circle:focus-visible{ box-shadow:0 0 0 3px rgba(100,153,233,.5), 0 6px 16px rgba(0,0,0,.12); }
 
-  
-/* --- Restore centered title without absolute positioning; symmetric layout --- */
-.topbar{
-  display: grid !important;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 8px;
-  position: static !important;
-}
-.topbar .titlewrap{
-  position: static !important;
-  left: auto !important;
-  transform: none !important;
-  text-align: center;
-}
+    /* ===================== 白色外框（頁面主卡） ===================== */
+    .page-shell{ padding: clamp(20px, 3vw, 40px) 16px; }
+    .page-frame{
+      max-width: 1160px; margin: 0 auto;
+      background: rgba(255,255,255,.42);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--glass-br);
+      box-shadow: 0 24px 48px rgba(0,0,0,.10), inset 0 0 0 1px var(--glass-inner);
+      position: relative; overflow: clip;
+    }
+    .page-frame::before,.page-frame::after{
+      content:""; position:absolute; pointer-events:none;
+      width: clamp(140px, 16vw, 220px); height: clamp(140px, 16vw, 220px);
+      border-radius: 50%; filter: blur(30px); opacity:.25;
+    }
+    .page-frame::before{ top:-60px; left:-60px; background: #cfe6ff; }
+    .page-frame::after{ bottom:-60px; right:-60px; background:#d9f1ff; }
 
+    /* 內部分區 */
+    .header-strip{
+      padding: clamp(12px, 2vw, 18px) clamp(14px, 2.2vw, 22px);
+      border-bottom:1px solid rgba(255,255,255,.75);
+      background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,.22));
+    }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .titlewrap{
+      flex:1 1 auto; display:flex; flex-direction:column; align-items:center; min-width:240px;
+    }
+
+    .card-wrapper{
+      background: var(--glass-bg);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 26px rgba(0,0,0,.06), inset 0 0 0 1px var(--glass-inner);
+      border: 1px solid var(--glass-br);
+      padding: clamp(14px, 2.2vw, 28px) clamp(12px, 2vw, 22px) clamp(18px, 2.4vw, 28px);
+      margin: clamp(12px, 2vw, 18px);
+    }
+
+    /* Home 按鈕 */
+    .btn-home{
+      display:inline-block;text-decoration:none;font-weight:700;
+      padding:.55rem 1.1rem;border-radius:999px;
+      border:1.5px solid var(--primary);background:#fff;color:var(--primary);
+      transition:background .2s ease,color .2s ease,box-shadow .2s ease,transform .05s ease;
+      -webkit-tap-highlight-color: transparent;font-size:clamp(.9rem, 1.6vw, 1rem);
+    }
+    .btn-home:hover{background:var(--primary);color:#fff;box-shadow:0 8px 16px rgba(4,59,143,.18);transform:translateY(-1px);}
+    .btn-home:active{transform:translateY(0);box-shadow:0 4px 8px rgba(4,59,143,.18);}
+    .btn-home:focus-visible{outline:3px solid rgba(100,153,233,.6);outline-offset:2px}
+
+    /* ===================== 版面：側欄＋九宮格 ===================== */
+    .main-container{
+      display:flex; justify-content:center; align-items:flex-start; gap:16px;
+    }
+
+    /* —— 桌機：左側固定寬度 —— */
+    .sidebar{width:220px; flex:0 0 220px;}
+    .content{display:flex; flex-direction:column; align-items:center; overflow:visible; width:100%;}
+
+    /* 九宮格容器（自適應欄數） */
+    .card-container{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(var(--card-size), 1fr));
+      gap: var(--gap);
+      width: 100%;
+      max-width: calc(3 * 220px + 2 * var(--gap));
+    }
+
+    /* ===== 字卡 ===== */
+    .card{
+      position: relative; width: 100%;
+      aspect-ratio: 1 / 1; height: auto;
+      perspective:1200px; contain: layout style; isolation: isolate;
+      will-change: transform; overflow: visible;
+    }
+    .card-inner{
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d; will-change: transform;
+      transform: rotateY(var(--rot, 0deg)) scale(var(--s, 1)) translateZ(0);
+      transition: transform 1100ms cubic-bezier(.22,.72,.18,1) var(--delay,80ms);
+    }
+    .card:hover { z-index: 5; }
+    .card:hover .card-inner{ --rot: 180deg; --s: 1.03; }
+
+    /* 觸控：點擊也能翻（行動裝置） */
+    .card:active .card-inner{ --rot: 180deg; --s: 1.02; }
+
+    .card-front, .card-back{
+      position: absolute; inset: 0; display:flex; justify-content:center; align-items:center;
+      border-radius: var(--radius-sm); padding: clamp(12px, 2vw, 20px);
+      color: #fff; text-align: center; font-weight: 700; font-size: clamp(.9rem, 1.8vw, 1rem);
+      box-shadow: 0 8px 16px rgba(0,0,0,.14), 0 2px 6px rgba(0,0,0,.08);
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      transform: translateZ(0.5px);
+      -webkit-font-smoothing: antialiased;
+      transition: box-shadow .28s ease .48s;
+      background-image: linear-gradient( to bottom, rgba(255,255,255,.08), rgba(0,0,0,.06) );
+      border:1px solid rgba(255,255,255,.35);
+      word-break: break-word;
+    }
+    .card-back{ transform: rotateY(180deg) translateZ(0.5px); font-weight: 500; font-size: clamp(.88rem, 1.7vw, .98rem); }
+    .card:hover .card-front, .card:hover .card-back { box-shadow: 0 14px 28px rgba(0,0,0,.18); }
+
+    @supports not (aspect-ratio: 1 / 1){
+      .card::before{ content:""; display:block; padding-top:100%; }
+      .card-inner{ position:absolute; inset:0; }
+    }
+
+    /* 側欄按鈕（桌機） */
+    .sidebar button{
+      width:100%;margin-bottom:10px;padding:12px 12px;
+      background:#fff;color:var(--primary);border:1px solid var(--primary);
+      border-radius:12px;cursor:pointer;font-weight:700;
+      transition: transform .06s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+      box-shadow:0 4px 10px rgba(4,59,143,.08);
+      font-size: .95rem;
+    }
+    .sidebar button:hover{background:var(--primary);color:#fff;transform: translateY(-1px);box-shadow:0 10px 18px rgba(4,59,143,.18);}
+    .sidebar button:focus-visible{outline:3px solid rgba(100,153,233,.6);outline-offset:2px}
+
+    /* 分頁 */
+    .pagination{
+      margin-top:clamp(18px, 3vw, 32px);
+      display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;
+      width:100%;
+    }
+    .pagination button{
+      padding:10px 16px;font-size:1rem;cursor:pointer;border-radius:999px;
+      border:1px solid var(--primary);background:#fff;color:var(--primary);
+      transition: background .2s ease, color .2s ease, transform .06s ease, box-shadow .2s ease;
+      box-shadow:0 4px 10px rgba(4,59,143,.06); min-width:108px;
+    }
+    .pagination button:hover{background:var(--primary);color:#fff;transform: translateY(-1px);box-shadow:0 10px 18px rgba(4,59,143,.18);}
+    .pagination button:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+
+    /* ======= 手機/平板 RWD 強化 ======= */
+    /* 768px 以下：側欄改為頂部可橫滑按鈕列 + 下拉選單備用 */
+    .mobile-topic-bar{
+      display:none;
+      gap:8px; overflow-x:auto; -webkit-overflow-scrolling: touch; padding-bottom:6px; margin-bottom:8px;
+    }
+    .mobile-topic-bar::-webkit-scrollbar{height:6px}
+    .mobile-topic-bar::-webkit-scrollbar-thumb{background:rgba(4,59,143,.25);border-radius:999px}
+
+    .mobile-topic-select{ display:none; width:100%; margin:6px 0 10px; }
+
+    @media (max-width: 991.98px){ /* 平板含以下：左右改上下排列 */
+      .main-container{flex-direction:column; gap:12px;}
+      .sidebar{display:none;} /* 隱藏桌機側欄 */
+      .mobile-topic-bar{display:flex; flex-wrap:nowrap;}
+      .mobile-topic-select{display:block;}
+      .card-container{max-width: 100%;}
+      .page-frame{border-radius:18px}
+      .card-wrapper{border-radius:16px}
+    }
+
+    @media (max-width: 575.98px){ /* 手機：字級、間距再縮，按鈕更好點 */
+      .btn-home{padding:.5rem 1rem}
+      .subheading{margin-bottom:.9rem}
+      .pagination{gap:10px}
+      .pagination button{min-width:44%; padding:12px 14px; font-size:.98rem}
+      .mobile-topic-bar button{flex:0 0 auto}
+    }
+
+    /* 頁腳（如未使用可略） */
+    footer{background:var(--secondary);color:#fff;text-align:center;}
+    footer h5{font-size:1.125rem;margin-bottom:1rem;}
+    footer ul{list-style:none;padding-left:0;margin-bottom:1.5rem;}
+    footer li{margin-bottom:.25rem;}
+    footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:1.25rem;padding-top:.9rem;font-size:.875rem;color:#ccc;}
   </style>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
   <main class="flex-grow-1 page-shell">
@@ -264,19 +243,25 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
             <h1>股票主題學習卡片</h1>
             <div class="subheading">九宮格翻牌學習｜簡單易懂｜趣味遊戲</div>
           </div>
-          
-                  <a href="#" class="nav-help nav-help--circle" aria-label="Help" title="Help">?</a>
+          <span style="width:92px"></span><!-- 置中對齊的小占位 -->
         </div>
       </div>
 
       <!-- 內容區 -->
       <div class="card-wrapper">
-        <div class="main-container d-flex">
+        <div class="main-container">
+          <!-- 桌機側欄（在手機/平板會隱藏） -->
           <div class="sidebar" id="topicList"></div>
-          <div class="content flex-grow-1">
-            <div class="card-scaler" id="cardScaler">
-              <div class="card-container" id="cardContainer"></div>
-            </div>
+
+          <!-- 手機/平板主題選擇（桌機隱藏） -->
+          <div class="mobile-topic-select">
+            <select id="topicSelect" class="form-control"></select>
+          </div>
+          <div class="mobile-topic-bar" id="topicBar"></div>
+
+          <!-- 右側內容 -->
+          <div class="content">
+            <div class="card-container" id="cardContainer"></div>
 
             <div class="pagination">
               <button id="prevPage">上一頁</button>
@@ -289,11 +274,12 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
     </div>
   </main>
 
-  <!-- jQuery & Bootstrap JS -->
+  <!-- jQuery & Bootstrap JS（保留相容） -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    /* ====== 資料 ====== */
     const topics = {
       "技術分析與交易策略": [
         { name: "布林帶策略", description: "用三條線包住價格，當價格碰到上下邊界時，可能代表太貴或太便宜，是進出場的參考點。" },
@@ -375,23 +361,60 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
     let currentPage = 1;
     const itemsPerPage = 9; // 固定 9 宮格
 
-    const topicList = document.getElementById("topicList");
+    const topicList = document.getElementById("topicList");     // 桌機側欄
+    const topicBar  = document.getElementById("topicBar");       // 行動橫滑列
+    const topicSelect = document.getElementById("topicSelect");  // 行動下拉
     const cardContainer = document.getElementById("cardContainer");
     const prevPageBtn = document.getElementById("prevPage");
     const nextPageBtn = document.getElementById("nextPage");
     const pageInfo = document.getElementById("pageInfo");
 
-    Object.keys(topics).forEach(topic => {
-      const btn = document.createElement("button");
-      btn.textContent = topic;
-      btn.onclick = () => {
-        currentTopic = topic;
-        currentPage = 1;
-        renderCards();
-      };
-      topicList.appendChild(btn);
-    });
+    /* ====== 建立主題按鈕 / 下拉 ====== */
+    function buildTopics(){
+      topicList.innerHTML = "";
+      topicBar.innerHTML = "";
+      topicSelect.innerHTML = "";
 
+      Object.keys(topics).forEach(topic => {
+        // 桌機側欄按鈕
+        const btn = document.createElement("button");
+        btn.textContent = topic;
+        btn.onclick = () => { setTopic(topic); };
+        topicList.appendChild(btn);
+
+        // 行動：橫滑按鈕
+        const mbtn = document.createElement("button");
+        mbtn.textContent = topic;
+        mbtn.className = "btn btn-light";
+        mbtn.style.border = "1px solid var(--primary)";
+        mbtn.style.color = "var(--primary)";
+        mbtn.style.borderRadius = "999px";
+        mbtn.style.padding = "8px 12px";
+        mbtn.onclick = () => { setTopic(topic); topicSelect.value = topic; };
+        topicBar.appendChild(mbtn);
+
+        // 行動：下拉
+        const opt = document.createElement("option");
+        opt.value = topic; opt.textContent = topic;
+        topicSelect.appendChild(opt);
+      });
+
+      topicSelect.onchange = (e)=> setTopic(e.target.value);
+    }
+
+    function setTopic(topic){
+      currentTopic = topic;
+      currentPage = 1;
+      renderCards();
+      // 同步選取狀態（可選：讓被選主題的行動按鈕視覺更明顯）
+      [...topicBar.children].forEach(btn=>{
+        btn.classList.toggle("active", btn.textContent === topic);
+        btn.style.background = btn.classList.contains("active") ? "var(--primary)" : "#fff";
+        btn.style.color = btn.classList.contains("active") ? "#fff" : "var(--primary)";
+      });
+    }
+
+    /* ====== 卡片渲染 ====== */
     function renderCards() {
       const terms = topics[currentTopic] || [];
       const startIndex = (currentPage - 1) * itemsPerPage;
@@ -429,7 +452,7 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
       prevPageBtn.disabled = currentPage === 1;
       nextPageBtn.disabled = currentPage === totalPages;
 
-      // 填滿 9 宮格，確保每頁版型不歪
+      // 填滿 9 宮格，確保每頁版型不歪（即使在 RWD 下也維持整頁視覺）
       const blankCount = itemsPerPage - currentTerms.length;
       for (let i = 0; i < blankCount; i++) {
         const blankCard = document.createElement("div");
@@ -445,7 +468,6 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
         renderCards();
       }
     };
-
     nextPageBtn.onclick = () => {
       const totalPages = Math.ceil((topics[currentTopic] || []).length / itemsPerPage) || 1;
       if (currentPage < totalPages) {
@@ -454,72 +476,11 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
       }
     };
 
+    /* ====== 初始化 ====== */
+    buildTopics();
     const defaultTopic = Object.keys(topics)[0];
-    currentTopic = defaultTopic;
-    renderCards();
-
-    function resizeGrid() {
-      const scaler = document.getElementById('cardScaler');
-      const content = document.querySelector('.content');
-      if (!scaler || !content) return;
-
-      const gap = 12;           // 與 CSS --gap 一致
-      const cardBase = 220;     // 與 CSS --card-base 一致
-      const needed = 3 * cardBase + 2 * gap;
-
-      const safePad = 0;
-      const available = Math.max(0, content.clientWidth - safePad);
-
-      const scale = Math.min(1, available / needed);
-      scaler.style.setProperty('--grid-scale', scale);
-
-      const pagination = document.querySelector('.pagination');
-      if (pagination) pagination.style.marginTop = scale < 1 ? '28px' : '40px';
-    }
-    // 重新渲染卡片後需要重算一次縮放
-    const _renderCards = renderCards;
-    renderCards = function(){
-      _renderCards();
-      resizeGrid();
-    };
-    window.addEventListener('load', resizeGrid);
-    window.addEventListener('resize', resizeGrid);
+    setTopic(defaultTopic);
+    topicSelect.value = defaultTopic;
   </script>
-  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
-
-  <script>
-    (function(){
-      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-      function init(){
-        if(typeof initImageTutorial !== 'function'){ console.warn('[tutorial] not loaded'); return null; }
-        return initImageTutorial({
-          pageKey: 'dictionary',
-          version: 'img-v1',
-          images: [
-            "{{ url_for('static', filename='image/tutorial/07_dictionary_1.png') }}",
-            "{{ url_for('static', filename='image/tutorial/07_dictionary_2.png') }}"
-          ],
-          autoShow: true,
-          enableEsc: true
-        });
-      }
-      ready(function(){
-        var tut = init();
-        var tries = 0;
-        if(!tut){
-          var timer = setInterval(function(){
-            tut = init(); tries++;
-            if(tut || tries>30){ clearInterval(timer); }
-          }, 100);
-        }
-        document.querySelector('.nav-help')?.addEventListener('click', function(e){
-          e.preventDefault();
-          if(!tut) tut = init();
-          try{ tut.clear(); tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
-        });
-      });
-    })();
-  </script>
-
 </body>
 </html>
