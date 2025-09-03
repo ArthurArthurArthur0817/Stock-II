@@ -14,6 +14,9 @@
   <!-- (可選) 你的外部樣式 -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"/>
 
+  <!-- 共用教學樣式 -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
+
   <style>
     /* 1) 全域配色 */
     :root{
@@ -188,6 +191,24 @@
     color: #fff !important;
     }
 
+  
+/* 圓形「?」重看教學按鈕（與 risk 風格一致） */
+.tut-help{
+  position:fixed; top:18px; right:18px; z-index:999;
+  width:42px; height:42px; border-radius:999px; border:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:800; line-height:1; font-size:1rem;
+  background:rgba(255,255,255,.92); color:var(--primary);
+  box-shadow:0 6px 16px rgba(0,0,0,.14);
+}
+.tut-help:hover{ background:#fff; }
+.tut-help:focus{ outline:none }
+.tut-help:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.14); }
+/* iPhone 瀏海安全區 */
+@supports(padding:env(safe-area-inset-right)){
+  .tut-help{ right:calc(14px + env(safe-area-inset-right)); top:calc(14px + env(safe-area-inset-top)); }
+}
+
   </style>
 </head>
 <body>
@@ -259,7 +280,29 @@
   </main>
 
   <!-- jQuery & Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <button type="button" class="tut-help" data-action="show-tutorial" aria-label="重新查看使用教學" title="使用教學">?</button>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 共用教學腳本 -->
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <!-- 此頁教學：兩張圖，第一次進入該頁自動顯示（由 tutorial.js 的 localStorage 控制） -->
+  <script>
+    const tutAccount = initImageTutorial({
+      pageKey: 'account',
+      version: 'img-v1',  // 改版時改字串，使用者會再看一次
+      images: [
+        "{{ url_for('static', filename='image/tutorial/02_account_1.png') }}",
+        "{{ url_for('static', filename='image/tutorial/02_account_2.png') }}"
+      ],
+      autoShow: true,
+      enableEsc: true
+    });
+    // 若你頁面某處要手動重看，可在該元素加 data-action="show-tutorial"
+    document.querySelectorAll('[data-action="show-tutorial"]').forEach(el => {
+      el.addEventListener('click', e => { e.preventDefault(); tutAccount.clear(); tutAccount.show(); });
+    });
+  </script>
 </body>
 </html>

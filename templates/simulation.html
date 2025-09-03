@@ -216,9 +216,30 @@
       max-width:100%;
       height:auto;
     }
+  
+/* 圓形「?」重看教學按鈕（固定右上） */
+.tut-help{
+  position:fixed; top:18px; right:18px; z-index:1001;
+  width:42px; height:42px; border-radius:999px; border:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:800; line-height:1; font-size:1rem;
+  background:rgba(255,255,255,.92); color:var(--primary, #043b8f);
+  box-shadow:0 6px 16px rgba(0,0,0,.14);
+}
+.tut-help:hover{ background:#fff; }
+.tut-help:focus{ outline:none }
+.tut-help:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.14); }
+/* iPhone 瀏海安全區 */
+@supports(padding:env(safe-area-inset-right)){
+  .tut-help{ right:calc(14px + env(safe-area-inset-right)); top:calc(14px + env(safe-area-inset-top)); }
+}
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
+  <button type="button" class="tut-help" data-action="show-tutorial" aria-label="重新查看使用教學" title="使用教學">?</button>
+
   <!-- 左上角：返回主畫面 -->
   <a href="{{ url_for('main') }}" class="btn-home">Home</a>
 
@@ -273,7 +294,7 @@
               <td style="width:120px;"><div class="text-center"><img src="/static/image/KChart/大陽線.png" width="55" height="187"></div></td>
               <td style="width:40%;">開盤價即為最低價，隨後股價一路上攻，最後收在股價最高點，代表買盤力道強勁。</td>
               <td style="width:120px;"><div class="text-center"><img src="/static/image/KChart/小陽線.png" width="58" height="192"></div></td>
-              <td>股價跌到低點時有買盤支撐，但漲到高點又遇到賣壓……通常是一種反轉訊號。（略）</td>
+              <td>股價跌到低點時有買盤支撐，但漲到高點又遇到賣壓，最終由多方略勝一籌，推升股價呈現上漲狀態，K 線出現這樣的型態，通常是一種反轉訊號，如果在大漲後出現，表示高檔震盪﹔反之，如果在大跌後出現，可能表示股價已觸底，未來股價有望反彈。</td>
             </tr>
             <tr>
               <td colspan="2"><h3 class="text-center">光頭陽線</h3></td>
@@ -281,9 +302,9 @@
             </tr>
             <tr>
               <td><div class="text-center"><img src="/static/image/KChart/光頭陽線.png" width="65" height="169"></div></td>
-              <td>開盤後股價一度下跌，但因有買盤支撐，推升股價一路走升，最終收在最高價位……</td>
+              <td>開盤後股價一度下跌，但因有買盤支撐，推升股價一路走升，最終收在最高價位，當下影線越長，代表反彈的力道越大，屬於多頭上漲的訊號。</td>
               <td><div class="text-center"><img src="/static/image/KChart/光腳陽線.png" width="61" height="177"></div></td>
-              <td>開盤後股價一度衝至最高點，但在高檔區遭遇賣壓……</td>
+              <td>開盤後股價一度衝至最高點，但在高檔區遭遇賣壓，最終由多方略勝一籌，收盤價仍高於開盤價，當上影線越長，代表賣盤力道較強、拉回程度越大。</td>
             </tr>
             <tr>
               <td colspan="2"><h3 class="text-center">陽線錘子</h3></td>
@@ -291,9 +312,9 @@
             </tr>
             <tr>
               <td><div class="text-center"><img src="/static/image/KChart/陽錘.png" width="65" height="169"></div></td>
-              <td>股價大跌之後，空方力道減弱……可視為股價底部支撐的訊號。</td>
+              <td>股價大跌之後，空方力道減弱，隨後買盤一路買到最高價作收，如果在長期下跌的情況下，看到這樣的型態，代表買盤已積累一段時間後開始釋放，可以視為股價底部支撐的訊號。</td>
               <td><div class="text-center"><img src="/static/image/KChart/倒陽錘.png" width="60" height="175" alt="A sample picture"></div></td>
-              <td>股價大漲之後，多方力道減弱……上影線越長，代表賣壓越大。</td>
+              <td>股價大漲之後，多方力道減弱，隨後股價被賣盤拉回，但最終由多方略勝一籌，收盤價仍高於開盤價，上影線的長度表示拉回的程度，上影線越長，代表賣壓越大。</td>
             </tr>
           </table>
         </div>
@@ -309,9 +330,9 @@
             </tr>
             <tr>
               <td style="width:120px;"><div class="text-center"><img src="/static/image/KChart/大陰.png" width="55" height="187"></div></td>
-              <td style="width:40%;">開盤價即是最高價，隨後股價一路下滑，最後收在最低點……</td>
+              <td style="width:40%;">開盤價即是最高價，隨後股價一路下滑，最後收在股價最低點，代表賣方力道強勁，下跌幅度越大，如果在長期下跌的情況下，又看到這樣的型態，股價可能會加速暴跌。 </td>
               <td style="width:120px;"><div class="text-center"><img src="/static/image/KChart/小陰線.png" width="58" height="192"></div></td>
-              <td>多空勢均力敵程度較高時，常見為弱勢盤整。（略）</td>
+              <td>股價跌到低點時有買盤支撐，但漲到高點又遇到賣壓，最終由空方略勝一籌，使得股價呈現下跌狀態，當中間實線長度越短，代表雙方勢均力敵的程度越高。K 線出現這樣的型態，通常代表市場進入弱勢盤整。</td>
             </tr>
             <tr>
               <td colspan="2"><h3 class="text-center">光頭陰線</h3></td>
@@ -319,9 +340,9 @@
             </tr>
             <tr>
               <td><div class="text-center"><img src="/static/image/KChart/光頭陰線.png" width="65" height="169"></div></td>
-              <td>開盤後一度下跌，最終收盤仍低於開盤價……</td>
+              <td>開盤後股價一度下跌，但有買盤支撐，推升股價回升，最終收盤價仍低於開盤價，如果在長期下跌的情況下，出現這樣的型態，可能為股價觸底的訊號。</td>
               <td><div class="text-center"><img src="/static/image/KChart/光腳陰線.png" width="61" height="177"></div></td>
-              <td>上檔賣壓沉重，最終拉回至最低價收盤……</td>
+              <td>開盤後股價一度衝至最高點，但因上檔賣壓沉重，最終由空方略勝一籌，拉回至最低價收盤。如果是在上漲末升段，K 線出現這樣的型態，通常被視為反轉下跌的訊號，多頭可能會陷入被套牢的窘境。</td>
             </tr>
             <tr>
               <td colspan="2"><h3 class="text-center">陰線錘子</h3></td>
@@ -329,9 +350,9 @@
             </tr>
             <tr>
               <td><div class="text-center"><img src="/static/image/KChart/陰線槌子.png" width="65" height="169"></div></td>
-              <td>空頭轉向多頭或相反的常見訊號……</td>
+              <td>股價大跌之後，多頭力量慢慢凝聚，隨後買盤一路推升股價走升，最終仍由空方略勝一籌，如果在持續走空後的低檔區，看到這樣的型態，通常視為空頭轉向多頭的訊號﹔反之，出現在高檔區則可能由多轉空。</td>
               <td><div class="text-center"><img src="/static/image/KChart/倒錘陰線.png" width="60" height="175"></div></td>
-              <td>上影線越長，代表賣壓越沉重……</td>
+              <td>股價大漲之後，空方力量慢慢凝聚，隨後賣盤一路賣到最低價作收，上影線的長度表示拉回的程度，上影線越長，代表賣壓越大。</td>
             </tr>
           </table>
         </div>
@@ -347,9 +368,9 @@
             </tr>
             <tr>
               <td style="width:120px;"><div class="text-center"><img src="/static/image/KChart/十字線.png" width="55" height="187"></div></td>
-              <td style="width:40%;">多空勢均力敵……高點出現易轉弱，低點出現易反彈。</td>
+              <td style="width:40%;"> <p>（開盤價=收盤價） </p>十字線代表多空雙方勢均力敵，開盤價與收盤價一致，當十字線出現在近期波段的高點，則表示多方力量減弱，股價可能會下跌﹔反之，十字線出現在近期波段的低點，則表示空方力量轉弱，股價則有上漲的可能。</td>
               <td style="width:120px;"><div class="text-center"><img src="/static/image/KChart/T字線.png" width="58" height="186"></div></td>
-              <td>下影線越長，反彈力道越強……</td>
+              <td> <p> （開盤價=收盤價=最高價） </p>下雖然一開始賣壓較大，造成股價跌深，但隨後因買氣回升，股價一路回升到開盤時的價位，並收在最高點，當下影線越長，代表反彈力道更強勁，屬於多方勝利，如果 T 字線出現在上漲波段，表示股價可能已到頂部，投資人可能要考慮是否要賣出獲利了結。 </td>
             </tr>
             <tr>
               <td colspan="2"><h3 class="text-center">一字線</h3></td>
@@ -357,9 +378,11 @@
             </tr>
             <tr>
               <td><div class="text-center"><img src="/static/image/KChart/一字線.png" width="54" height="181"></div></td>
-              <td>極端狀態或成交冷清時常見……</td>
+              <td> <p> （開盤價=收盤價=最高價=最低價） </p>
+            <p>一字線通常屬於極端狀態，代表投資人非常看好或非常看壞，例如開盤直接跳空漲停直到收盤、開盤跳空跌停一直到收盤，這兩種情況都會呈現一字線，另一種情況，就是非常冷門的股票，一天只在同個價位成交一兩筆，這時也會出現一字線。 </p></td>
               <td><div class="text-center"><img src="/static/image/KChart/倒T字線.png" width="61" height="177"></div></td>
-              <td>若出現在上漲波段，代表轉弱機率大；上影線越長賣壓越重。</td>
+              <td><p> （開盤價=收盤價=最低價） </p>
+            <p>雖然一開始的買氣很強，推升股價衝到最高點，但隨後因賣壓出現，一路跌至開盤時的價位，並收在最低點，如果倒 T 字線出現在上漲波段，代表股價可能已開始轉弱，當上影線越長、賣壓越沉重。 </p> </td>
             </tr>
           </table>
         </div>
@@ -453,5 +476,33 @@
       });
     });
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <script>
+    (function(){
+      if (typeof initImageTutorial !== 'function') { console.warn('[tutorial] tutorial.js not loaded'); return; }
+      const tutSimulation = initImageTutorial({
+        pageKey: 'simulation',
+        version: 'img-v1',
+        images: [
+          "{{ url_for('static', filename='image/tutorial/04_simulation_1.png') }}",
+          "{{ url_for('static', filename='image/tutorial/04_simulation_2.png') }}",
+          "{{ url_for('static', filename='image/tutorial/04_simulation_3.png') }}",
+          "{{ url_for('static', filename='image/tutorial/04_simulation_4.png') }}",
+          "{{ url_for('static', filename='image/tutorial/04_simulation_5.png') }}",
+          "{{ url_for('static', filename='image/tutorial/04_simulation_6.png') }}"
+        ],
+        autoShow: true,
+        enableEsc: true
+      });
+      // 綁定重看
+      document.querySelectorAll('[data-action="show-tutorial"]').forEach(function(el){
+        el.addEventListener('click', function(e){
+          e.preventDefault(); try{ tutSimulation.clear(); tutSimulation.show(); }catch(_){}
+        });
+      });
+    })();
+  </script>
+
 </body>
 </html>

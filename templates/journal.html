@@ -141,14 +141,14 @@
     line-height: 1.5;
   }
 
+  
   </style>
 
   <!-- Chart.js（功能不變） -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
-<body>
-
-  <!-- 頁頭：只改外觀，不改結構 -->
+<body><!-- 頁頭：只改外觀，不改結構 -->
   <header>
     <h1>Process Tracking</h1>
     <a href="{{ url_for('main') }}" class="btn">Home</a>
@@ -216,6 +216,99 @@
   {% else %}
     <p style="text-align:center; margin-top:40px; color:#ffffff;">目前尚無有效紀錄。</p>
   {% endif %}
+
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  
+  
+  
+  <script>
+    (function(){
+      function buildHelpLink(homeA){
+        var helpA = document.createElement('a');
+        helpA.href = '#';
+        helpA.id = 'navTutorialLink';
+        helpA.setAttribute('data-action','show-tutorial');
+        helpA.className = homeA.className; // inherit Home's style
+        if(homeA.querySelector('.en') || homeA.querySelector('.zh')){
+          helpA.innerHTML = '<span class="en">?</span><span class="zh">網站功能介紹</span>';
+        }else{
+          helpA.textContent = '?';
+        }
+        return helpA;
+      }
+
+      function insertNearHome(){
+        var homeA = document.querySelector(`a[href="{{ url_for('main') }}"]`);
+        if(!homeA){
+          var anchors = Array.from(document.querySelectorAll('nav a, .nav a, .navbar a, a'));
+          homeA = anchors.find(a => /home/i.test((a.textContent||'').trim()));
+        }
+        if(!homeA) return null;
+        if(document.getElementById('navTutorialLink')) return homeA;
+
+        // Case 1: Home inside <li> -> create a sibling <li> before it
+        var homeLI = homeA.closest('li');
+        if(homeLI && homeLI.parentElement){
+          var helpLI = document.createElement('li');
+          helpLI.className = homeLI.className; // inherit li styles
+          var helpA = buildHelpLink(homeA);
+          helpLI.appendChild(helpA);
+          homeLI.parentElement.insertBefore(helpLI, homeLI);
+
+          // Tighten gap: if CSS uses "li + li { margin-left: X }", reduce Home's margin-left
+          var csHomeLI = getComputedStyle(homeLI);
+          var ml = parseFloat(csHomeLI.marginLeft) || 0;
+          if(ml > 0){
+            homeLI.style.marginLeft = '6px'; // pull closer to the new help item
+          }
+          return homeA;
+        }
+
+        // Case 2: Direct anchors in a flex container -> insert helpA before Home
+        var helpA2 = buildHelpLink(homeA);
+        var container = homeA.parentElement || document.querySelector('nav, .nav, .navbar');
+        if(container){
+          container.insertBefore(helpA2, homeA);
+          // Reduce distance: use negative margin to counter flex gap (if any)
+          var cs = getComputedStyle(container);
+          var gapStr = cs.columnGap || cs.gap || '0px';
+          var gap = parseFloat(gapStr) || 0;
+          if(gap > 0){
+            helpA2.style.marginRight = (-0.6 * gap) + 'px';
+          }else{
+            // fallback minimal spacing
+            helpA2.style.marginRight = '6px';
+          }
+        }
+        return homeA;
+      }
+
+      function initTut(){
+        if (typeof initImageTutorial !== 'function') { console.warn('[tutorial] tutorial.js not loaded'); return null; }
+        return initImageTutorial({
+          pageKey: 'journal',
+          version: 'img-v1',
+          images: [
+            "{{ url_for('static', filename='image/tutorial/06_journal_1.png') }}",
+            "{{ url_for('static', filename='image/tutorial/06_journal_2.png') }}"
+          ],
+          autoShow: true,
+          enableEsc: true
+        });
+      }
+
+      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+      ready(function(){
+        insertNearHome();
+        var tut = initTut();
+        document.addEventListener('click', function(e){
+          var t = e.target.closest('[data-action="show-tutorial"]');
+          if(t && tut){ e.preventDefault(); try{ tut.clear(); tut.show(); }catch(_){} }
+        }, true);
+      });
+    })();
+  </script>
 
 </body>
 </html>

@@ -1,27 +1,111 @@
-/* === Image Tutorial Overlay (v1.1) === */
-.imgtut{position:fixed; inset:0; background:rgba(0,0,0,.75); display:flex;
-  align-items:center; justify-content:center; z-index:13000;}
-.imgtut.hidden{display:none}
-/* 放大一點 */
-.imgtut__frame{position:relative; max-width: 980px; width:94%;}
-.imgtut__img{width:100%; height:auto; display:block; border-radius:16px;
-  box-shadow:0 20px 50px rgba(0,0,0,.35)}
-/* 導覽在圖片之外：置於圖片下方，靠右 */
-.imgtut__nav{position:absolute; right:12px; bottom:12px; display:flex; gap:10px; align-items:center}
-/* 無外框按鈕：透明背景、無邊框；保留 focus-visible */
-.imgtut__btn{border:0; background:transparent; color:#fff; font-weight:700;
-  padding:8px 10px; cursor:pointer; border-radius:10px}
-.imgtut__btn:hover{opacity:.9}
-.imgtut__btn:focus{outline:none}
-.imgtut__btn:focus-visible{box-shadow:0 0 0 3px rgba(255,255,255,.45);}
-/* 文字/圖示大小 */
-.imgtut__btn--prev, .imgtut__btn--next{font-size:22px; line-height:1}
-.imgtut__btn--done{display:none; font-size:14px; padding:10px 14px;
-  background:#111; border:0; border-radius:999px; box-shadow:0 6px 16px rgba(0,0,0,.2)}
-/* 計數在右上角 */
-.imgtut__counter{position:absolute; top:12px; right:16px; background:rgba(255,255,255,.9);
-  color:#111; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700}
-@media (prefers-reduced-motion: reduce){
-  .imgtut, .imgtut *{animation:none !important; transition:none !important}
+/* ========== Tutorial v5 (overlay) - unified prev/next colors, centered arrows ========== */
+:root{
+  --tut-inset: clamp(12px, 4vw, 48px);        /* 與視窗邊緣的內縮 */
+  --tut-radius: 16px;
+  --tut-shadow: 0 24px 60px rgba(0,0,0,.35);
+  --tut-ctrl-outline: rgba(255,255,255,.55);
 }
-.imgtut__btn--prev, .imgtut__btn--next{ text-shadow:0 1px 2px rgba(0,0,0,.6); }
+
+.tut-overlay{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  display: none; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+.tut-overlay.is-open{ display:flex; }
+
+.tut-frame{
+  position: relative;
+  width: calc(100vw - 2*var(--tut-inset));
+  height: calc(100dvh - 2*var(--tut-inset));
+  max-width: 1200px; max-height: 92dvh;
+  border-radius: var(--tut-radius);
+  box-shadow: var(--tut-shadow);
+  overflow: hidden;
+  background: #000; /* 深底，圖片以 contain 呈現 */
+}
+
+.tut-slide{
+  position: absolute; inset: 0;
+  display:flex; align-items:center; justify-content:center;
+  opacity: 0; transform: scale(.98);
+  transition: opacity .24s ease, transform .24s ease;
+}
+.tut-slide.is-active{ opacity: 1; transform: scale(1); }
+.tut-slide img{
+  width: 100%; height: 100%; object-fit: contain; background:#000;
+}
+
+/* Controls base */
+.tut-prev, .tut-next, .tut-close, .tut-done{
+  -webkit-tap-highlight-color: transparent;
+}
+.tut-prev, .tut-next{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:48px; height:48px; border-radius:999px; border:0;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;
+  font-size:0; /* 用 ::before 畫箭頭 */
+  background: rgba(120,120,120,.60);             /* ←→ 同底色：灰色半透明 */
+}
+.tut-prev{ left: 12px; }
+.tut-next{ right: 12px; }
+.tut-prev:hover, .tut-next:hover{ background: rgba(120,120,120,.75); }
+.tut-prev:focus-visible, .tut-next:focus-visible{ outline:3px solid rgba(0,0,0,.5); outline-offset:2px; }
+
+/* 以 ::before 放置 SVG 箭頭，確保完美置中與一致視覺 */
+.tut-prev::before, .tut-next::before{
+  content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:18px; height:18px; background-size:contain; background-repeat:no-repeat; background-position:center;
+  /* 統一箭頭為黑色 */
+  filter: none;
+}
+/* 左箭頭（黑色） */
+.tut-prev::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'><path d='M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z'/></svg>");
+}
+/* 右箭頭（黑色） */
+.tut-next::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'><path d='M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z'/></svg>");
+}
+
+.tut-close{
+  position:absolute; top:10px; right:10px;
+  width:40px; height:40px; border-radius:999px; border:0;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(0,0,0,.55); color:#fff; font-weight:900; font-size:20px;
+  box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;
+}
+.tut-close:hover{ background: rgba(0,0,0,.68); }
+.tut-close:focus-visible{ outline:3px solid var(--tut-ctrl-outline); outline-offset:2px; }
+
+.tut-footer{
+  position:absolute; bottom:12px; right:12px;
+  display:flex; gap:8px; align-items:center;
+}
+.tut-done{
+  padding:.6rem 1rem; border-radius:999px; border:1px solid rgba(255,255,255,.35);
+  background: rgba(0,0,0,.55); color:#fff; font-weight:700; cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  display:none; /* 只在最後一頁顯示（由 JS 控制） */
+}
+.tut-done:hover{ background: rgba(0,0,0,.68); }
+.tut-done:focus-visible{ outline:3px solid var(--tut-ctrl-outline); outline-offset:2px; }
+
+/* Safe-area（iPhone 瀏海） */
+@supports(padding: env(safe-area-inset-top)){
+  .tut-frame{
+    width: calc(100vw - 2*(var(--tut-inset) + env(safe-area-inset-left)));
+    height: calc(100dvh - 2*(var(--tut-inset) + env(safe-area-inset-top)));
+  }
+  .tut-prev{ left: calc(12px + env(safe-area-inset-left)); }
+  .tut-next{ right: calc(12px + env(safe-area-inset-right)); }
+  .tut-close{ top: calc(10px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); }
+}
+
+/* （可選）圓點指示 */
+.tut-dots{
+  position:absolute; bottom:14px; left:12px; display:flex; gap:6px;
+}
+.tut-dot{ width:8px; height:8px; border-radius:999px; background:rgba(255,255,255,.4); }
+.tut-dot.is-active{ background:#fff; }

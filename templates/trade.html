@@ -186,11 +186,32 @@
     .form-row.justify-content-center {
     justify-content: center;
     }
+  
+/* 圓形「?」重看教學按鈕 */
+.tut-help{
+  position:fixed; top:18px; right:18px; z-index:999;
+  width:42px; height:42px; border-radius:999px; border:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:800; line-height:1; font-size:1rem;
+  background:rgba(255,255,255,.92); color:var(--primary);
+  box-shadow:0 6px 16px rgba(0,0,0,.14);
+}
+.tut-help:hover{ background:#fff; }
+.tut-help:focus{ outline:none }
+.tut-help:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.14); }
+/* iPhone 瀏海安全區 */
+@supports(padding:env(safe-area-inset-right)){
+  .tut-help{ right:calc(14px + env(safe-area-inset-right)); top:calc(14px + env(safe-area-inset-top)); }
+}
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 
 </head>
 <body>
+  <button type="button" class="tut-help" data-action="show-tutorial" aria-label="重新查看使用教學" title="使用教學">?</button>
+
     <main class="flex-grow-1">
         <div class="container">
           <div class="card-wrapper">
@@ -467,5 +488,32 @@
       }
     })();
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <script>
+    (function(){
+      if (typeof initImageTutorial !== 'function') { console.warn('[tutorial] tutorial.js not loaded'); return; }
+      const tutTrade = initImageTutorial({
+        pageKey: 'trade',
+        version: 'img-v1',
+        images: [
+          "{{ url_for('static', filename='image/tutorial/03_trade_1.png') }}",
+          "{{ url_for('static', filename='image/tutorial/03_trade_2.png') }}",
+          "{{ url_for('static', filename='image/tutorial/03_trade_3.png') }}",
+          "{{ url_for('static', filename='image/tutorial/03_trade_4.png') }}",
+          "{{ url_for('static', filename='image/tutorial/03_trade_5.png') }}"
+        ],
+        autoShow: true,
+        enableEsc: true
+      });
+      // 綁定重看
+      document.querySelectorAll('[data-action="show-tutorial"]').forEach(function(el){
+        el.addEventListener('click', function(e){
+          e.preventDefault(); try{ tutTrade.clear(); tutTrade.show(); }catch(_){}
+        });
+      });
+    })();
+  </script>
+
 </body>
 </html>
