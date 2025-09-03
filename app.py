@@ -27,6 +27,7 @@ import plotly.graph_objs as go
 from plotly.offline import plot
 import question 
 from question import get_gemini_response
+import re
 
 
 
@@ -560,31 +561,74 @@ def calculate_roi(stock_id, investment, period):
         "plot_html": plot_div,
         "desc": desc
     }, None
-
+    
+def is_valid_tw_ticker(ticker: str):
+    """回傳 (ok: bool, msg: Optional[str])"""
+    if not re.fullmatch(r"\d{4}", ticker or ""):
+        return False, "台股代號需為 4 位數字。"
+    try:
+        import twstock
+        if ticker in twstock.codes:
+            return True, None
+        return False, f"查無台股代號「{ticker}」。"
+    except Exception:
+        # twstock 無法使用時，改以嘗試抓近期資料作為備援驗證
+        try:
+            _df = fetch_recent_data(ticker)
+            if _df is not None and len(_df) >= 2:
+                return True, None
+            return False, f"查無台股代號「{ticker}」。"
+        except Exception:
+            return False, "目前無法驗證股票代號，請稍後再試。"
+            
 @app.route('/roi')
 def roi():
-    return render_template('roi.html')
+    # 預設空白表單
+    form = {"ticker": "", "amount": "", "period": "1m"}
+    errors = {}
+    return render_template('roi.html', form=form, errors=errors)
+
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
-    stock_id = request.form.get('ticker', '').strip()
-    amount = request.form.get('amount', '').strip()
+    stock_id = (request.form.get('ticker') or '').strip()
+    amount = (request.form.get('amount') or '').strip()
     period = request.form.get('period', '1m')
 
-    if not stock_id or not amount:
-        return "請填寫完整欄位"
+    form = {"ticker": stock_id, "amount": amount, "period": period}
+    errors = {}
 
+    # 1) 代號驗證
+    ok, msg = is_valid_tw_ticker(stock_id)
+    if not ok:
+        errors["ticker"] = msg
+        flash(msg, "danger")
+        return render_template("roi.html", form=form, errors=errors)
+
+    # 2) 金額驗證
     try:
         investment = float(amount)
+        if investment <= 0:
+            raise ValueError
     except ValueError:
-        return "金額格式錯誤，請輸入數字"
+        msg = "投資金額必須是正數。"
+        errors["amount"] = msg
+        flash(msg, "danger")
+        return render_template("roi.html", form=form, errors=errors)
 
+    # 3) 計算
     result, error = calculate_roi(stock_id, investment, period)
     if error:
-        return f"<p>{error}</p><a href='/'>返回</a>"
+        # 例如「查無資料或抓取失敗」「資料不足」等
+        flash(error, "danger")
+        return render_template("roi.html", form=form, errors={"ticker": error})
 
-    return render_template("roi_result.html", stock_id=stock_id, investment=investment, period=period, result=result)
-
+    # 4) 成功 → 結果頁
+    return render_template("roi_result.html",
+                           stock_id=stock_id,
+                           investment=investment,
+                           period=period,
+                           result=result)
 
 
 
