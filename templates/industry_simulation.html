@@ -132,11 +132,41 @@
       box-shadow:0 4px 10px rgba(0,0,0,.05);
       font-size:.9rem;
     }
+  
+    /* 右上角圓形「?」重看教學（與 Home 對稱） */
+    .btn-help{
+      position:fixed;
+      top:20px;
+      right:20px;
+      z-index:1000;
+      width:40px; height:40px; border-radius:999px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:800; line-height:1; font-size:18px;
+      background:#fff; color:var(--primary);
+      border:1.5px solid var(--primary);
+      text-decoration:none;
+      transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
+      box-shadow:0 6px 12px rgba(0,0,0,.10);
+    }
+    .btn-help:hover{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 8px 16px rgba(4,59,143,.18);
+      transform:translateY(-1px);
+      text-decoration:none;
+    }
+    .btn-help:active{ transform:translateY(0); box-shadow:0 4px 8px rgba(4,59,143,.18); }
+    .btn-help:focus{ outline:none; }
+    .btn-help:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.12); }
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
   <!-- 左上角 Home 按鈕 -->
   <a href="{{ url_for('main') }}" class="btn-home">Home</a>
+
+  <a href="#" class="btn-help" aria-label="Help" title="Help">?</a>
 
   <!-- 主要內容 -->
   <div class="industry_info">
@@ -363,5 +393,50 @@ $(function() {
     });
 });
 </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  
+
+
+  <script>
+    (function(){
+      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+      function init(){
+        if(typeof initImageTutorial !== 'function'){ return null; }
+        return initImageTutorial({
+          pageKey: 'industry_simulation',
+          version: 'img-v1',
+          images: [
+            "{{ url_for('static', filename='image/tutorial/10_industry_3.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_4.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_5.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_6.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_7.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_8.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_9.png') }}"
+          ],
+          autoShow: false,         // 不使用共用檔的 autoShow，改由本頁自行控制
+          enableEsc: true
+        });
+      }
+      ready(function(){
+        var tut = init();
+        // 本頁面獨立的一次性自動顯示旗標
+        var autoKey = 'imgTutorialAutoShown:img-v1:industry_simulation';
+        if(!localStorage.getItem(autoKey)){
+          localStorage.setItem(autoKey, '1');     // 標記已自動顯示過
+          try{ tut && tut.show(); }catch(_){}
+        }
+        // 右上角「？」：重看，不影響 autoKey（不會再次自動跳）
+        document.addEventListener('click', function(e){
+          var t = e.target.closest('.btn-help, .nav-help, [data-action="show-tutorial"]');
+          if(!t) return;
+          e.preventDefault();
+          try{ tut && tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
+        }, true);
+      });
+    })();
+  </script>
+
 </body>
 </html>

@@ -150,11 +150,41 @@
       transform:translateY(0);
       box-shadow:0 4px 8px rgba(4,59,143,.18);
     }
+  
+    /* 右上角圓形「?」重看教學（與 Home 對稱） */
+    .btn-help{
+      position:fixed;
+      top:20px;
+      right:20px;
+      z-index:1000;
+      width:40px; height:40px; border-radius:999px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:800; line-height:1; font-size:18px;
+      background:#fff; color:var(--primary);
+      border:1.5px solid var(--primary);
+      text-decoration:none;
+      transition:background .2s ease, color .2s ease, box-shadow .2s ease, transform .05s ease;
+      box-shadow:0 6px 12px rgba(0,0,0,.10);
+    }
+    .btn-help:hover{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 8px 16px rgba(4,59,143,.18);
+      transform:translateY(-1px);
+      text-decoration:none;
+    }
+    .btn-help:active{ transform:translateY(0); box-shadow:0 4px 8px rgba(4,59,143,.18); }
+    .btn-help:focus{ outline:none; }
+    .btn-help:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.12); }
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
   <!-- 左上角 Home 按鈕 -->
   <a href="{{ url_for('main') }}" class="btn-home">Home</a>
+
+  <a href="#" class="btn-help" aria-label="Help" title="Help">?</a>
 
   <main class="flex-grow-1">
     <div class="container">
@@ -222,5 +252,44 @@
       document.getElementById('outputBox').value = '';
     }
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <script>
+    (function(){
+      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+      function init(){
+        if(typeof initImageTutorial !== 'function'){ return null; }
+        return initImageTutorial({
+          pageKey: 'question_ask',
+          version: 'img-v1',
+          images: [
+            "{{ url_for('static', filename='image/tutorial/09_question_ask_1.png') }}",
+            "{{ url_for('static', filename='image/tutorial/09_question_ask_2.png') }}"
+          ],
+          autoShow: true,
+          enableEsc: true
+        });
+      }
+      ready(function(){
+        var tut = init();
+        var tries = 0;
+        if(!tut){
+          var timer = setInterval(function(){
+            tut = init(); tries++;
+            if(tut || tries>30){ clearInterval(timer); }
+          }, 100);
+        }
+        var help = document.querySelector('.btn-help');
+        if(help){
+          help.addEventListener('click', function(e){
+            e.preventDefault();
+            if(!tut) tut = init();
+            try{ tut.clear(); tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
+          });
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>

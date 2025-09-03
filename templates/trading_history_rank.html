@@ -99,14 +99,42 @@
     .table th:nth-child(4),
     .table td:nth-child(4) { width: 25%; }  /* 總獲利 */
     
+  
+    /* 圓形「?」重看教學（放在右側，與 Home 對稱） */
+    .nav-help--circle{
+      width:40px; height:40px; border-radius:999px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:800; line-height:1; font-size:18px;
+      background:#fff; color:var(--primary);
+      border:1.5px solid var(--primary);
+      text-decoration:none;
+      box-shadow:0 6px 16px rgba(0,0,0,.12);
+    }
+    .nav-help--circle:hover{ background:#fff; color:var(--primary-dark); text-decoration:none; }
+    .nav-help--circle:focus{ outline:none; }
+    .nav-help--circle:focus-visible{ box-shadow:0 0 0 3px rgba(100,153,233,.5), 0 6px 16px rgba(0,0,0,.12); }
+
+  
+/* 導覽列對稱：左 Home、中空白、右 ？ */
+.topbar-grid{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:8px;
+}
+.topbar-grid .titlewrap{ min-height: 1px; } /* 保留中欄，無標題也不影響高度 */
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
   <main class="flex-grow-1">
     <div class="container-fluid mt-5 mb-5 card-wrapper">
-      <div class="mb-3 d-flex justify-content-between align-items-center">
-        <a href="{{ url_for('main') }}" class="btn-home">Home</a>
-      </div>
+      <div class="mb-3 topbar-grid">
+  <a href="{{ url_for('main') }}" class="btn-home">Home</a>
+  <div class="titlewrap"></div>
+  <a href="#" class="nav-help nav-help--circle" aria-label="Help" title="Help">?</a>
+</div>
 
       <h1>交易模擬排行</h1>
 
@@ -139,5 +167,40 @@
   <!-- jQuery & Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <script>
+    (function(){
+      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+      function init(){
+        if(typeof initImageTutorial !== 'function'){ console.warn('[tutorial] not loaded'); return null; }
+        return initImageTutorial({
+          pageKey: 'rank',
+          version: 'img-v1',
+          images: [
+            "{{ url_for('static', filename='image/tutorial/08_rank_1.png') }}"
+          ],
+          autoShow: true,
+          enableEsc: true
+        });
+      }
+      ready(function(){
+        var tut = init();
+        var tries = 0;
+        if(!tut){
+          var timer = setInterval(function(){
+            tut = init(); tries++;
+            if(tut || tries>30){ clearInterval(timer); }
+          }, 100);
+        }
+        document.querySelector('.nav-help')?.addEventListener('click', function(e){
+          e.preventDefault();
+          if(!tut) tut = init();
+          try{ tut.clear(); tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
+        });
+      });
+    })();
+  </script>
+
 </body>
 </html>

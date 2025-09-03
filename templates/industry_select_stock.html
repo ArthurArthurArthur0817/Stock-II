@@ -221,15 +221,41 @@
     color: #cccccc;
     }
 
+  
+    /* group right actions + circular '?' */
+    .header-actions{ display:flex; align-items:center; gap:10px; }
+    .nav-help--circle{
+      width:40px; height:40px; border-radius:999px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:800; line-height:1; font-size:18px;
+      background:#fff; color:var(--primary);
+      border:1.5px solid var(--primary);
+      text-decoration:none;
+      box-shadow:0 6px 12px rgba(0,0,0,.10);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-help--circle:hover{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 8px 16px rgba(4,59,143,.18);
+      text-decoration:none;
+    }
+    .nav-help--circle:focus{ outline:none; }
+    .nav-help--circle:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.12); }
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 
 <body>
   <!-- Header：左標題、右 Home -->
   <header>
-    <h1>選擇股票模擬</h1>
+  <h1>選擇股票模擬</h1>
+  <div class="header-actions">
     <a href="{{ url_for('main') }}" class="btn">Home</a>
-  </header>
+    <a href="#" class="nav-help nav-help--circle" data-action="show-tutorial" aria-label="Help" title="Help">?</a>
+  </div>
+</header>
 
   <div class="select_industry_container">
     <form method="POST" id="selectIndustryForm" style="width: 100%; max-width: 700px;">
@@ -285,6 +311,47 @@
       });
     });
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  
+  <script>
+    (function(){
+      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+      function init(){
+        if(typeof initImageTutorial !== 'function'){ return null; }
+        return initImageTutorial({
+          pageKey: 'industry_select',
+          version: 'img-v1',
+          images: [
+            "{{ url_for('static', filename='image/tutorial/10_industry_1.png') }}",
+            "{{ url_for('static', filename='image/tutorial/10_industry_2.png') }}"
+          ],
+          autoShow: true,
+          enableEsc: true
+        });
+      }
+      ready(function(){
+        var tut = init();
+        var tries = 0;
+        if(!tut){
+          var timer = setInterval(function(){
+            tut = init(); tries++;
+            if(tut || tries>30){ clearInterval(timer); }
+          }, 100);
+        }
+        // Delegated click (works even if DOM changes)
+        document.addEventListener('click', function(e){
+          var t = e.target.closest('.nav-help, [data-action="show-tutorial"]');
+          if(!t) return;
+          e.preventDefault();
+          if(!tut) tut = init();
+          try{ tut.clear(); tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
+        }, true);
+      });
+    })();
+  </script>
+    
+
 </body>
 </html>
 

@@ -142,17 +142,37 @@
   }
 
   
+    /* Group Home & Help; circle '?' button */
+    .header-actions{ display:flex; align-items:center; gap:10px; }
+    .header-actions .nav-help--circle{
+      width:40px; height:40px; border-radius:999px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:800; line-height:1; font-size:18px;
+      background:rgba(255,255,255,.92); color:var(--primary, #043b8f);
+      box-shadow:0 6px 16px rgba(0,0,0,.14);
+      border:0;
+      text-decoration:none;
+    }
+    .header-actions .nav-help--circle:hover{ background:#fff; text-decoration:none; }
+    .header-actions .nav-help--circle:focus{ outline:none; }
+    .header-actions .nav-help--circle:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.14); }
+
   </style>
 
   <!-- Chart.js（功能不變） -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
-<body><!-- 頁頭：只改外觀，不改結構 -->
+<body>
+
+  <!-- 頁頭：只改外觀，不改結構 -->
   <header>
-    <h1>Process Tracking</h1>
+  <h1>Process Tracking</h1>
+  <div class="header-actions">
+    <a href="#" class="nav-help nav-help--circle btn" aria-label="Help" title="Help">?</a>
     <a href="{{ url_for('main') }}" class="btn">Home</a>
-  </header>
+  </div>
+</header>
 
   <!-- ===== 中央白色區塊：保持原樣，以下內容完全不動 ===== -->
 
@@ -219,96 +239,42 @@
 
   <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
 
-  
-  
-  
-  <script>
-    (function(){
-      function buildHelpLink(homeA){
-        var helpA = document.createElement('a');
-        helpA.href = '#';
-        helpA.id = 'navTutorialLink';
-        helpA.setAttribute('data-action','show-tutorial');
-        helpA.className = homeA.className; // inherit Home's style
-        if(homeA.querySelector('.en') || homeA.querySelector('.zh')){
-          helpA.innerHTML = '<span class="en">?</span><span class="zh">網站功能介紹</span>';
-        }else{
-          helpA.textContent = '?';
-        }
-        return helpA;
+<script>
+  (function(){
+    function ensureInit(){
+      if (typeof initImageTutorial !== 'function') return null;
+      return initImageTutorial({
+        pageKey: 'journal',
+        version: 'img-v1',
+        images: [
+          "{{ url_for('static', filename='image/tutorial/06_journal_1.png') }}",
+          "{{ url_for('static', filename='image/tutorial/06_journal_2.png') }}"
+        ],
+        autoShow: true,
+        enableEsc: true
+      });
+    }
+    function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+    ready(function(){
+      var tut = ensureInit();
+      var tries = 0;
+      if(!tut){
+        var timer = setInterval(function(){
+          tut = ensureInit(); tries++;
+          if(tut || tries > 30){ clearInterval(timer); }
+        }, 100);
       }
-
-      function insertNearHome(){
-        var homeA = document.querySelector(`a[href="{{ url_for('main') }}"]`);
-        if(!homeA){
-          var anchors = Array.from(document.querySelectorAll('nav a, .nav a, .navbar a, a'));
-          homeA = anchors.find(a => /home/i.test((a.textContent||'').trim()));
-        }
-        if(!homeA) return null;
-        if(document.getElementById('navTutorialLink')) return homeA;
-
-        // Case 1: Home inside <li> -> create a sibling <li> before it
-        var homeLI = homeA.closest('li');
-        if(homeLI && homeLI.parentElement){
-          var helpLI = document.createElement('li');
-          helpLI.className = homeLI.className; // inherit li styles
-          var helpA = buildHelpLink(homeA);
-          helpLI.appendChild(helpA);
-          homeLI.parentElement.insertBefore(helpLI, homeLI);
-
-          // Tighten gap: if CSS uses "li + li { margin-left: X }", reduce Home's margin-left
-          var csHomeLI = getComputedStyle(homeLI);
-          var ml = parseFloat(csHomeLI.marginLeft) || 0;
-          if(ml > 0){
-            homeLI.style.marginLeft = '6px'; // pull closer to the new help item
-          }
-          return homeA;
-        }
-
-        // Case 2: Direct anchors in a flex container -> insert helpA before Home
-        var helpA2 = buildHelpLink(homeA);
-        var container = homeA.parentElement || document.querySelector('nav, .nav, .navbar');
-        if(container){
-          container.insertBefore(helpA2, homeA);
-          // Reduce distance: use negative margin to counter flex gap (if any)
-          var cs = getComputedStyle(container);
-          var gapStr = cs.columnGap || cs.gap || '0px';
-          var gap = parseFloat(gapStr) || 0;
-          if(gap > 0){
-            helpA2.style.marginRight = (-0.6 * gap) + 'px';
-          }else{
-            // fallback minimal spacing
-            helpA2.style.marginRight = '6px';
-          }
-        }
-        return homeA;
-      }
-
-      function initTut(){
-        if (typeof initImageTutorial !== 'function') { console.warn('[tutorial] tutorial.js not loaded'); return null; }
-        return initImageTutorial({
-          pageKey: 'journal',
-          version: 'img-v1',
-          images: [
-            "{{ url_for('static', filename='image/tutorial/06_journal_1.png') }}",
-            "{{ url_for('static', filename='image/tutorial/06_journal_2.png') }}"
-          ],
-          autoShow: true,
-          enableEsc: true
+      var help = document.querySelector('.nav-help');
+      if(help){
+        help.addEventListener('click', function(e){
+          e.preventDefault();
+          if(!tut) tut = ensureInit();
+          try{ tut.clear(); tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
         });
       }
-
-      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
-      ready(function(){
-        insertNearHome();
-        var tut = initTut();
-        document.addEventListener('click', function(e){
-          var t = e.target.closest('[data-action="show-tutorial"]');
-          if(t && tut){ e.preventDefault(); try{ tut.clear(); tut.show(); }catch(_){} }
-        }, true);
-      });
-    })();
-  </script>
+    });
+  })();
+</script>
 
 </body>
 </html>

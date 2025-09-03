@@ -86,7 +86,8 @@
 }
 .header-strip .topbar{
   display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-}
+ position:relative; }
+.topbar .titlewrap{ position:absolute; left:50%; transform:translateX(-50%); text-align:center; }
 .header-strip .titlewrap{
   flex:1 1 auto; display:flex; flex-direction:column; align-items:center; min-width:260px;
 }
@@ -218,7 +219,39 @@ footer h5{font-size:1.125rem;margin-bottom:1rem;}
 footer ul{list-style:none;padding-left:0;margin-bottom:1.5rem;}
 footer li{margin-bottom:.25rem;}
 footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;padding-top:1rem;font-size:.875rem;color:#ccc;}
+  
+    /* 圓形「?」重看教學（放在 Home 左邊） */
+    .nav-help--circle{
+      width:40px; height:40px; border-radius:999px; padding:0;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:800; line-height:1; font-size:18px;
+      background:#fff; color:var(--primary);
+      border:1.5px solid var(--primary);
+      text-decoration:none;
+      box-shadow:0 6px 16px rgba(0,0,0,.12);
+    }
+    .nav-help--circle:hover{ background:#fff; color:var(--primary-dark); text-decoration:none; }
+    .nav-help--circle:focus{ outline:none; }
+    .nav-help--circle:focus-visible{ box-shadow:0 0 0 3px rgba(100,153,233,.5), 0 6px 16px rgba(0,0,0,.12); }
+
+  
+/* --- Restore centered title without absolute positioning; symmetric layout --- */
+.topbar{
+  display: grid !important;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  position: static !important;
+}
+.topbar .titlewrap{
+  position: static !important;
+  left: auto !important;
+  transform: none !important;
+  text-align: center;
+}
+
   </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
   <main class="flex-grow-1 page-shell">
@@ -231,7 +264,8 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
             <h1>股票主題學習卡片</h1>
             <div class="subheading">九宮格翻牌學習｜簡單易懂｜趣味遊戲</div>
           </div>
-          <span style="width:92px"></span><!-- 讓 Home 置中對齊的小占位 -->
+          
+                  <a href="#" class="nav-help nav-help--circle" aria-label="Help" title="Help">?</a>
         </div>
       </div>
 
@@ -451,5 +485,41 @@ footer .copyright{border-top:1px solid rgba(255,255,255,.72);margin-top:2rem;pad
     window.addEventListener('load', resizeGrid);
     window.addEventListener('resize', resizeGrid);
   </script>
+  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
+
+  <script>
+    (function(){
+      function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+      function init(){
+        if(typeof initImageTutorial !== 'function'){ console.warn('[tutorial] not loaded'); return null; }
+        return initImageTutorial({
+          pageKey: 'dictionary',
+          version: 'img-v1',
+          images: [
+            "{{ url_for('static', filename='image/tutorial/07_dictionary_1.png') }}",
+            "{{ url_for('static', filename='image/tutorial/07_dictionary_2.png') }}"
+          ],
+          autoShow: true,
+          enableEsc: true
+        });
+      }
+      ready(function(){
+        var tut = init();
+        var tries = 0;
+        if(!tut){
+          var timer = setInterval(function(){
+            tut = init(); tries++;
+            if(tut || tries>30){ clearInterval(timer); }
+          }, 100);
+        }
+        document.querySelector('.nav-help')?.addEventListener('click', function(e){
+          e.preventDefault();
+          if(!tut) tut = init();
+          try{ tut.clear(); tut.show(); }catch(err){ console.warn('[tutorial] show failed', err); }
+        });
+      });
+    })();
+  </script>
+
 </body>
 </html>
