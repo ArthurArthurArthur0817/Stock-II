@@ -88,30 +88,9 @@
     @keyframes spin{to{transform:rotate(360deg);}}
     .loading-text{ font-size:1rem; text-shadow:0 2px 8px rgba(0,0,0,.25); }
     
-  
-/* 圓形「?」重看教學按鈕（固定右上） */
-.tut-help{
-  position:fixed; top:18px; right:18px; z-index:1001;
-  width:42px; height:42px; border-radius:999px; border:0;
-  display:inline-flex; align-items:center; justify-content:center;
-  font-weight:800; line-height:1; font-size:1rem;
-  background:rgba(255,255,255,.92); color:var(--primary, #043b8f);
-  box-shadow:0 6px 16px rgba(0,0,0,.14);
-}
-.tut-help:hover{ background:#fff; }
-.tut-help:focus{ outline:none }
-.tut-help:focus-visible{ box-shadow:0 0 0 3px rgba(4,59,143,.25), 0 6px 16px rgba(0,0,0,.14); }
-/* iPhone 瀏海安全區 */
-@supports(padding:env(safe-area-inset-right)){
-  .tut-help{ right:calc(14px + env(safe-area-inset-right)); top:calc(14px + env(safe-area-inset-top)); }
-}
-
   </style>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/tutorial.css') }}">
 </head>
 <body>
-  <button type="button" class="tut-help" data-action="show-tutorial" aria-label="重新查看使用教學" title="使用教學">?</button>
-
   <main class="flex-grow-1">
     <div class="container mt-5 mb-5 card-wrapper">
       <div class="mb-3">
@@ -122,28 +101,72 @@
       <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
           <h1>RETURN ON INVESTMENT</h1>
+            <!-- 全域訊息（flash） -->
+            {% with messages = get_flashed_messages(with_categories=True) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'danger' if category in ['error','danger'] else category }} alert-dismissible fade show" role="alert" aria-live="polite">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
 
           <form action="{{ url_for('calculate') }}" method="POST">
             <div class="form-group">
               <label class="form-label" for="ticker">台股代號</label>
-              <input type="text" class="form-control form-control-lg" id="ticker" name="ticker" placeholder="例如：2330" required>
+              <input
+                type="text"
+                class="form-control form-control-lg {% if errors and errors.ticker %}is-invalid{% endif %}"
+                id="ticker"
+                name="ticker"
+                placeholder="例如：2330"
+                required
+                pattern="\d{4}"
+                inputmode="numeric"
+                value="{{ form.ticker if form else '' }}"
+                aria-describedby="tickerHelp tickerFeedback"
+              />
+              <small id="tickerHelp" class="form-text text-muted">請輸入 4 位數台股代號，例如 2330。</small>
+              <div id="tickerFeedback" class="invalid-feedback">
+                {{ errors.ticker if errors and errors.ticker else '' }}
+              </div>
+
             </div>
 
             <div class="form-group">
               <label class="form-label" for="amount">投資金額（TWD）</label>
-              <input type="number" class="form-control form-control-lg" id="amount" name="amount" min="1" step="1" placeholder="例如：100000" required>
+              <input
+                type="number"
+                class="form-control form-control-lg {% if errors and errors.amount %}is-invalid{% endif %}"
+                id="amount"
+                name="amount"
+                min="1"
+                step="1"
+                placeholder="例如：100000"
+                required
+                value="{{ form.amount if form else '' }}"
+              />
+              <div class="invalid-feedback">
+                {{ errors.amount if errors and errors.amount else '' }}
+              </div>
+
             </div>
 
             <div class="form-group">
               <label class="form-label" for="period">投資期間</label>
               <select class="form-control form-control-lg" id="period" name="period" required>
-                <option value="1d">近 1 交易日</option>
-                <option value="5d">近 5 交易日</option>
-                <option value="1m" selected>近 1 個月</option>
-                <option value="3m">近 3 個月</option>
-                <option value="6m">近 6 個月</option>
-                <option value="1y">近 1 年</option>
+                <option value="1d" {{ 'selected' if form and form.period=='1d' else '' }}>近 1 交易日</option>
+                <option value="5d" {{ 'selected' if form and form.period=='5d' else '' }}>近 5 交易日</option>
+                <option value="1m" {{ 'selected' if not form or form.period=='1m' else '' }}>近 1 個月</option>
+                <option value="3m" {{ 'selected' if form and form.period=='3m' else '' }}>近 3 個月</option>
+                <option value="6m" {{ 'selected' if form and form.period=='6m' else '' }}>近 6 個月</option>
+                <option value="1y" {{ 'selected' if form and form.period=='1y' else '' }}>近 1 年</option>
               </select>
+
             </div>
 
             <div class="text-center mt-4">
@@ -205,29 +228,5 @@
     })();
   </script>
     
-  <script src="{{ url_for('static', filename='js/tutorial.js') }}"></script>
-
-  <script>
-    (function(){
-      if (typeof initImageTutorial !== 'function') { console.warn('[tutorial] tutorial.js not loaded'); return; }
-      const tutROI = initImageTutorial({
-        pageKey: 'roi',
-        version: 'img-v1',
-        images: [
-          "{{ url_for('static', filename='image/tutorial/05_roi_1.png') }}",
-          "{{ url_for('static', filename='image/tutorial/05_roi_2.png') }}"
-        ],
-        autoShow: true,
-        enableEsc: true
-      });
-      // 綁定重看
-      document.querySelectorAll('[data-action="show-tutorial"]').forEach(function(el){
-        el.addEventListener('click', function(e){
-          e.preventDefault(); try{ tutROI.clear(); tutROI.show(); }catch(_){}
-        });
-      });
-    })();
-  </script>
-
 </body>
 </html>
