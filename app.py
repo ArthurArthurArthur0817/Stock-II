@@ -124,9 +124,9 @@ def calculate_risk_score(answers):
     score = sum(map(int, answers.values()))  # 將所有選項數值加總
 
     # 根據分數分類風險類型
-    if score <= 18:
+    if score <= 60:
         return "保守型投資者", -1
-    elif 11 <= score <= 25:
+    elif 60 <= score <= 140:
         return "穩健型投資者", 0
     else:
         return "積極型投資者", 1
