@@ -664,11 +664,14 @@ def clear_trading_history():
 
 
 # ----------------- 路由 -----------------
+TRADING_FILE = "trading_history.txt"
 @app.route('/simulation')
 def simulation():  
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
+    if os.path.exists(TRADING_FILE):
+        os.remove(TRADING_FILE)
     # ✅ 每次都隨機選一支新的股票
     session['stock_code'] = get_random_stock()
     session['start_index'] = 0
