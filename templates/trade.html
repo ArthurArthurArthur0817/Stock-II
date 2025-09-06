@@ -231,12 +231,12 @@
             {% endwith %}
 
             <!-- 股票查詢表單 -->
-        <h4 class="section-title">Stock Name</h4>
+        <h4 class="section-title">股票名稱</h4>
         <form method="POST" class="mb-3">
           <div class="form-row">
             <div class="form-group col-md-6">
-              <input type="text" class="form-control" id="stock" name="stock" required placeholder="Enter 4-digit Taiwan stock code">
-              <small class="form-text">Only 4-digit Taiwan stock codes are supported (e.g., 2330).</small>
+              <input type="text" class="form-control" id="stock" name="stock" required placeholder="請輸入 4 碼台股代號">
+              <small class="form-text">僅支援 4 位數台股代碼（例如：2330）。</small>
             </div>
           </div>
             <div class="actions mt-3 d-flex flex-column align-items-center">
@@ -246,16 +246,16 @@
         </form>
 
             <!-- 股票資訊顯示 -->
-            <h4 class="section-title">Stock Information</h4>
+            <h4 class="section-title">股票資訊</h4>
             <div class="info-box mb-3">
               {% if stock_info %}
-                <div><strong>Name:</strong> {{ stock_info['name'] }}</div>
-                <div><strong>Symbol:</strong> {{ stock_info['symbol'] }}</div>
-                <div><strong>Sector:</strong> {{ stock_info['sector'] }}</div>
-                <div><strong>Market Cap:</strong> {{ stock_info['market_cap'] }}</div>
-                <div><strong>Current Price:</strong> {{ stock_info['current_price'] }}</div>
+                <div><strong>名稱:</strong> {{ stock_info['name'] }}</div>
+                <div><strong>代號:</strong> {{ stock_info['symbol'] }}</div>
+                <div><strong>產業別:</strong> {{ stock_info['sector'] }}</div>
+                <div><strong>市值:</strong> {{ stock_info['market_cap'] }}</div>
+                <div><strong>現價:</strong> {{ stock_info['current_price'] }}</div>
               {% else %}
-                <div class="text-muted">No stock information available. Please search for a stock symbol.</div>
+                <div class="text-muted">目前沒有股票資訊。請先查詢股票代碼。</div>
               {% endif %}
             </div>
             
@@ -268,44 +268,44 @@
 
           <div class="form-row justify-content-center">
             <div class="form-group col-md-2">
-              <label for="type"><strong>Trade Type</strong></label>
+              <label for="type"><strong>交易別</strong></label>
               <select class="form-control" name="type" id="type">
-                <option value="BUY">Buy</option>
-                <option value="SELL">Sell</option>
+                <option value="BUY">買進</option>
+                <option value="SELL">賣出</option>
               </select>
             </div>
 
             <div class="form-group col-md-2">
-              <label for="trade_category"><strong>Trade Category</strong></label>
+              <label for="trade_category"><strong>交易方式</strong></label>
               <select class="form-control" name="trade_category" id="trade_category">
                 <option value="CASH">現股</option>
               </select>
             </div>
 
             <div class="form-group col-md-2">
-              <label for="market_session"><strong>Market Session</strong></label>
+              <label for="market_session"><strong>交易時段</strong></label>
               <select class="form-control" name="market_session" id="market_session">
                  <option value="REGULAR">普通</option>
               </select>
             </div>
 
             <div class="form-group col-md-2">
-               <label for="price"><strong>Price</strong></label>
+               <label for="price"><strong>價格</strong></label>
                <input type="number" step="0.01" class="form-control" name="price" id="price" required value="{{ stock_info['current_price'] }}">
             </div>
            
 
            <div class="form-group col-md-2">
-            <label for="quantity"><strong>Quantity</strong></label>
-            <input type="number" class="form-control" name="quantity" id="quantity" required placeholder="Enter quantity" min="1" step="1">
+            <label for="quantity"><strong>數量</strong></label>
+            <input type="number" class="form-control" name="quantity" id="quantity" required placeholder="請輸入張數" min="1" step="1">
           </div>
         </div>
       
         <!-- ✅ 把交易時段提示移到 form-row 外，避免被撐爆 -->
         <div class="form-group">
-          <small class="form-text">Trading is only allowed from 9:00 AM to 1:30 PM.</small>
+          <small class="form-text">僅允許於上午 9:00 至 下午 1:30 進行交易。</small>
           {% if not is_trading_time %}
-            <div class="text-danger mt-1">Currently not within trading hours. </div>
+            <div class="text-danger mt-1">目前不在交易時段。 </div>
           {% endif %}
         </div>
 
@@ -332,7 +332,7 @@
             <form method="POST" class="mb-3">
                 <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="strategy"><strong>Select Strategy</strong></label>
+                    <label for="strategy"><strong>選擇策略</strong></label>
                     <select class="form-control" name="strategy" id="strategy">
                     <option value="momentum">Momentum Strategy</option>
                     <!-- <option value="mean_reversion">Mean Reversion Strategy</option> -->
@@ -355,8 +355,8 @@
 
                 <!-- 投資金額 -->
                 <div class="form-group col-md-6">
-                    <label for="investment_amount"><strong>Investment Amount</strong></label>
-                    <input type="number" class="form-control" name="investment_amount" id="investment_amount" required placeholder="Enter investment amount" min="0" step="1">
+                    <label for="investment_amount"><strong>投資金額</strong></label>
+                    <input type="number" class="form-control" name="investment_amount" id="investment_amount" required placeholder="請輸入投資金額" min="0" step="1">
                 </div>
                 </div>
                 <button type="submit" name="apply_strategy" class="btn btn-outline-primary px-4">Apply Strategy Analysis</button>
@@ -366,7 +366,7 @@
         <!-- **策略分析結果顯示在畫面下方** -->
         {% if strategy_result %}
             <div class="analysis-container">
-                <h5 class="mb-3">Strategy Analysis Result</h5>
+                <h5 class="mb-3">策略分析結果</h5>
                 <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
