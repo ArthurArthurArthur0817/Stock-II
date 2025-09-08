@@ -134,7 +134,6 @@ def calculate_risk_score(answers):
 
 
 
-# 用戶帳戶頁面
 @app.route('/account')
 def account():
     if 'user_id' not in session:
@@ -154,7 +153,7 @@ def account():
 
         user_balance = user_balance['balance']
         
-        # 查詢用戶持有的股票並合併相同股票的數量
+        # 1️⃣ 查詢用戶持有的股票並合併相同股票的數量
         cursor.execute("""
             SELECT stock, SUM(quantity) as total_quantity
             FROM portfolios
@@ -162,20 +161,29 @@ def account():
             GROUP BY stock
         """, (session['user_id'],))
         stocks = cursor.fetchall()
-        
-        # 獲取 portfolios 表中的數據
+
+        # 2️⃣ 獲取 portfolios 表中的數據
         cursor.execute("SELECT * FROM portfolios WHERE user_id = %s", (session['user_id'],))
         portfolios = cursor.fetchall()
 
-        # 為每支股票添加即時價格
+        # 3️⃣ 從 transactions 取得最後一次 BUY 的價格，對應到每個 portfolio
         for portfolio in portfolios:
             stock_symbol = portfolio['stock']
-            stock_info, error = get_stock_info(stock_symbol)
-            portfolio['price'] = stock_info['current_price'] if stock_info else None
             
+            cursor.execute("""
+                SELECT price
+                FROM transactions
+                WHERE user_id = %s AND stock = %s AND type = 'BUY'
+                ORDER BY transaction_time DESC
+                LIMIT 1
+            """, (session['user_id'], stock_symbol))
             
-        
-            
+            last_buy = cursor.fetchone()
+            portfolio['price'] = last_buy['price'] if last_buy else None
+
+        # 不再抓即時價格，所以不需要更新 portfolios.price
+        # connection.commit() 可以省略
+
     except Exception as e:
         flash(f"An error occurred: {str(e)}")
         return redirect(url_for('account'))
@@ -187,8 +195,6 @@ def account():
             connection.close()
     
     return render_template('account.html', balance=user_balance, stocks=stocks, portfolios=portfolios)
-
-
 
 
 @app.route('/trade', methods=['GET', 'POST'])
@@ -203,7 +209,7 @@ def trade():
 
     now = datetime.now()
     start_time = now.replace(hour=9, minute=0, second=0, microsecond=0)
-    end_time = now.replace(hour=23, minute=30, second=0, microsecond=0)
+    end_time = now.replace(hour=23, minute=50, second=0, microsecond=0)
     is_trading_time = start_time <= now <= end_time
 
     if request.method == 'POST':
@@ -354,8 +360,14 @@ def transaction():
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
 
-    # 獲取 transaction 表中的數據
-    cursor.execute("SELECT stock, quantity, price, transaction_time, type FROM transactions")
+    user_id = session['user_id']
+    # 只取得該使用者的交易紀錄
+    query = """
+        SELECT stock, quantity, price, transaction_time, type
+        FROM transactions
+        WHERE user_id = %s
+    """
+    cursor.execute(query, (user_id,))
     transactions = cursor.fetchall()
 
     cursor.close()
