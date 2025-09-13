@@ -26,7 +26,7 @@
     - 提供策略建議，幫助使用者從模擬中反思與成長。
 
 
-
+## 檔案架構
  ```
 Stock/
 │
@@ -65,14 +65,14 @@ Stock/
 
 
 ## ER-Diagram
+ ```
 
-<img width="761" alt="image" src="https://github.com/user-attachments/assets/e28f491d-0c30-4ca6-ad30-019debcacd5b">
 
 
 
 ## MySQL
 
-
+```
 use my_database;
 
 CREATE TABLE users (
@@ -155,7 +155,7 @@ JOIN
 GROUP BY 
     u.username;
 
-for使用教學:
+
 ALTER TABLE users ADD COLUMN home_tutorial_seen TINYINT(1) NOT NULL DEFAULT 0;
 
 
