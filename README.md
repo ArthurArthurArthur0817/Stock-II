@@ -63,9 +63,9 @@ Stock/
 └── static/
     ├── styles.css         
 
-
-## ER-Diagram
  ```
+## ER-Diagram
+
 
 
 
