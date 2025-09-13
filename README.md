@@ -1,5 +1,6 @@
 # 結合策略模擬與生成式 AI 的互動式投資教育系統
-<img width="614" height="326" alt="image" src="https://github.com/user-attachments/assets/389aecbb-1332-4292-8c20-24c903cabc6e" />
+<img width="614" height="326" alt="image" src="https://github.com/user-attachments/assets/389aecbb-1332-4292-8c20-24c903cabc6e" /> <img width="548" height="386" alt="image" src="https://github.com/user-attachments/assets/e1e02994-8c50-4070-9349-4c91c2c1bf14" />
+
 
 ## 發展動機與目標
 目前市面上缺乏針對零基礎使用者設計的模擬投資平台，導致許多初學者必須經歷多次嘗試與失敗，才能逐步累積投資經驗。  
