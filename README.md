@@ -69,7 +69,7 @@ Stock/
  ```
 ## ER-Diagram
 
-
+![ER Diagram](./ERDiagram.jpg)
 
 
 
